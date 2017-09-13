@@ -11,7 +11,7 @@
 *.userprefs
 
 # Build related
-artifacts
+dist/
 
 # Build results
 [Dd]ebug/
