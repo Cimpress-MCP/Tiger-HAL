@@ -96,7 +96,13 @@ namespace Tiger.Hal
                 return jValue;
             }
 
-            foreach (var property in jsonObjectContract.Properties)
+            var properties = jsonObjectContract
+                .Properties
+                .Where(p => !p.Ignored)
+                .Where(p => p.Readable)
+                .Where(p => p.ShouldSerialize?.Invoke(value) ?? true)
+                .Where(p => p.GetIsSpecified?.Invoke(value) ?? true);
+            foreach (var property in properties)
             {
                 var jPropertyValue = jValue[property.PropertyName];
                 var nativeValue = property.ValueProvider.GetValue(value);
@@ -181,11 +187,7 @@ namespace Tiger.Hal
             }
 
             // note(cosborn) Lists embed themselves in a wrapper object.
-            var wrapperObject = JObject.FromObject(
-                new
-                { // note(cosborn) Indirect through JObject for proper key name transformation.
-                    Count = arrayValue.Length
-                }, CreateJsonSerializer());
+            var wrapperObject = new JObject();
 
             var links = transformer.GenerateLinks(value);
             if (links.Count != 0)

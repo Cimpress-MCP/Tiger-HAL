@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
 
@@ -11,7 +12,7 @@ namespace Tiger.Hal
     public sealed class TransformationMap<T>
         : ITransformationMap
     {
-        readonly List<ILinkInstruction> _links = new List<ILinkInstruction>();
+        readonly Dictionary<string, ILinkInstruction> _links = new Dictionary<string, ILinkInstruction>();
         readonly List<IEmbedInstruction> _embeds = new List<IEmbedInstruction>();
 
         /// <summary>Initializes a new instance of the <see cref="TransformationMap{T}"/> class.</summary>
@@ -24,11 +25,12 @@ namespace Tiger.Hal
         {
             if (selfSelector == null) { throw new ArgumentNullException(nameof(selfSelector)); }
 
-            _links.Add(new SimpleLinkInstruction<T>("self", selfSelector));
+            _links["self"] = new SimpleLinkInstruction<T>(selfSelector);
+            //_links.Add(new SimpleLinkInstruction<T>("self", selfSelector));
         }
 
         /// <inheritdoc/>
-        IReadOnlyCollection<ILinkInstruction> ITransformationMap.LinkInstructions => _links;
+        IReadOnlyDictionary<string, ILinkInstruction> ITransformationMap.LinkInstructions => _links;
 
         /// <inheritdoc/>
         IReadOnlyCollection<IEmbedInstruction> ITransformationMap.EmbedInstructions => _embeds;
@@ -50,7 +52,34 @@ namespace Tiger.Hal
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (selector == null) { throw new ArgumentNullException(nameof(selector)); }
 
-            _links.Add(new SimpleLinkInstruction<T>(relation, selector));
+            _links[relation] = new SimpleLinkInstruction<T>(selector);
+            return this;
+        }
+
+        /// <summary>Creates a link for the given type.</summary>
+        /// <typeparam name="TMember">
+        /// The member type of the return type of <paramref name="collectionSelector"/>.
+        /// </typeparam>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="collectionSelector">
+        /// A function that selects a collection from a value of type <typeparamref name="T"/>.
+        /// </param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="TMember"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public TransformationMap<T> Link<TMember>(
+            [NotNull] string relation,
+            [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
+            [NotNull] Func<TMember, LinkBuilder> linkSelector)
+        {
+            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+
+            _links[relation] = new PluralSimpleLinkInstruction<T>(_ => collectionSelector(_).Select(linkSelector));
             return this;
         }
 
@@ -82,7 +111,7 @@ namespace Tiger.Hal
             {
                 case MemberExpression me:
                     var propertySelector = valueSelector.Compile();
-                    _links.Add(new SimpleLinkInstruction<T>(relation, linkSelector));
+                    _links[relation] = new SimpleLinkInstruction<T>(linkSelector);
                     _embeds.Add(new MemberEmbedInstruction<T, TSelected>(relation, me.Member.Name, propertySelector));
                     return this;
                 default:
@@ -119,7 +148,7 @@ namespace Tiger.Hal
             { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
                 case MemberExpression me:
                     var propertySelector = valueSelector.Compile();
-                    _links.Add(new MemberLinkInstruction<T, TSelected>(relation, propertySelector, linkSelector));
+                    _links[relation] = new MemberLinkInstruction<T, TSelected>(propertySelector, linkSelector);
                     _embeds.Add(new MemberEmbedInstruction<T, TSelected>(relation, me.Member.Name, propertySelector));
                     return this;
                 default:

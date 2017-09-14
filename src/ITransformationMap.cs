@@ -11,7 +11,7 @@ namespace Tiger.Hal
         /// <summary>
         /// Gets a collection of instructions for creating link relations.
         /// </summary>
-        IReadOnlyCollection<ILinkInstruction> LinkInstructions { get; }
+        IReadOnlyDictionary<string, ILinkInstruction> LinkInstructions { get; }
 
         /// <summary>
         /// Gets a collection of instructions for embedding values.

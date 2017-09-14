@@ -37,10 +37,11 @@ namespace Tiger.Hal
             if (value == null) { throw new ArgumentNullException(nameof(value)); }
 
             return _transformationMap.LinkInstructions
-                .Select(li => (rel: li.Relation, builder: li.TransformToLinkBuilder(value)))
-                .Select(kvp => (rel: kvp.rel, link: kvp.builder.Build(_urlHelper)))
-                .ToLookup(kvp => kvp.rel, kvp => kvp.link)
-                .ToDictionary(g => g.Key, kvp => new LinkCollection(kvp.ToList()));
+                .SelectMany(
+                    kvp => kvp.Value.TransformToLinkBuilders(value),
+                    (kvp, lb) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular, link: lb.Build(_urlHelper)))
+                .ToLookup(kvp => (rel: kvp.rel, isSingular: kvp.isSingular), kvp => kvp.link)
+                .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
         }
     }
 }
