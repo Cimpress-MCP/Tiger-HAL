@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
+using Tiger.Hal;
 using static System.StringComparison;
 
-namespace Tiger.Hal.UnitTest.Utility
+namespace Test.Utility
 {
     /// <summary>Compares two instances of <see cref="Link"/> for equality.</summary>
     sealed class LinkEqualityComparer

@@ -13,11 +13,12 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Tiger.Hal.UnitTest.Utility;
+using Test.Utility;
+using Tiger.Hal;
 using Xunit;
 // ReSharper disable All
 
-namespace Tiger.Hal.UnitTest
+namespace Test
 {
     /// <summary>Tests related to the <see cref="HalJsonOutputFormatter"/> class.</summary>
     [Properties(Arbitrary = new[] { typeof(Generators) })]
@@ -49,7 +50,7 @@ namespace Tiger.Hal.UnitTest
         }
 
         [Property(DisplayName = "An unregistered type cannot be written.")]
-        protected virtual void UnregisteredType_CannotWriteResult()
+        protected void UnregisteredType_CannotWriteResult()
         {
             // arrange
             var repo = Mock.Of<IHalRepository>(r => r.CanTransform(It.IsAny<Type>()) == false);
@@ -71,7 +72,7 @@ namespace Tiger.Hal.UnitTest
         }
 
         [Property(DisplayName = "A registered type can be written.")]
-        protected virtual void RegisteredType_CanWriteResult()
+        protected void RegisteredType_CanWriteResult()
         {
             // arrange
             var repo = Mock.Of<IHalRepository>(r => r.CanTransform(It.IsAny<Type>()) == true);
@@ -93,7 +94,7 @@ namespace Tiger.Hal.UnitTest
         }
 
         [Property(DisplayName = "An unregistered type is serialized normally.")]
-        protected virtual void UnregisteredType_NotModified(Guid id)
+        protected void UnregisteredType_NotModified(Guid id)
         {
             // arrange
             var dto = new Unregistered
@@ -124,7 +125,7 @@ namespace Tiger.Hal.UnitTest
         }
 
         [Property(DisplayName = "A registered type creates its self link correctly.")]
-        protected virtual void RegisteredType_SelfLink(Guid id, NonNull<string> route)
+        protected void RegisteredType_SelfLink(Guid id, NonNull<string> route)
         {
             // arrange
             var dto = new Registered
@@ -147,6 +148,10 @@ namespace Tiger.Hal.UnitTest
                 ContractResolver = new DefaultContractResolver
                 {
                     NamingStrategy = new TNamingStrategy()
+                },
+                Converters =
+                {
+                    new LinkCollection.Converter()
                 }
             };
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
@@ -173,7 +178,7 @@ namespace Tiger.Hal.UnitTest
         }
 
         [Property(DisplayName = "A registered type creates additional links correctly.")]
-        protected virtual void RegisteredType_AdditionalLink(
+        protected void RegisteredType_AdditionalLink(
             Guid id,
             Guid parentId,
             UnequalNonNullPair<string> routes)
@@ -206,6 +211,10 @@ namespace Tiger.Hal.UnitTest
                 ContractResolver = new DefaultContractResolver
                 {
                     NamingStrategy = new TNamingStrategy()
+                },
+                Converters =
+                {
+                    new LinkCollection.Converter()
                 }
             };
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);

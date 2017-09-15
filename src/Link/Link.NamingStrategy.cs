@@ -3,7 +3,7 @@
 namespace Tiger.Hal
 {
     /// <content>JSON serialization naming strategy.</content>
-    sealed partial class Link
+    public sealed partial class Link
     {
         /// <summary>
         /// Defines the strategy for naming keys in the JSON serialization of <see cref="Link"/>.

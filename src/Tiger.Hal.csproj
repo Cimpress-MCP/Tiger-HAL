@@ -19,15 +19,21 @@
     <PackageTags>hal;json;hal+json;link</PackageTags>
     <PackageReleaseNotes>⁃ Everything is new!
 </PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/Cimpress-MCP</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/Cimpress-MCP/Tiger-Hal/develop/tiger_logo.png</PackageIconUrl>
+    <PackageProjectUrl>https://cimpress.githost.io/cosborn/Tiger.HAL</PackageProjectUrl>
+    <PackageIconUrl>https://cimpress.githost.io/cosborn/Tiger.HAL/raw/master/tiger_logo.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Cimpress-MCP/Tiger-Hal.git</RepositoryUrl>
+    <RepositoryUrl>https://cimpress.githost.io/cosborn/Tiger.HAL.git</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>
     <Features>IOperation</Features>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../stylecop.json" />
+    <None Remove="Tiger.Hal.csproj.DotSettings" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Link/LinkBuilder.Constant.cs">
@@ -45,11 +51,14 @@
     <Compile Update="Link/Link.NamingStrategy.cs">
       <DependentUpon>Link/Link.cs</DependentUpon>
     </Compile>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <AdditionalFiles Include="../stylecop.json" />
-    <None Remove="Tiger.Hal.csproj.DotSettings" />
+    <Compile Update="Link/LinkCollection.Converter.cs">
+      <DependentUpon>Link/LinkCollection.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -61,9 +70,15 @@
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
     <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
     
-    <!-- <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
-    <PackageReference Include="System.Runtime.Analyzers" Version="1.2.0-beta2" PrivateAssets="All" />
-    <PackageReference Include="System.Collections.Immutable.Analyzers" Version="1.2.0-beta2" PrivateAssets="All" /> -->
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.3.0-beta1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   
 </Project>

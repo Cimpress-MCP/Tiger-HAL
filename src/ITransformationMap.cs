@@ -17,5 +17,10 @@ namespace Tiger.Hal
         /// Gets a collection of instructions for embedding values.
         /// </summary>
         IReadOnlyCollection<IEmbedInstruction> EmbedInstructions { get; }
+
+        /// <summary>
+        /// Gets a collection of instructions for hoisting values.
+        /// </summary>
+        IReadOnlyCollection<IHoistInstruction> HoistInstructions { get; }
     }
 }

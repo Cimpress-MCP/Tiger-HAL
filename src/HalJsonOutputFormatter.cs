@@ -2,7 +2,9 @@
 using System.Buffers;
 using System.Collections;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -11,15 +13,21 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using static System.Reflection.BindingFlags;
 
 namespace Tiger.Hal
 {
     /// <summary>A <see cref="JsonOutputFormatter"/> for HAL+JSON content.</summary>
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = @"Ending with ""Contract"" is OK.")]
     [PublicAPI]
     public sealed class HalJsonOutputFormatter
         : JsonOutputFormatter
     {
         readonly IHalRepository _halRepository;
+
+        // note(cosborn) Cache the reflection; it's relatively expensive.
+        readonly MethodInfo _cocInfo = typeof(DefaultContractResolver)
+            .GetMethod("CreateObjectContract", Instance | NonPublic);
 
         /// <summary>Initializes a new instance of the <see cref="HalJsonOutputFormatter"/> class.</summary>
         /// <param name="halRepository">The application's HAL+JSON repository.</param>
@@ -84,7 +92,7 @@ namespace Tiger.Hal
         }
 
         [CanBeNull]
-        JToken WalkObject( // ReSharper disable once InconsistentNaming
+        JToken WalkObject(
             [NotNull] JsonObjectContract jsonObjectContract,
             [CanBeNull] JToken jValue,
             [CanBeNull] object value)
@@ -96,29 +104,28 @@ namespace Tiger.Hal
                 return jValue;
             }
 
-            var properties = jsonObjectContract
-                .Properties
-                .Where(p => !p.Ignored)
-                .Where(p => p.Readable)
-                .Where(p => p.ShouldSerialize?.Invoke(value) ?? true)
-                .Where(p => p.GetIsSpecified?.Invoke(value) ?? true);
-            foreach (var property in properties)
+            var walkQuads =
+                from property in jsonObjectContract.Properties
+                let jPropertyValue = jValue[property.PropertyName]
+                where jPropertyValue != null
+                let nativeValue = property.ValueProvider.GetValue(value)
+                let contract = SerializerSettings.ContractResolver.ResolveContract(property.PropertyType)
+                select (name: property.PropertyName, jPropertyValue, nativeValue, contract);
+            foreach (var (name, jPropertyValue, nativeValue, contract) in walkQuads)
             {
-                var jPropertyValue = jValue[property.PropertyName];
-                var nativeValue = property.ValueProvider.GetValue(value);
-                switch (SerializerSettings.ContractResolver.ResolveContract(property.PropertyType))
+                switch (contract)
                 {
                     case JsonObjectContract joc:
-                        jValue[property.PropertyName] = WalkObject(joc, jPropertyValue, nativeValue);
+                        jValue[name] = WalkObject(joc, jPropertyValue, nativeValue);
                         break;
                     case JsonArrayContract jac:
-                        jValue[property.PropertyName] = WalkArray(jac, jPropertyValue, nativeValue);
+                        jValue[name] = WalkArray(jac, jPropertyValue, nativeValue);
                         break;
                     case JsonDictionaryContract jdc:
-                        jValue[property.PropertyName] = WalkDictionary(jdc, jPropertyValue, nativeValue);
+                        jValue[name] = WalkDictionary(jdc, jPropertyValue, nativeValue);
                         break;
 
-                    // note(cosborn) Dynamic? Something else?
+                    // todo(cosborn) Dynamic? Something else?
                 }
             }
 
@@ -129,20 +136,27 @@ namespace Tiger.Hal
             }
 
             var embeds = ImmutableList.Create<JProperty>();
-            foreach (var embedInstruction in transformer.Embeds)
+            var embedPairs =
+                from embedInstruction in transformer.Embeds
+                let embedIndex = embedInstruction.Index.ToString()
+                join property in jsonObjectContract.Properties
+                    on embedIndex equals property.UnderlyingName
+                let embedValue = embedInstruction.GetEmbedValue(value)
+                let jEmbedValue = embedValue == null
+                    ? JValue.CreateNull()
+                    : Walk(embedValue, embedInstruction.Type)
+                let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
+                select (index: property.PropertyName, jProperty);
+            foreach (var (index, jProperty) in embedPairs)
             {
-                embeds = embeds.Add(new JProperty(
-                    embedInstruction.Relation,
-                    Walk(embedInstruction.GetEmbeddedValue(value), embedInstruction.Type)));
-                var embedProperty = jsonObjectContract.Properties
-                    .SingleOrDefault(p => p.UnderlyingName == embedInstruction.Index.ToString());
+                embeds = embeds.Add(jProperty);
                 /* note(cosborn)
                  * Remember, indexing the JToken will give us a value within
                  * a JProperty. We can't remove the value from the property
                  * (what would that mean?), so we move up one level to remove
                  * the entire property from the parent object.
                  */
-                jValue[embedProperty?.PropertyName ?? embedInstruction.Index]?.Parent.Remove();
+                jValue[index]?.Parent.Remove();
             }
 
             if (embeds.Count != 0)
@@ -154,7 +168,7 @@ namespace Tiger.Hal
         }
 
         [CanBeNull]
-        JToken WalkArray( // ReSharper disable once InconsistentNaming
+        JToken WalkArray(
             [NotNull] JsonArrayContract jsonArrayContract,
             [CanBeNull] JToken jValue,
             [CanBeNull] object value)
@@ -166,23 +180,27 @@ namespace Tiger.Hal
                 return jValue;
             }
 
-            var arrayValue = ((IEnumerable)value).Cast<object>().ToImmutableArray(); // ReSharper disable once InconsistentNaming
             var collectionItemContract = SerializerSettings.ContractResolver.ResolveContract(jsonArrayContract.CollectionItemType);
-            foreach (var (index, indexValue) in arrayValue.Select((o, i) => (index: i, indexValue: o)))
+            var arrayValue = ((IEnumerable)value).Cast<object>();
+            var walkPairs =
+                from indexPair in arrayValue.Select((o, i) => (index: i, nativeValue: o))
+                let jIndexValue = jValue[indexPair.index]
+                select (indexPair, jIndexValue);
+            foreach (var ((index, nativeValue), jIndexValue) in walkPairs)
             {
                 switch (collectionItemContract)
                 {
                     case JsonObjectContract joc:
-                        jValue[index] = WalkObject(joc, jValue[index], indexValue);
+                        jValue[index] = WalkObject(joc, jIndexValue, nativeValue);
                         break;
                     case JsonArrayContract jac:
-                        jValue[index] = WalkArray(jac, jValue[index], indexValue);
+                        jValue[index] = WalkArray(jac, jIndexValue, nativeValue);
                         break;
                     case JsonDictionaryContract jdc:
-                        jValue[index] = WalkDictionary(jdc, jValue[index], indexValue);
+                        jValue[index] = WalkDictionary(jdc, jIndexValue, nativeValue);
                         break;
 
-                    // note(cosborn) Dynamic? Something else?
+                    // todo(cosborn) Dynamic? Something else?
                 }
             }
 
@@ -196,25 +214,49 @@ namespace Tiger.Hal
             }
 
             var embeds = ImmutableList.Create<JProperty>();
-            foreach (var embedInstruction in transformer.Embeds)
+            var embedPairs =
+                from embedInstruction in transformer.Embeds
+                let embedValue = embedInstruction.GetEmbedValue(value)
+                let jEmbedValue = embedValue == null
+                    ? JValue.CreateNull()
+                    : Walk(embedValue, embedInstruction.Type)
+                let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
+                select (index: embedInstruction.Index, jProperty);
+            foreach (var (index, jProperty) in embedPairs)
             {
-                embeds = embeds.Add(new JProperty(
-                    embedInstruction.Relation,
-                    Walk(embedInstruction.GetEmbeddedValue(value), embedInstruction.Type)));
-                if (embedInstruction.Index is int index)
-                { // Json.NET will panic if we send in anything but an int.
-                    jValue[index]?.Remove();
+                embeds = embeds.Add(jProperty);
+                if (index is int arrayIndex)
+                { // note(cosborn) Json.NET will panic if we send in anything but an int.
+                    jValue[arrayIndex]?.Remove();
                 }
             }
 
             // note(cosborn) We know embeds has at least one.
             wrapperObject["_embedded"] = new JObject(embeds.Add(new JProperty("self", jValue)));
 
+            if (transformer.Hoists.Count != 0)
+            { // todo(cosborn) Check count because object contract creation is relatively expensive due to reflection.
+                var objectContract = CreateObjectContract(jsonArrayContract.UnderlyingType);
+
+                var pairs =
+                    from hoist in transformer.Hoists
+                    join property in objectContract.Properties
+                        on hoist.Name equals property.UnderlyingName
+                    let hoistValue = hoist.GetHoistValue(value)
+                    let jTokenValue = JToken.FromObject(hoistValue, CreateJsonSerializer())
+                    select (name: property.PropertyName, jTokenValue);
+
+                foreach (var (name, jTokenValue) in pairs)
+                {
+                    wrapperObject[name] = jTokenValue;
+                }
+            }
+
             return wrapperObject;
         }
 
         [CanBeNull]
-        JToken WalkDictionary( // ReSharper disable once InconsistentNaming
+        JToken WalkDictionary(
             [NotNull] JsonDictionaryContract jsonDictionaryContract,
             [CanBeNull] JToken jValue,
             [CanBeNull] object value)
@@ -226,7 +268,7 @@ namespace Tiger.Hal
                 return jValue;
             }
 
-            var dictValue = (IDictionary)value; // ReSharper disable once InconsistentNaming
+            var dictValue = (IDictionary)value;
             var dictionaryValueContract = SerializerSettings.ContractResolver.ResolveContract(jsonDictionaryContract.DictionaryValueType);
             foreach (var key in dictValue.Keys)
             {
@@ -243,7 +285,7 @@ namespace Tiger.Hal
                         jValue[jKey] = new JProperty(jKey, WalkDictionary(jdc, jValue[jKey], dictValue[key]));
                         break;
 
-                    // note(cosborn) Dynamic? Something else?
+                    // todo(cosborn) Dynamic? Something else?
                 }
             }
 
@@ -254,19 +296,27 @@ namespace Tiger.Hal
             }
 
             var embeds = ImmutableList.Create<JProperty>();
-            foreach (var embedInstruction in transformer.Embeds)
+            var embedPairs =
+                from embedInstruction in transformer.Embeds
+                let nativeKey = embedInstruction.Index.ToString()
+                let embedKey = jsonDictionaryContract.DictionaryKeyResolver(nativeKey)
+                let index = embedKey ?? embedInstruction.Index
+                let embedValue = embedInstruction.GetEmbedValue(value)
+                let jEmbedValue = embedValue == null
+                    ? JValue.CreateNull()
+                    : Walk(embedValue, embedInstruction.Type)
+                let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
+                select (index, jProperty);
+            foreach (var (index, jProperty) in embedPairs)
             {
-                embeds = embeds.Add(new JProperty(
-                    embedInstruction.Relation,
-                    Walk(embedInstruction.GetEmbeddedValue(value), embedInstruction.Type)));
-                var embedKey = jsonDictionaryContract.DictionaryKeyResolver(embedInstruction.Index.ToString());
+                embeds = embeds.Add(jProperty);
                 /* note(cosborn)
                  * Remember, indexing the JToken will give us a value within
                  * a JProperty. We can't remove the value from the property
                  * (what would that mean?), so we move up one level to remove
                  * the entire property from the parent object.
                  */
-                jValue[embedKey ?? embedInstruction.Index]?.Parent.Remove();
+                jValue[index]?.Parent.Remove();
             }
 
             if (embeds.Count != 0)
@@ -276,5 +326,8 @@ namespace Tiger.Hal
 
             return jValue;
         }
+
+        JsonObjectContract CreateObjectContract(Type type) =>
+            (JsonObjectContract)_cocInfo.Invoke(SerializerSettings.ContractResolver, new object[] { type });
     }
 }

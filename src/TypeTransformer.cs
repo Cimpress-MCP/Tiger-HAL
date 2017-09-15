@@ -32,6 +32,9 @@ namespace Tiger.Hal
         IReadOnlyCollection<IEmbedInstruction> ITypeTransformer.Embeds => _transformationMap.EmbedInstructions;
 
         /// <inheritdoc/>
+        IReadOnlyCollection<IHoistInstruction> ITypeTransformer.Hoists => _transformationMap.HoistInstructions;
+
+        /// <inheritdoc/>
         IReadOnlyDictionary<string, LinkCollection> ITypeTransformer.GenerateLinks(object value)
         {
             if (value == null) { throw new ArgumentNullException(nameof(value)); }

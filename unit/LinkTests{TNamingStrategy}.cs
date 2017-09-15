@@ -3,11 +3,12 @@ using FsCheck;
 using FsCheck.Xunit;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Tiger.Hal.UnitTest.Utility;
+using Test.Utility;
+using Tiger.Hal;
 using Xunit;
 // ReSharper disable All
 
-namespace Tiger.Hal.UnitTest
+namespace Test
 {
     /// <summary>Tests related to the <see cref="Link"/> class.</summary>
     [Properties(Arbitrary = new[] { typeof(Generators) })]

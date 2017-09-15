@@ -6,8 +6,13 @@ namespace Tiger.Hal
     /// <summary>Transforms a value into its HAL representation.</summary>
     public interface ITypeTransformer
     {
-        /// <summary>Gets a mapping of accessor to collection of link relations.</summary>
+        /// <summary>Gets a mapping of accessor to embeddable value.</summary>
+        [NotNull, ItemNotNull]
         IReadOnlyCollection<IEmbedInstruction> Embeds { get; }
+
+        /// <summary>Gets a mapping of accessor to hoistable value.</summary>
+        [NotNull, ItemNotNull]
+        IReadOnlyCollection<IHoistInstruction> Hoists { get; }
 
         /// <summary>
         /// Generates a mapping of link relations to a collection of links

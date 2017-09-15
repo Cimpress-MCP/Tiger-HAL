@@ -27,10 +27,10 @@ namespace Tiger.Hal
         [NotNull]
         Type Type { get; }
 
-        /// <summary>Retrieves the value to be embedded from the given main object.</summary>
+        /// <summary>Retrieves the value to embed from the given main object.</summary>
         /// <param name="main">The main object.</param>
-        /// <returns>The value to be embedded.</returns>
+        /// <returns>The value to embed.</returns>
         [NotNull]
-        object GetEmbeddedValue([NotNull] object main);
+        object GetEmbedValue([NotNull] object main);
     }
 }

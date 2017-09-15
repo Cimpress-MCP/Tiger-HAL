@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using static JetBrains.Annotations.ImplicitUseTargetFlags;
 
-namespace Tiger.Hal.UnitTest.Utility
+namespace Test.Utility
 {
     [UsedImplicitly(Members)]
     static class UnequalNonNullPair

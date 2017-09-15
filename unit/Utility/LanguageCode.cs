@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
-namespace Tiger.Hal.UnitTest.Utility
+namespace Test.Utility
 {
     /// <summary>Represents a language code, with nation.</summary>
     public class LanguageCode

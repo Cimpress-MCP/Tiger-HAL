@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using FsCheck;
 using JetBrains.Annotations;
-using static JetBrains.Annotations.ImplicitUseTargetFlags;
 
-namespace Tiger.Hal.UnitTest.Utility
+namespace Test.Utility
 {
-    [UsedImplicitly(Members)]
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     static class Generators
     {
         public static Arbitrary<Uri> Uri() => Arb.From(

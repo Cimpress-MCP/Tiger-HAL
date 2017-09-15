@@ -5,12 +5,11 @@ namespace Tiger.Hal
 {
     /// <summary>Represents an instruction for embedding a value in a HAL response.</summary>
     /// <typeparam name="T">The parent type of the value to embed.</typeparam>
-    /// <typeparam name="TSelected">The type of the value to embed.</typeparam>
-    sealed class MemberEmbedInstruction<T, TSelected>
+    /// <typeparam name="TMember">The type of the value to embed.</typeparam>
+    sealed class MemberEmbedInstruction<T, TMember>
         : IEmbedInstruction
     {
-        readonly string _memberName;
-        readonly Func<T, TSelected> _valueSelector;
+        readonly Func<T, TMember> _valueSelector;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemberEmbedInstruction{T,TSelected}"/> class.
@@ -24,10 +23,10 @@ namespace Tiger.Hal
         public MemberEmbedInstruction(
             [NotNull] string relation,
             [NotNull] string memberName,
-            [NotNull] Func<T, TSelected> valueSelector)
+            [NotNull] Func<T, TMember> valueSelector)
         {
             Relation = relation ?? throw new ArgumentNullException(nameof(relation));
-            _memberName = memberName ?? throw new ArgumentNullException(nameof(memberName));
+            Index = memberName ?? throw new ArgumentNullException(nameof(memberName));
             _valueSelector = valueSelector ?? throw new ArgumentNullException(nameof(valueSelector));
         }
 
@@ -35,12 +34,12 @@ namespace Tiger.Hal
         public string Relation { get; }
 
         /// <inheritdoc/>
-        object IEmbedInstruction.Index => _memberName;
+        public object Index { get; }
 
         /// <inheritdoc/>
-        public Type Type => typeof(TSelected);
+        public Type Type => typeof(TMember);
 
         /// <inheritdoc/>
-        public object GetEmbeddedValue(object main) => _valueSelector((T)main);
+        public object GetEmbedValue(object main) => _valueSelector((T)main);
     }
 }
