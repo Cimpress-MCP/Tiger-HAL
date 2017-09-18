@@ -47,7 +47,7 @@ namespace Tiger.Hal
 
             if (!_transformations.TryGetValue(type, out var transformationMap))
             {
-                transformer = default(ITypeTransformer);
+                transformer = default;
                 return false;
             }
 

@@ -14,6 +14,10 @@ namespace Tiger.Hal
         [NotNull, ItemNotNull]
         IReadOnlyCollection<IHoistInstruction> Hoists { get; }
 
+        /// <summary>Gets a collection of ignorable properties.</summary>
+        [NotNull, ItemNotNull]
+        IReadOnlyCollection<string> Ignores { get; }
+
         /// <summary>
         /// Generates a mapping of link relations to a collection of links
         /// for the given value.

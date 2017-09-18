@@ -140,7 +140,8 @@ namespace Test
                 uhf.GetUrlHelper(It.IsAny<ActionContext>()) == urlHelper.Object);
             var map = new Dictionary<Type, ITransformationMap>
             {
-                [typeof(Registered)] = new TransformationMap<Registered>(r => LinkBuilder.Route(route.Get, new { r.Id }))
+                [typeof(Registered)] = new TransformationMap.Builder<Registered>(
+                    r => LinkBuilder.Route(route.Get, new { r.Id }))
             };
             var repo = new HalRepository(Mock.Of<IActionContextAccessor>(), urlHelperFactory, map);
             var serializerSettings = new JsonSerializerSettings
@@ -199,7 +200,8 @@ namespace Test
                 .Verifiable();
             var urlHelperFactory = Mock.Of<IUrlHelperFactory>(uhf =>
                 uhf.GetUrlHelper(It.IsAny<ActionContext>()) == urlHelper.Object);
-            var registeredMap = new TransformationMap<Registered>(r => LinkBuilder.Route(route, new { id = r.Id }))
+            var registeredMap = new TransformationMap.Builder<Registered>(
+                    r => LinkBuilder.Route(route, new { id = r.Id }))
                 .Link("up", r => LinkBuilder.Route(parentRoute, new { id = r.ParentId }));
             var map = new Dictionary<Type, ITransformationMap>
             {

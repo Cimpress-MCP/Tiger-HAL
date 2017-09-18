@@ -164,6 +164,16 @@ namespace Tiger.Hal
                 jValue["_embedded"] = new JObject(embeds);
             }
 
+            var ignores =
+                from i in transformer.Ignores
+                join p in jsonObjectContract.Properties
+                    on i equals p.UnderlyingName
+                select p.PropertyName;
+            foreach (var ignore in ignores)
+            {
+                jValue[ignore]?.Parent.Remove();
+            }
+
             return jValue;
         }
 
