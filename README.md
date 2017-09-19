@@ -45,12 +45,12 @@ public sealed class PrintJobHalProfile
     {
         transformationMap
             .Self<PrintJob>(pj => Route("GetByPrintJobId", new { pj.Id }))
-            .Ignore(pj => pj.Id)
-            .Link(Pool, pj => pj.Pool, Const)
-            .LinkMany(Watchers, pj => pj.Watchers, w => new Constant(w.Uri) { Name = w.Name })
-            .Link(Events, pj => pj.Events, (pj, pjec) => Route("GetEventsForPrintJob", new { pj.Id }))
+            .Link(Pool, pj => Const(pj.Pool))
+            .Link(Watchers, pj => pj.Watchers, w => new Constant(w.Uri) { Name = w.Name })
+            .Link(Events, pj => Route("GetEventsForPrintJob", new { pj.Id }))
             .Embed(Items, pj => pj.Items, pj => Route("GetItemsForPrintJob", new { pj.Id }))
-            .LinkMany(Assets, pj => pj.Assets, a => new Constant(a.Uri) { Title = a.Role });
+            .Link(Assets, pj => pj.Assets, a => new Constant(a.Uri) { Title = a.Role })
+            .Ignore(pj => pj.Id, pj => pj.Pool, pj => pj.Watchers, pj => pj.Events, pj => pj.Assets);
 
         transformationMap
             .Self<PrintJobEventCollection>(pjec => Route("GetEventsForPrintJob", new { id = pjec.PrintJobId }))
@@ -58,10 +58,10 @@ public sealed class PrintJobHalProfile
             .Hoist(pjec => pjec.Count);
 
         transformationMap
-            .Self<PrintJobEvent>(e => Route("GetEvent", new { e.PrintJobId, e.Id }))
-            .Ignore(e => e.Id)
-            .Link("index", e => e.PrintJobId, id => Route("GetEventsForPrintJob", new { id }))
-            .Link("up", e => e.PrintJobId, id => Route("GetByPrintJobId", new { id }));
+            .Self<PrintJobEvent>(e => Route("GetEvent", new { e.Id, e.PrintJobId }))
+            .Link("index", e => Route("GetEventsForPrintJob", new { id = e.PrintJobId }))
+            .Link("up", e => Route("GetByPrintJobId", new { id = e.PrintJobId }))
+            .Ignore(pj => pj.Id, pj => pj.PrintJobId);
     }
 }
 ```

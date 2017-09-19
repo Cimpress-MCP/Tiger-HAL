@@ -67,93 +67,6 @@ namespace Tiger.Hal
                 return this;
             }
 
-            /// <summary>
-            /// Creates a link for the given type, optionally removing
-            /// the specified member from the serialization.
-            /// </summary>
-            /// <typeparam name="TMember">The return type of <paramref name="memberSelector"/>.</typeparam>
-            /// <param name="relation">The name of the link relation to establish.</param>
-            /// <param name="memberSelector">
-            /// A function that selects a value of type <typeparamref name="TMember"/>
-            /// from a value of type <typeparamref name="T"/>.
-            /// </param>
-            /// <param name="linkSelector">
-            /// A function that creates a <see cref="LinkBuilder"/>
-            /// from a value of type <typeparamref name="TMember"/>.
-            /// </param>
-            /// <param name="retain">
-            /// A value indicating whether the value selected by <paramref name="memberSelector"/>
-            /// should be included in the HAL+JSON serialization.
-            /// </param>
-            /// <returns>The modified transformation map.</returns>
-            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentNullException"><paramref name="memberSelector"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentException"><paramref name="memberSelector"/> is malformed.</exception>
-            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
-            [NotNull]
-            public Builder<T> Link<TMember>(
-                [NotNull] string relation,
-                [NotNull] Expression<Func<T, TMember>> memberSelector,
-                [NotNull] Func<TMember, LinkBuilder> linkSelector,
-                bool retain = false)
-            {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
-                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
-
-                switch (memberSelector.Body)
-                {
-                    case MemberExpression me:
-                        if (!retain) { _ignores.Add(me.Member.Name); }
-                        var valueSelector = memberSelector.Compile();
-                        _links[relation] = new LinkInstruction<T>(t => linkSelector(valueSelector(t)));
-                        return this;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector);
-                }
-            }
-
-            /// <summary>Creates a collection of links for the given type.</summary>
-            /// <typeparam name="TMember">The return type of <paramref name="memberSelector"/>.</typeparam>
-            /// <param name="relation">The name of the link relation to establish.</param>
-            /// <param name="memberSelector">
-            /// A function that selects a value from a value of type <typeparamref name="T"/>.
-            /// </param>
-            /// <param name="linkSelector">
-            /// A function that creates a <see cref="LinkBuilder"/>
-            /// from a value of type <typeparamref name="T"/>.
-            /// </param>
-            /// <param name="retain">
-            /// A value indicating whether the value selected by <paramref name="memberSelector"/>
-            /// should be included in the HAL+JSON serialization.
-            /// </param>
-            /// <returns>The modified transformation map.</returns>
-            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentNullException"><paramref name="memberSelector"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentException"><paramref name="memberSelector"/> is malformed.</exception>
-            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
-            [NotNull]
-            public Builder<T> Link<TMember>(
-                [NotNull] string relation,
-                [NotNull] Expression<Func<T, TMember>> memberSelector,
-                [NotNull] Func<T, TMember, LinkBuilder> linkSelector,
-                bool retain = false)
-            {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
-
-                switch (memberSelector.Body)
-                {
-                    case MemberExpression me:
-                        if (!retain) { _ignores.Add(me.Member.Name); }
-                        var valueSelector = memberSelector.Compile();
-                        _links[relation] = new LinkInstruction<T>(t => linkSelector(t, valueSelector(t)));
-                        return this;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector);
-                }
-            }
-
             /// <summary>Creates a link for the given type.</summary>
             /// <typeparam name="TMember">
             /// The member type of the return type of <paramref name="collectionSelector"/>.
@@ -172,28 +85,20 @@ namespace Tiger.Hal
             /// <returns>The modified transformation map.</returns>
             /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentException"><paramref name="collectionSelector"/> is malformed.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
             [NotNull]
-            public Builder<T> LinkMany<TMember>(
+            public Builder<T> Link<TMember>(
                 [NotNull] string relation,
-                [NotNull] Expression<Func<T, IEnumerable<TMember>>> collectionSelector,
+                [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
                 [NotNull] Func<TMember, LinkBuilder> linkSelector,
                 bool retain = false)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
-                switch (collectionSelector.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
-                    case MemberExpression me:
-                        if (!retain) { _ignores.Add(me.Member.Name); }
-                        var valueSelector = collectionSelector.Compile();
-                        _links[relation] = new ManyLinkInstruction<T>(t => valueSelector(t).Select(linkSelector));
-                        return this;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector);
-                }
+                _links[relation] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(linkSelector));
+                return this;
             }
 
             /// <summary>Creates a collection of links for the given type.</summary>
@@ -208,36 +113,21 @@ namespace Tiger.Hal
             /// <param name="linkSelector">
             /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="TMember"/>.
             /// </param>
-            /// <param name="retain">
-            /// A value indicating whether the value selected by <paramref name="collectionSelector"/>
-            /// should be included in the HAL+JSON serialization.
-            /// </param>
             /// <returns>The modified transformation map.</returns>
             /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentException"><paramref name="collectionSelector"/> is malformed</exception>
             /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
             [NotNull]
-            public Builder<T> LinkMany<TMember>(
+            public Builder<T> Link<TMember>(
                 [NotNull] string relation,
-                [NotNull] Expression<Func<T, IEnumerable<TMember>>> collectionSelector,
-                [NotNull] Func<T, TMember, LinkBuilder> linkSelector,
-                bool retain = false)
+                [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
+                [NotNull] Func<T, TMember, LinkBuilder> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
 
-                switch (collectionSelector.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
-                    case MemberExpression me:
-                        if (!retain) { _ignores.Add(me.Member.Name); }
-                        var valueSelector = collectionSelector.Compile();
-                        _links[relation] = new ManyLinkInstruction<T>(
-                            t => valueSelector(t).Select(tm => linkSelector(t, tm)));
-                        return this;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector);
-                }
+                _links[relation] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(tm => linkSelector(t, tm)));
+                return this;
             }
 
             /// <summary>Creates a link for the given type.</summary>
@@ -255,36 +145,22 @@ namespace Tiger.Hal
             /// A function that creates a <see cref="LinkBuilder"/> from a value of type
             /// <typeparamref name="TKey"/> and a value of type <typeparamref name="TValue"/>.
             /// </param>
-            /// <param name="retain">
-            /// A value indicating whether the value selected by <paramref name="dictionarySelector"/>
-            /// should be included in the HAL+JSON serialization.
-            /// </param>
             /// <returns>The modified transformation map.</returns>
             /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="dictionarySelector"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentException"><paramref name="dictionarySelector"/> is malformed</exception>
             /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
             [NotNull]
-            public Builder<T> LinkMany<TKey, TValue>(
+            public Builder<T> Link<TKey, TValue>(
                 [NotNull] string relation,
-                [NotNull] Expression<Func<T, IDictionary<TKey, TValue>>> dictionarySelector,
-                [NotNull] Func<TKey, TValue, LinkBuilder> linkSelector,
-                bool retain = false)
+                [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
+                [NotNull] Func<TKey, TValue, LinkBuilder> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
 
-                switch (dictionarySelector.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
-                    case MemberExpression me:
-                        if (!retain) { _ignores.Add(me.Member.Name); }
-                        var valueSelector = dictionarySelector.Compile();
-                        _links[relation] = new ManyLinkInstruction<T>(
-                            t => valueSelector(t).Select(kvp => linkSelector(kvp.Key, kvp.Value)));
-                        return this;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector);
-                }
+                _links[relation] = new ManyLinkInstruction<T>(
+                    t => dictionarySelector(t).Select(kvp => linkSelector(kvp.Key, kvp.Value)));
+                return this;
             }
 
             /// <summary>Creates a collection of links for the given type.</summary>
@@ -303,37 +179,23 @@ namespace Tiger.Hal
             /// <typeparamref name="T"/>, a value of type <typeparamref name="TKey"/>,
             /// and a value of type <typeparamref name="TValue"/>.
             /// </param>
-            /// <param name="retain">
-            /// A value indicating whether the value selected by <paramref name="dictionarySelector"/>
-            /// should be included in the HAL+JSON serialization.
-            /// </param>
             /// <returns>The modified transformation map.</returns>
             /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="dictionarySelector"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentException"><paramref name="dictionarySelector"/> is malformed.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
             [NotNull]
-            public Builder<T> LinkMany<TKey, TValue>(
+            public Builder<T> Link<TKey, TValue>(
                 [NotNull] string relation,
-                [NotNull] Expression<Func<T, IDictionary<TKey, TValue>>> dictionarySelector,
-                [NotNull] Func<T, TKey, TValue, LinkBuilder> linkSelector,
-                bool retain = false)
+                [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
+                [NotNull] Func<T, TKey, TValue, LinkBuilder> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
 
-                switch (dictionarySelector.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
-                    case MemberExpression me:
-                        if (!retain) { _ignores.Add(me.Member.Name); }
-                        var valueSelector = dictionarySelector.Compile();
-                        _links[relation] = new ManyLinkInstruction<T>(
-                            t => valueSelector(t).Select(
-                                kvp => linkSelector(t, kvp.Key, kvp.Value)));
-                        return this;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector);
-                }
+                _links[relation] = new ManyLinkInstruction<T>(
+                    t => dictionarySelector(t).Select(
+                        kvp => linkSelector(t, kvp.Key, kvp.Value)));
+                return this;
             }
 
             #endregion
@@ -440,26 +302,154 @@ namespace Tiger.Hal
                 }
             }
 
-            /// <summary>Causes a property not to be represented in the HAL+JSON serialization of a value.</summary>
-            /// <typeparam name="TMember">The type of the value to ignore.</typeparam>
-            /// <param name="memberSelector">A function selecting a top-level member to ignore.</param>
-            /// <returns>The modified transformation map.</returns>
-            /// <exception cref="ArgumentNullException"><paramref name="memberSelector"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentException"><paramref name="memberSelector"/> is malformed.</exception>
-            [NotNull]
-            public Builder<T> Ignore<TMember>([NotNull] Expression<Func<T, TMember>> memberSelector)
-            {
-                if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
+            #region Ignore
 
-                switch (memberSelector.Body)
+            /// <summary>Causes a property not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <typeparam name="T1">The type of the member selected by <paramref name="memberSelector1"/>.</typeparam>
+            /// <param name="memberSelector1">
+            /// A function selecting a top-level member of type <typeparamref name="T1"/> to ignore.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException">A member of <paramref name="memberSelector1"/> is malformed.</exception>
+            [NotNull]
+            public Builder<T> Ignore<T1>([NotNull] Expression<Func<T, T1>> memberSelector1)
+            {
+                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+
+                switch (memberSelector1.Body)
                 { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
                     case MemberExpression me:
                         _ignores.Add(me.Member.Name);
                         return this;
                     default:
-                        throw new ArgumentException(MalformedValueSelector);
+                        throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
                 }
             }
+
+            /// <summary>Causes properties not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <typeparam name="T1">The type of the member selected by <paramref name="memberSelector1"/>.</typeparam>
+            /// <typeparam name="T2">The type of the member selected by <paramref name="memberSelector2"/>.</typeparam>
+            /// <param name="memberSelector1">
+            /// A function selecting a top-level member of type <typeparamref name="T1"/> to ignore.
+            /// </param>
+            /// <param name="memberSelector2">
+            /// A function selecting a top-level member of type <typeparamref name="T2"/> to ignore.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException">A member of <paramref name="memberSelector1"/> is malformed.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector2"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException">A member of <paramref name="memberSelector2"/> is malformed.</exception>
+            [NotNull]
+            public Builder<T> Ignore<T1, T2>(
+                [NotNull] Expression<Func<T, T1>> memberSelector1,
+                [NotNull] Expression<Func<T, T2>> memberSelector2)
+            {
+                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+                if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+
+                switch (memberSelector1.Body)
+                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                    case MemberExpression me:
+                        _ignores.Add(me.Member.Name);
+                        break;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
+                }
+
+                switch (memberSelector2.Body)
+                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                    case MemberExpression me:
+                        _ignores.Add(me.Member.Name);
+                        break;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector, nameof(memberSelector2));
+                }
+
+                return this;
+            }
+
+            /// <summary>Causes properties not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <typeparam name="T1">The type of the member selected by <paramref name="memberSelector1"/>.</typeparam>
+            /// <typeparam name="T2">The type of the member selected by <paramref name="memberSelector2"/>.</typeparam>
+            /// <typeparam name="T3">The type of the member selected by <paramref name="memberSelector3"/>.</typeparam>
+            /// <param name="memberSelector1">
+            /// A function selecting a top-level member of type <typeparamref name="T1"/> to ignore.
+            /// </param>
+            /// <param name="memberSelector2">
+            /// A function selecting a top-level member of type <typeparamref name="T2"/> to ignore.
+            /// </param>
+            /// <param name="memberSelector3">
+            /// A function selecting a top-level member of type <typeparamref name="T3"/> to ignore.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException">A member of <paramref name="memberSelector1"/> is malformed.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector2"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException">A member of <paramref name="memberSelector2"/> is malformed.</exception>
+            [NotNull]
+            public Builder<T> Ignore<T1, T2, T3>(
+                [NotNull] Expression<Func<T, T1>> memberSelector1,
+                [NotNull] Expression<Func<T, T2>> memberSelector2,
+                [NotNull] Expression<Func<T, T3>> memberSelector3)
+            {
+                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+                if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+
+                switch (memberSelector1.Body)
+                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                    case MemberExpression me:
+                        _ignores.Add(me.Member.Name);
+                        break;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
+                }
+
+                switch (memberSelector2.Body)
+                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                    case MemberExpression me:
+                        _ignores.Add(me.Member.Name);
+                        break;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector, nameof(memberSelector2));
+                }
+
+                return this;
+            }
+
+            /// <summary>Causes properties not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <param name="memberSelectors">A collection of functions, each selecting a top-level member to ignore.</param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelectors"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException">A member of <paramref name="memberSelectors"/> is malformed.</exception>
+            [NotNull]
+            public Builder<T> Ignore([NotNull] params Expression<Func<T, object>>[] memberSelectors)
+            {
+                if (memberSelectors == null) { throw new ArgumentNullException(nameof(memberSelectors)); }
+
+                foreach (var memberSelector in memberSelectors)
+                {
+                    switch (memberSelector.Body)
+                    { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                        case MemberExpression me:
+                            _ignores.Add(me.Member.Name);
+                            return this;
+                        default:
+                            throw new ArgumentException(MalformedValueSelector, nameof(memberSelectors))
+                            {
+                                Data =
+                                {
+                                    ["selector"] = memberSelector
+                                }
+                            };
+                    }
+                }
+
+                return this;
+            }
+
+            #endregion
         }
     }
 }
