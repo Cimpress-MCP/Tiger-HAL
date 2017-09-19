@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Tiger.Hal
 {
-    /// <summary>Maps types to type transformers.</summary>
+    /// <inheritdoc/>
     sealed class HalRepository
         : IHalRepository
     {

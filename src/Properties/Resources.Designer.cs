@@ -62,11 +62,20 @@ namespace Tiger.Hal.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Embed&apos;s value selector is malformed; it may only refer to a first-level member..
+        ///   Looks up a localized string similar to Value selector is malformed; it may only refer to a first-level member..
         /// </summary>
         internal static string MalformedValueSelector {
             get {
                 return ResourceManager.GetString("MalformedValueSelector", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A relation URI must be absolute..
+        /// </summary>
+        internal static string RelativeRelationUri {
+            get {
+                return ResourceManager.GetString("RelativeRelationUri", resourceCulture);
             }
         }
     }

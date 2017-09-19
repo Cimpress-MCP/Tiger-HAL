@@ -118,7 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="MalformedValueSelector" xml:space="preserve">
-    <value>Embed's value selector is malformed; it may only refer to a first-level member.</value>
+    <value>Value selector is malformed; it may only refer to a first-level member.</value>
     <comment>We only allow selectors of the kind `t =&gt; t.Member`.</comment>
+  </data>
+  <data name="RelativeRelationUri" xml:space="preserve">
+    <value>A relation URI must be absolute.</value>
+    <comment>A... A relation URI must be... uh, non-relative?</comment>
   </data>
 </root>

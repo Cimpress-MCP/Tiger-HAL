@@ -1,4 +1,4 @@
-# Tiger.Types
+# Tiger.Hal
 
 This project is using the standard [`dotnet`] build tool. A brief primer:
 
@@ -6,7 +6,7 @@ This project is using the standard [`dotnet`] build tool. A brief primer:
 
 - Restore NuGet dependencies: `dotnet restore`
 - Build the entire solution: `dotnet build`
-- Run all unit tests: `dotnet test`
+- Run all unit tests: `dotnet test ./unit/Test.csproj`
 - Pack for publishing: `dotnet pack -o "$(pwd)/artifacts"`
 
 The parameter `--configuration` (shortname `-c`) can be supplied to the `build`, `test`, and `pack` steps with the following meaningful values:

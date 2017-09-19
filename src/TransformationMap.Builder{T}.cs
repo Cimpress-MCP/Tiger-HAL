@@ -44,6 +44,10 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             IReadOnlyCollection<string> ITransformationMap.IgnoreInstructions => _ignores;
 
+            /* todo(cosborn)
+             * Should expressions allow indexing, in the case of collections and dictionaries?
+             */
+
             #region Link
 
             /// <summary>Creates a link for the given type.</summary>
@@ -68,6 +72,29 @@ namespace Tiger.Hal
             }
 
             /// <summary>Creates a link for the given type.</summary>
+            /// <param name="relation">The name of the link relation to establish.</param>
+            /// <param name="linkSelector">
+            /// A function that creates a <see cref="LinkBuilder"/>
+            /// from a value of type <typeparamref name="T"/>.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Link(
+                [NotNull] Uri relation,
+                [NotNull] Func<T, LinkBuilder> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+                _links[relation.AbsoluteUri] = new LinkInstruction<T>(linkSelector);
+                return this;
+            }
+
+            /// <summary>Creates a collection of links for the given type.</summary>
             /// <typeparam name="TMember">
             /// The member type of the return type of <paramref name="collectionSelector"/>.
             /// </typeparam>
@@ -78,10 +105,6 @@ namespace Tiger.Hal
             /// <param name="linkSelector">
             /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="TMember"/>.
             /// </param>
-            /// <param name="retain">
-            /// A value indicating whether the value selected by <paramref name="collectionSelector"/>
-            /// should be included in the HAL+JSON serialization.
-            /// </param>
             /// <returns>The modified transformation map.</returns>
             /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
@@ -90,14 +113,44 @@ namespace Tiger.Hal
             public Builder<T> Link<TMember>(
                 [NotNull] string relation,
                 [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
-                [NotNull] Func<TMember, LinkBuilder> linkSelector,
-                bool retain = false)
+                [NotNull] Func<TMember, LinkBuilder> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
                 if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 _links[relation] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(linkSelector));
+                return this;
+            }
+
+            /// <summary>Creates a collection of links for the given type.</summary>
+            /// <typeparam name="TMember">
+            /// The member type of the return type of <paramref name="collectionSelector"/>.
+            /// </typeparam>
+            /// <param name="relation">The name of the link relation to establish.</param>
+            /// <param name="collectionSelector">
+            /// A function that selects a collection from a value of type <typeparamref name="T"/>.
+            /// </param>
+            /// <param name="linkSelector">
+            /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="TMember"/>.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Link<TMember>(
+                [NotNull] Uri relation,
+                [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
+                [NotNull] Func<TMember, LinkBuilder> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+                if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+                _links[relation.AbsoluteUri] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(linkSelector));
                 return this;
             }
 
@@ -130,7 +183,38 @@ namespace Tiger.Hal
                 return this;
             }
 
-            /// <summary>Creates a link for the given type.</summary>
+            /// <summary>Creates a collection of links for the given type.</summary>
+            /// <typeparam name="TMember">
+            /// The member type of the return type of <paramref name="collectionSelector"/>.
+            /// </typeparam>
+            /// <param name="relation">The name of the link relation to establish.</param>
+            /// <param name="collectionSelector">
+            /// A function that selects a collection of values of type <typeparamref name="TMember"/>
+            /// from a value of type <typeparamref name="T"/>.
+            /// </param>
+            /// <param name="linkSelector">
+            /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="TMember"/>.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Link<TMember>(
+                [NotNull] Uri relation,
+                [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
+                [NotNull] Func<T, TMember, LinkBuilder> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+                if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+
+                _links[relation.AbsoluteUri] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(tm => linkSelector(t, tm)));
+                return this;
+            }
+
+            /// <summary>Creates a collection of links for the given type.</summary>
             /// <typeparam name="TKey">
             /// The key type of the return type of <paramref name="dictionarySelector"/>.
             /// </typeparam>
@@ -176,6 +260,41 @@ namespace Tiger.Hal
             /// </param>
             /// <param name="linkSelector">
             /// A function that creates a <see cref="LinkBuilder"/> from a value of type
+            /// <typeparamref name="TKey"/> and a value of type <typeparamref name="TValue"/>.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="dictionarySelector"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Link<TKey, TValue>(
+                [NotNull] Uri relation,
+                [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
+                [NotNull] Func<TKey, TValue, LinkBuilder> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+                if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
+
+                _links[relation.AbsoluteUri] = new ManyLinkInstruction<T>(
+                    t => dictionarySelector(t).Select(kvp => linkSelector(kvp.Key, kvp.Value)));
+                return this;
+            }
+
+            /// <summary>Creates a collection of links for the given type.</summary>
+            /// <typeparam name="TKey">
+            /// The key type of the return type of <paramref name="dictionarySelector"/>.
+            /// </typeparam>
+            /// <typeparam name="TValue">
+            /// The value type of the return type of <paramref name="dictionarySelector"/>.
+            /// </typeparam>
+            /// <param name="relation">The name of the link relation to establish.</param>
+            /// <param name="dictionarySelector">
+            /// A function that selects a dictionary from a value of type <typeparamref name="T"/>.
+            /// </param>
+            /// <param name="linkSelector">
+            /// A function that creates a <see cref="LinkBuilder"/> from a value of type
             /// <typeparamref name="T"/>, a value of type <typeparamref name="TKey"/>,
             /// and a value of type <typeparamref name="TValue"/>.
             /// </param>
@@ -193,6 +312,43 @@ namespace Tiger.Hal
                 if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
 
                 _links[relation] = new ManyLinkInstruction<T>(
+                    t => dictionarySelector(t).Select(
+                        kvp => linkSelector(t, kvp.Key, kvp.Value)));
+                return this;
+            }
+
+            /// <summary>Creates a collection of links for the given type.</summary>
+            /// <typeparam name="TKey">
+            /// The key type of the return type of <paramref name="dictionarySelector"/>.
+            /// </typeparam>
+            /// <typeparam name="TValue">
+            /// The value type of the return type of <paramref name="dictionarySelector"/>.
+            /// </typeparam>
+            /// <param name="relation">The name of the link relation to establish.</param>
+            /// <param name="dictionarySelector">
+            /// A function that selects a dictionary from a value of type <typeparamref name="T"/>.
+            /// </param>
+            /// <param name="linkSelector">
+            /// A function that creates a <see cref="LinkBuilder"/> from a value of type
+            /// <typeparamref name="T"/>, a value of type <typeparamref name="TKey"/>,
+            /// and a value of type <typeparamref name="TValue"/>.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="dictionarySelector"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Link<TKey, TValue>(
+                [NotNull] Uri relation,
+                [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
+                [NotNull] Func<T, TKey, TValue, LinkBuilder> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+                if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
+
+                _links[relation.AbsoluteUri] = new ManyLinkInstruction<T>(
                     t => dictionarySelector(t).Select(
                         kvp => linkSelector(t, kvp.Key, kvp.Value)));
                 return this;
@@ -216,19 +372,58 @@ namespace Tiger.Hal
             /// <exception cref="ArgumentException"><paramref name="memberSelector"/> is malformed.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
             [NotNull]
-            public Builder<T> Embed<TMember>([NotNull] string relation, [NotNull] Expression<Func<T, TMember>> memberSelector, [NotNull] Func<T, LinkBuilder> linkSelector)
+            public Builder<T> Embed<TMember>(
+                [NotNull] string relation,
+                [NotNull] Expression<Func<T, TMember>> memberSelector,
+                [NotNull] Func<T, LinkBuilder> linkSelector)
             {
                 if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
-                // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
                 switch (memberSelector.Body)
                 {
                     case MemberExpression me:
                         var valueSelector = memberSelector.Compile();
                         _links[relation] = new LinkInstruction<T>(linkSelector);
                         _embeds.Add(new MemberEmbedInstruction<T, TMember>(relation, me.Member.Name, valueSelector));
+                        return this;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector);
+                }
+            }
+
+            /// <summary>Creates an embed for the given type, using only the main object.</summary>
+            /// <typeparam name="TMember">The type of the selected value.</typeparam>
+            /// <param name="relation">The name of the link relation to establish.</param>
+            /// <param name="memberSelector">A function selecting a top-level member to embed.</param>
+            /// <param name="linkSelector">
+            /// A function that creates a <see cref="LinkBuilder"/>
+            /// from a value of type <typeparamref name="T"/>.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="memberSelector"/> is malformed.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Embed<TMember>(
+                [NotNull] Uri relation,
+                [NotNull] Expression<Func<T, TMember>> memberSelector,
+                [NotNull] Func<T, LinkBuilder> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+                if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
+                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+                switch (memberSelector.Body)
+                {
+                    case MemberExpression me:
+                        var valueSelector = memberSelector.Compile();
+                        _links[relation.AbsoluteUri] = new LinkInstruction<T>(linkSelector);
+                        _embeds.Add(new MemberEmbedInstruction<T, TMember>(relation.AbsoluteUri, me.Member.Name, valueSelector));
                         return this;
                     default:
                         throw new ArgumentException(MalformedValueSelector);
@@ -270,6 +465,42 @@ namespace Tiger.Hal
                 }
             }
 
+            /// <summary>Creates an embed for the given type, using the main object and the selected object.</summary>
+            /// <typeparam name="TMember">The type of the selected property.</typeparam>
+            /// <param name="relation">The name of the link relation to establish.</param>
+            /// <param name="memberSelector">A function selecting a top-level member to embed.</param>
+            /// <param name="linkSelector">
+            /// A function that creates a <see cref="LinkBuilder"/> from a value of type
+            /// <typeparamref name="T"/> and a value of type <typeparamref name="TMember"/>.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException"><paramref name="memberSelector"/> is malformed.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Embed<TMember>(
+                [NotNull] Uri relation,
+                [NotNull] Expression<Func<T, TMember>> memberSelector,
+                [NotNull] Func<T, TMember, LinkBuilder> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+                if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
+                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+                switch (memberSelector.Body)
+                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                    case MemberExpression me:
+                        var valueSelector = memberSelector.Compile();
+                        _links[relation.AbsoluteUri] = new LinkInstruction<T>(t => linkSelector(t, valueSelector(t)));
+                        _embeds.Add(new MemberEmbedInstruction<T, TMember>(relation.AbsoluteUri, me.Member.Name, valueSelector));
+                        return this;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector);
+                }
+            }
+
             #endregion
 
             /// <summary>
@@ -292,7 +523,7 @@ namespace Tiger.Hal
                 if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
 
                 switch (memberSelector.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                {
                     case MemberExpression me:
                         var valueSelector = memberSelector.Compile();
                         _hoists.Add(new MemberHoistInstruction<T, TMember>(me.Member.Name, valueSelector));
@@ -318,7 +549,7 @@ namespace Tiger.Hal
                 if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
 
                 switch (memberSelector1.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                {
                     case MemberExpression me:
                         _ignores.Add(me.Member.Name);
                         return this;
@@ -350,7 +581,7 @@ namespace Tiger.Hal
                 if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
 
                 switch (memberSelector1.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                {
                     case MemberExpression me:
                         _ignores.Add(me.Member.Name);
                         break;
@@ -388,6 +619,8 @@ namespace Tiger.Hal
             /// <exception cref="ArgumentException">A member of <paramref name="memberSelector1"/> is malformed.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="memberSelector2"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentException">A member of <paramref name="memberSelector2"/> is malformed.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector3"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentException">A member of <paramref name="memberSelector3"/> is malformed.</exception>
             [NotNull]
             public Builder<T> Ignore<T1, T2, T3>(
                 [NotNull] Expression<Func<T, T1>> memberSelector1,
@@ -396,9 +629,10 @@ namespace Tiger.Hal
             {
                 if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
                 if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+                if (memberSelector3 == null) { throw new ArgumentNullException(nameof(memberSelector3)); }
 
                 switch (memberSelector1.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                {
                     case MemberExpression me:
                         _ignores.Add(me.Member.Name);
                         break;
@@ -407,12 +641,21 @@ namespace Tiger.Hal
                 }
 
                 switch (memberSelector2.Body)
-                { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                {
                     case MemberExpression me:
                         _ignores.Add(me.Member.Name);
                         break;
                     default:
                         throw new ArgumentException(MalformedValueSelector, nameof(memberSelector2));
+                }
+
+                switch (memberSelector3.Body)
+                {
+                    case MemberExpression me:
+                        _ignores.Add(me.Member.Name);
+                        break;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector, nameof(memberSelector3));
                 }
 
                 return this;
@@ -431,7 +674,7 @@ namespace Tiger.Hal
                 foreach (var memberSelector in memberSelectors)
                 {
                     switch (memberSelector.Body)
-                    { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
+                    {
                         case MemberExpression me:
                             _ignores.Add(me.Member.Name);
                             return this;
