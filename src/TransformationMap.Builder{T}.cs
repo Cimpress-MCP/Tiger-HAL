@@ -535,7 +535,91 @@ namespace Tiger.Hal
 
             #region Ignore
 
-            /// <summary>Causes a property not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <summary>Causes a member not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <param name="memberSelector1">
+            /// The name of a top-level member of type <typeparamref name="T"/> to ignore.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Ignore([NotNull, InvokerParameterName] string memberSelector1)
+            {
+                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+
+                _ignores.Add(memberSelector1);
+                return this;
+            }
+
+            /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <param name="memberSelector1">
+            /// The name of the first top-level member of type <typeparamref name="T"/> to ignore.
+            /// </param>
+            /// <param name="memberSelector2">
+            /// The name of the second top-level member of type <typeparamref name="T"/> to ignore.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector2"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Ignore(
+                [NotNull, InvokerParameterName] string memberSelector1,
+                [NotNull, InvokerParameterName] string memberSelector2)
+            {
+                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+                if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+
+                _ignores.Add(memberSelector1);
+                _ignores.Add(memberSelector2);
+                return this;
+            }
+
+            /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <param name="memberSelector1">
+            /// The name of the first top-level member of type <typeparamref name="T"/> to ignore.
+            /// </param>
+            /// <param name="memberSelector2">
+            /// The name of the second top-level member of type <typeparamref name="T"/> to ignore.
+            /// </param>
+            /// <param name="memberSelector3">
+            /// The name of the third top-level member of type <typeparamref name="T"/> to ignore.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector2"/> is <see langword="null"/>.</exception>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelector3"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Ignore(
+                [NotNull, InvokerParameterName] string memberSelector1,
+                [NotNull, InvokerParameterName] string memberSelector2,
+                [NotNull, InvokerParameterName] string memberSelector3)
+            {
+                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+                if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+                if (memberSelector3 == null) { throw new ArgumentNullException(nameof(memberSelector3)); }
+
+                _ignores.Add(memberSelector1);
+                _ignores.Add(memberSelector2);
+                _ignores.Add(memberSelector3);
+                return this;
+            }
+
+            /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <param name="memberSelectors">
+            /// A collection of top-level members of type <typeparamref name="T"/> to ignore.
+            /// </param>
+            /// <returns>The modified transformation map.</returns>
+            /// <exception cref="ArgumentNullException"><paramref name="memberSelectors"/> is <see langword="null"/>.</exception>
+            [NotNull]
+            public Builder<T> Ignore(
+                [NotNull, InvokerParameterName] params string[] memberSelectors)
+            {
+                if (memberSelectors == null) { throw new ArgumentNullException(nameof(memberSelectors)); }
+
+                _ignores.AddRange(memberSelectors);
+                return this;
+            }
+
+            /// <summary>Causes a member not to be represented in the HAL+JSON serialization of a value.</summary>
             /// <typeparam name="T1">The type of the member selected by <paramref name="memberSelector1"/>.</typeparam>
             /// <param name="memberSelector1">
             /// A function selecting a top-level member of type <typeparamref name="T1"/> to ignore.
@@ -558,7 +642,7 @@ namespace Tiger.Hal
                 }
             }
 
-            /// <summary>Causes properties not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
             /// <typeparam name="T1">The type of the member selected by <paramref name="memberSelector1"/>.</typeparam>
             /// <typeparam name="T2">The type of the member selected by <paramref name="memberSelector2"/>.</typeparam>
             /// <param name="memberSelector1">
@@ -601,7 +685,7 @@ namespace Tiger.Hal
                 return this;
             }
 
-            /// <summary>Causes properties not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
             /// <typeparam name="T1">The type of the member selected by <paramref name="memberSelector1"/>.</typeparam>
             /// <typeparam name="T2">The type of the member selected by <paramref name="memberSelector2"/>.</typeparam>
             /// <typeparam name="T3">The type of the member selected by <paramref name="memberSelector3"/>.</typeparam>
@@ -661,32 +745,44 @@ namespace Tiger.Hal
                 return this;
             }
 
-            /// <summary>Causes properties not to be represented in the HAL+JSON serialization of a value.</summary>
+            /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
             /// <param name="memberSelectors">A collection of functions, each selecting a top-level member to ignore.</param>
             /// <returns>The modified transformation map.</returns>
             /// <exception cref="ArgumentNullException"><paramref name="memberSelectors"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentException">A member of <paramref name="memberSelectors"/> is malformed.</exception>
             [NotNull]
-            public Builder<T> Ignore([NotNull] params Expression<Func<T, object>>[] memberSelectors)
+            public Builder<T> Ignore([NotNull, ItemNotNull] params Expression<Func<T, object>>[] memberSelectors)
             {
                 if (memberSelectors == null) { throw new ArgumentNullException(nameof(memberSelectors)); }
 
-                foreach (var memberSelector in memberSelectors)
+                void SelectMember(Expression e)
                 {
-                    switch (memberSelector.Body)
+                    switch (e)
                     {
+                        case UnaryExpression ue when ue.NodeType == ExpressionType.Convert:
+                            /* note(cosborn)
+                             * Because we have to fall back to Expression<Func<T, object>>,
+                             * value types will be wrapped in a Convert call by the compiler.
+                             */
+                            SelectMember(ue.Operand);
+                            break;
                         case MemberExpression me:
                             _ignores.Add(me.Member.Name);
-                            return this;
+                            break;
                         default:
                             throw new ArgumentException(MalformedValueSelector, nameof(memberSelectors))
                             {
                                 Data =
                                 {
-                                    ["selector"] = memberSelector
+                                    ["selector"] = e
                                 }
                             };
                     }
+                }
+
+                foreach (var memberSelector in memberSelectors)
+                {
+                    SelectMember(memberSelector.Body);
                 }
 
                 return this;
