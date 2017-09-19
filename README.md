@@ -208,7 +208,7 @@ Given this modified example from the specification:
 }
 ```
 
-We can see that retrieving the book resource (presumably with the title <cite>The Way of Zen</cite>) when represented like this, requires an additional HTTP request in order to retrieve the author (presumably named Alan Watts). This is not outright bad, given that a person is an independently addressable resource. Embedding the person resource looks like this:
+We can see that retrieving the book resource (presumably with the title <cite>The Way of Zen</cite>), when represented like this, requires an additional HTTP request in order to retrieve the author (presumably named Alan Watts). This is not outright bad, given that a person is an independently addressable resource. Embedding the person resource looks like this:
 
 ```json
 {
