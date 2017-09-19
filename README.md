@@ -21,7 +21,7 @@ Given a response from an API that looks like this:
 ```json
 {
   "id": "c06f1945-a68a-4a6f-a7a9-5c35a0966abc",
-  "item": "23b73042-9dec-4587-a21f-4c4c25d8df3c",
+  "itemId": "23b73042-9dec-4587-a21f-4c4c25d8df3c",
   "composition": "vertical",
   "size": 42
 }
