@@ -65,15 +65,13 @@ In order to set up a HAL+JSON transformation, this library provides four operati
 
 There are no operations that correspond to, represent, or manipulate the `curies` link relation. This functionality is not supported in this library. The specification is very confused when it comes to CURIEs and link relations, and it's better off pretending that they don't exist.
 
-<!--
-Specifically, the specification gets two things wrong with respect to link relations. First, link relations mostly cannot be barewords. The bareword link relations (such as "index", "next", and "prev") are limited in number and curated in a global repository. The specification uses a made-up bareword every time it wants to return an array from an endpoint. Second, CURIEs must, accoring to their spec, be surrounded by square brackets so that they are not confused with normal, non-compact links. They should look like this: `[fen:pool]`. Including these square brackets confused every client I tried this out with, so it's better to just leave the whole feature aside.
--->
+<!-- Specifically, the specification gets two things wrong with respect to link relations. First, link relations mostly cannot be barewords. The bareword link relations (such as "index", "next", and "prev") are limited in number and curated in a global repository. The specification uses a made-up bareword every time it wants to return an array from an endpoint. Second, CURIEs must, accoring to their spec, be surrounded by square brackets so that they are not confused with normal, non-compact links. They should look like this: `[fen:pool]`. Including these square brackets confused every client I tried this out with, so it's better to just leave the whole feature aside. -->
 
 Please refer to this sample document for examples for the remainder of the documentation:
 
 ```csharp
 /// <summary>Defines HAL+JSON transformations for the application.</summary>
-public sealed class PrintJobHalProfile
+sealed class PrintJobHalProfile
     : IHalProfile
 {
     static readonly Uri _pool = new Uri("https://relations.fen.cimpress.io/pool", Absolute);
@@ -110,7 +108,7 @@ public sealed class PrintJobHalProfile
 
 ### Link
 
-The most important and most basic operation is `Link`. This operation creates a "link relation" between the current resource and another resource. The relation is defined by the value of the `rel` key, and the ID of the other resource is represented by the value of the `href` key. This functions identically to the HTML 5 elements `<a rel="" href="">` and `<link rel="" href="">`, as well as a lot of other web linked data formats.
+The most important and most basic operation is `Link`. This operation creates a "link relation" between the current resource and another resource. The relation is defined by its key, and the ID of the other resource is represented by the value of the `href` key. This functions essentially identically to the HTML 5 elements `<a rel="" href="">` and `<link rel="" href="">`, as well as a lot of other web linked data formats.
 
 There are three ways to instruct this library on how to generate a link from a value, and each way has a simple method and a complex method.
 
@@ -279,7 +277,7 @@ For developers unfamiliar with the HAL+JSON specification, its handling of array
 }
 ```
 
-Because a HAL+JSON response hangs on the keys "\_links" and "\_embedded", the top-level value cannot be an array. <small>(Where would the keys and values go?)</small> For that reason, arrays are considered to be embedding themselves. In this library, this embedding has handled automatically, and arrays are always embedded under the "self" link relation.
+Because a HAL+JSON response hangs on the keys "\_links" and "\_embedded", the top-level value cannot be an array. <small>(Where would the keys and values go?)</small> For that reason, arrays are considered to be embedding themselves. In this library, this embedding is handled automatically, and arrays are always embedded under the "self" link relation.
 
 ### Hoist
 
