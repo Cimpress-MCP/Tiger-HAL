@@ -13,7 +13,7 @@ namespace Tiger.Hal
     {
         readonly IActionContextAccessor _actionContextAccessor;
         readonly IUrlHelperFactory _urlHelperFactory;
-        readonly IReadOnlyDictionary<Type, ITransformationMap> _transformations;
+        readonly IReadOnlyDictionary<Type, ITransformationInstructions> _transformations;
 
         /// <summary>Initializes a new instance of the <see cref="HalRepository"/> class.</summary>
         /// <param name="actionContextAccessor">The application's accessor for <see cref="ActionContext"/>.</param>
@@ -25,7 +25,7 @@ namespace Tiger.Hal
         public HalRepository(
             [NotNull] IActionContextAccessor actionContextAccessor,
             [NotNull] IUrlHelperFactory urlHelperFactory,
-            [NotNull] IReadOnlyDictionary<Type, ITransformationMap> transformations)
+            [NotNull] IReadOnlyDictionary<Type, ITransformationInstructions> transformations)
         {
             _actionContextAccessor = actionContextAccessor ?? throw new ArgumentNullException(nameof(actionContextAccessor));
             _urlHelperFactory = urlHelperFactory ?? throw new ArgumentNullException(nameof(urlHelperFactory));

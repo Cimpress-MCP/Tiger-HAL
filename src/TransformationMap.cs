@@ -8,9 +8,9 @@ namespace Tiger.Hal
     [PublicAPI]
     public sealed partial class TransformationMap
     {
-        /// <summary>Gets the mapping of transformation maps.</summary>
-        internal IDictionary<Type, ITransformationMap> Maps { get; } =
-            new Dictionary<Type, ITransformationMap>();
+        /// <summary>Gets the mapping of transformation instructions.</summary>
+        internal IDictionary<Type, ITransformationInstructions> Maps { get; } =
+            new Dictionary<Type, ITransformationInstructions>();
 
         /// <summary>Creates the "self" link relation for the given type.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
@@ -21,7 +21,7 @@ namespace Tiger.Hal
         /// <returns>A transformation map from which further transformations can be defined.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
         [NotNull]
-        public Builder<T> Self<T>([NotNull] Func<T, LinkBuilder> selector)
+        public ITransformationMap<T> Self<T>([NotNull] Func<T, LinkBuilder> selector)
         {
             if (selector == null) { throw new ArgumentNullException(nameof(selector)); }
 

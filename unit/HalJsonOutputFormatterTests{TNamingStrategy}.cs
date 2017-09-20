@@ -138,7 +138,7 @@ namespace Test
                 .Verifiable();
             var urlHelperFactory = Mock.Of<IUrlHelperFactory>(uhf =>
                 uhf.GetUrlHelper(It.IsAny<ActionContext>()) == urlHelper.Object);
-            var map = new Dictionary<Type, ITransformationMap>
+            var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = new TransformationMap.Builder<Registered>(
                     r => LinkBuilder.Route(route.Get, new { r.Id }))
@@ -200,10 +200,9 @@ namespace Test
                 .Verifiable();
             var urlHelperFactory = Mock.Of<IUrlHelperFactory>(uhf =>
                 uhf.GetUrlHelper(It.IsAny<ActionContext>()) == urlHelper.Object);
-            var registeredMap = new TransformationMap.Builder<Registered>(
-                    r => LinkBuilder.Route(route, new { id = r.Id }))
-                .Link("up", r => LinkBuilder.Route(parentRoute, new { id = r.ParentId }));
-            var map = new Dictionary<Type, ITransformationMap>
+            var registeredMap = new TransformationMap.Builder<Registered>(r => LinkBuilder.Route(route, new { id = r.Id }));
+            ((ITransformationMap<Registered>)registeredMap).Link("up", r => LinkBuilder.Route(parentRoute, new { id = r.ParentId }));
+            var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = registeredMap
             };

@@ -7,7 +7,7 @@ namespace Tiger.Hal
     /// Represents the instructions necessary for transforming
     /// a value into its HAL representation.
     /// </summary>
-    interface ITransformationMap
+    interface ITransformationInstructions
     {
         /// <summary>
         /// Gets a collection of instructions for creating link relations.

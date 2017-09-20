@@ -29,7 +29,9 @@ namespace Tiger.Hal
         }
 
         /// <summary>Builds an <see cref="IHalRepository"/>.</summary>
-        /// <param name="profile">TKTKTK</param>
+        /// <param name="profile">
+        /// The profile containing the declarations for creating a transformation mapping.
+        /// </param>
         /// <returns>The built <see cref="IHalRepository"/>.</returns>
         [NotNull]
         public IHalRepository Build([NotNull] IHalProfile profile)
