@@ -172,7 +172,7 @@ namespace Test
             Assert.NotNull(actual);
             Assert.Empty(actual.Embedded);
             Assert.NotNull(actual.Links);
-            Assert.Equal(actual.Links.Count, 1);
+            Assert.Equal(1, actual.Links.Count);
             var self = Assert.Contains("self", actual.Links);
             Assert.NotNull(self);
             Assert.Equal($"https://example.invalid/registered/{id}", self.Href);
@@ -235,7 +235,7 @@ namespace Test
             Assert.NotNull(actual);
             Assert.Empty(actual.Embedded);
             Assert.NotNull(actual.Links);
-            Assert.Equal(actual.Links.Count, 2);
+            Assert.Equal(2, actual.Links.Count);
             var self = Assert.Contains("self", actual.Links);
             Assert.NotNull(self);
             Assert.Equal($"https://example.invalid/registered/{id}", self.Href);

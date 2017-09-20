@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -24,10 +23,6 @@ namespace Tiger.Hal
         /// <exception cref="ArgumentNullException"><paramref name="builder"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">A profile could not be added to the repository builder.</exception>
         [NotNull]
-        [SuppressMessage(
-            "ReSharper",
-            "ExceptionNotDocumented",
-            Justification = "The remaining uncaught exception types cannot occur by this method of loading them.")]
         public static IMvcCoreBuilder AddHalJson<TProfile>([NotNull] this IMvcCoreBuilder builder)
             where TProfile : class, IHalProfile
         {
