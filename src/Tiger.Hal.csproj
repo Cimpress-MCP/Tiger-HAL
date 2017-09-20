@@ -5,7 +5,7 @@
     <Copyright>©Cimpress 2017</Copyright>
     <AssemblyTitle>Tiger Hal</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>0.8.0</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
     <TargetFramework>netstandard1.6</TargetFramework>
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
@@ -74,7 +74,7 @@
     <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
     
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.3.0-beta1" PrivateAssets="All" />
+     <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.3.0-beta1" PrivateAssets="All" /> 
   </ItemGroup>
 
   <ItemGroup>
