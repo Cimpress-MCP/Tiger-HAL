@@ -17,3 +17,5 @@ The parameter `--configuration` (shortname `-c`) can be supplied to the `build`,
 This repository is attempting to use the [GitFlow] branching methodology. Results may be mixed, please be aware.
 
 [GitFlow]: http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/
+
+Feature requests are preferred over merge requests.
