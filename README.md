@@ -71,7 +71,7 @@ Please refer to this sample document for examples for the remainder of the docum
 
 ```csharp
 /// <summary>Defines HAL+JSON transformations for the application.</summary>
-sealed class PrintJobHalProfile
+sealed class HalProfile
     : IHalProfile
 {
     static readonly Uri _pool = new Uri("https://relations.fen.cimpress.io/pool", Absolute);
@@ -81,7 +81,7 @@ sealed class PrintJobHalProfile
     static readonly Uri _assets = new Uri("https://relations.fen.cimpress.io/assets", Absolute);
 
     /// <inheritdoc/>
-    public void OnTransformationMapCreating(TransformationMap transformationMap)
+    void IHalProfile.OnTransformationMapCreating(TransformationMap transformationMap)
     {
         transformationMap
             .Self<PrintJob>(pj => Route("GetByPrintJobId", new { pj.Id }))
@@ -102,6 +102,18 @@ sealed class PrintJobHalProfile
             .Link("index", e => Route("GetEventsForPrintJob", new { id = e.PrintJobId }))
             .Link("up", e => Route("GetByPrintJobId", new { id = e.PrintJobId }))
             .Ignore(pj => pj.Id, pj => pj.PrintJobId);
+
+        transformationMap
+            .Self<ItemCollection>(ic => Route("GetItemsForPrintJob", new { id = ic.PrintJobId }))
+            .Link("up", ic => Route("GetByPrintJobId", new { id = ic.PrintJobId }))
+            .Hoist(ic => ic.Count);
+
+        transformationMap
+            .Self<Item>(i => Const(i.ItemUri))
+            .Link(_assets, i => i.Assets, a => new Constant(a.Uri) { Title = a.Role })
+            .Link("index", i => Route("GetItemsForPrintJob", new { id = i.PrintJobId }))
+            .Link("up", i => Route("GetByPrintJobId", new { id = i.PrintJobId }))
+            .Ignore(pj => pj.ItemUri, pj => pj.PrintJobId, pj => pj.Assets);
     }
 }
 ```
@@ -146,7 +158,7 @@ A special kind of link operation is the creation of a value's `self` link. No ot
 Note that on line 12 of the example, the transformation map is passed as a parameter to the method.
 
 ```csharp
-public void OnTransformationMapCreating(TransformationMap transformationMap)
+void IHalProfile.OnTransformationMapCreating(TransformationMap transformationMap)
 ```
 
 There are no methods on the type `TransformationMap` other than `Self`. All further transformations are available on the type that `Self` returns. In this library, a `self` link is non-optional.
