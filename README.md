@@ -50,7 +50,7 @@ A response that looks like this would be much better:
 }
 ```
 
-Huh, look at that. Another Team uses singular resource names in their URIs. But because the entire URI is available to be followed without manipulation, clients of their API don't need to know that. (Actually, Another Team uses singular resource names when accessing a single resource, but plural resource names when accessing an index. Tricky.)
+Huh, look at that. Another Team uses singular resource names in their URIs. But because the entire URI is available to be followed without manipulation, clients of their API don't need to know that. (In fact, Another Team uses singular resource names when accessing a single resource, but plural resource names when accessing an index. Tricky.)
 
 When API responses contain link relations, following the chain of data becomes as easy as clicking links on a web page.
 
