@@ -5,7 +5,7 @@
     <Copyright>©Cimpress 2017</Copyright>
     <AssemblyTitle>Tiger Hal</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.8.0</VersionPrefix>
+    <VersionPrefix>1.0.0</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
     <TargetFramework>netstandard1.6</TargetFramework>
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
@@ -20,6 +20,7 @@
     <PackageReleaseNotes>⁃ Everything is new!
 </PackageReleaseNotes>
     <PackageProjectUrl>https://cimpress.githost.io/cosborn/Tiger.HAL</PackageProjectUrl>
+    <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <PackageIconUrl>https://cimpress.githost.io/cosborn/Tiger.HAL/raw/master/tiger_logo.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://cimpress.githost.io/cosborn/Tiger.HAL.git</RepositoryUrl>

@@ -19,7 +19,7 @@ build:
 
 publish:
   stage: publish
-  script: dotnet nuget push dist/*.nupkg -k -k $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY
+  script: dotnet nuget push dist/*.nupkg -k $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY
   dependencies:
     - build
   only:
