@@ -14,9 +14,9 @@
     <ProjectReference Include="..\src\Tiger.Hal.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FsCheck.Xunit" Version="2.9.2" />
+    <PackageReference Include="FsCheck.Xunit" Version="2.10.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
-    <PackageReference Include="Moq" Version="4.7.99" />
+    <PackageReference Include="Moq" Version="4.7.127" />
     <PackageReference Include="xunit.assert.source" Version="2.2.0" />
     <PackageReference Include="xunit.core" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
