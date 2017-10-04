@@ -15,11 +15,8 @@
 // </copyright>
 
 using System;
-using System.Linq;
+using System.Collections.Immutable;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using static JetBrains.Annotations.ImplicitUseTargetFlags;
 
 namespace Tiger.Hal
@@ -28,20 +25,14 @@ namespace Tiger.Hal
     [UsedImplicitly(Members)]
     sealed class HalRepositoryBuilder
     {
-        readonly IActionContextAccessor _actionContextAccessor;
-        readonly IUrlHelperFactory _urlHelperFactory;
+        readonly IServiceProvider _serviceProvider;
 
         /// <summary>Initializes a new instance of the <see cref="HalRepositoryBuilder"/> class.</summary>
-        /// <param name="actionContextAccessor">The application's accessor for <see cref="ActionContext"/>.</param>
-        /// <param name="urlHelperFactory">The application's factory for <see cref="IUrlHelper"/>.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="actionContextAccessor"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="urlHelperFactory"/> is <see langword="null"/>.</exception>
-        public HalRepositoryBuilder(
-            [NotNull] IActionContextAccessor actionContextAccessor,
-            [NotNull] IUrlHelperFactory urlHelperFactory)
+        /// <param name="serviceProvider">The application's service provider.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
+        public HalRepositoryBuilder([NotNull] IServiceProvider serviceProvider)
         {
-            _actionContextAccessor = actionContextAccessor ?? throw new ArgumentNullException(nameof(actionContextAccessor));
-            _urlHelperFactory = urlHelperFactory ?? throw new ArgumentNullException(nameof(urlHelperFactory));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         /// <summary>Builds an <see cref="IHalRepository"/>.</summary>
@@ -54,8 +45,8 @@ namespace Tiger.Hal
         {
             var transformationMap = new TransformationMap();
             profile.OnTransformationMapCreating(transformationMap);
-            var transformations = transformationMap.Maps.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            return new HalRepository(_actionContextAccessor, _urlHelperFactory, transformations);
+            var transformations = transformationMap.Maps.ToImmutableDictionary();
+            return new HalRepository(transformations, _serviceProvider);
         }
     }
 }

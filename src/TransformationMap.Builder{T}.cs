@@ -39,10 +39,10 @@ namespace Tiger.Hal
 
             /// <summary>Initializes a new instance of the <see cref="Builder{T}"/> class.</summary>
             /// <param name="selfSelector">
-            /// A function that creates a <see cref="LinkBuilder"/>
+            /// A function that creates a <see cref="LinkData"/>
             /// from a value of type <typeparamref name="T"/>.
             /// </param>
-            public Builder([NotNull] Func<T, LinkBuilder> selfSelector)
+            public Builder([NotNull] Func<T, ILinkData> selfSelector)
             {
                 _links["self"] = new LinkInstruction<T>(selfSelector);
             }
@@ -68,7 +68,7 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Link(
                 string relation,
-                Func<T, LinkBuilder> linkSelector)
+                Func<T, ILinkData> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
@@ -81,7 +81,7 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Link<TMember>(
                 string relation,
                 Func<T, IEnumerable<TMember>> collectionSelector,
-                Func<TMember, LinkBuilder> linkSelector)
+                Func<TMember, ILinkData> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
@@ -95,7 +95,7 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Link<TMember>(
                 string relation,
                 Func<T, IEnumerable<TMember>> collectionSelector,
-                Func<T, TMember, LinkBuilder> linkSelector)
+                Func<T, TMember, ILinkData> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
@@ -108,7 +108,7 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Link<TKey, TValue>(
                 string relation,
                 Func<T, IDictionary<TKey, TValue>> dictionarySelector,
-                Func<TKey, TValue, LinkBuilder> linkSelector)
+                Func<TKey, TValue, ILinkData> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
@@ -122,7 +122,7 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Link<TKey, TValue>(
                 string relation,
                 Func<T, IDictionary<TKey, TValue>> dictionarySelector,
-                Func<T, TKey, TValue, LinkBuilder> linkSelector)
+                Func<T, TKey, TValue, ILinkData> linkSelector)
             {
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
                 if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
@@ -141,7 +141,7 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Embed<TMember>(
                 string relation,
                 Expression<Func<T, TMember>> memberSelector,
-                Func<T, LinkBuilder> linkSelector)
+                Func<T, ILinkData> linkSelector)
             {
                 if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
@@ -163,7 +163,7 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Embed<TMember>(
                 string relation,
                 Expression<Func<T, TMember>> memberSelector,
-                Func<T, TMember, LinkBuilder> linkSelector)
+                Func<T, TMember, ILinkData> linkSelector)
             {
                 if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (relation == null) { throw new ArgumentNullException(nameof(relation)); }

@@ -80,7 +80,7 @@ sealed class HalProfile
     static readonly Uri _assets = new Uri("https://relations.fen.cimpress.io/assets", Absolute);
 
     /// <inheritdoc/>
-    void IHalProfile.OnTransformationMapCreating(TransformationMap transformationMap)
+    void IHalProfile.OnTransformationMapCreating(ITransformationMap transformationMap)
     {
         transformationMap
             .Self<PrintJob>(pj => Route("GetByPrintJobId", new { pj.Id }))
@@ -143,7 +143,7 @@ This can be seen on line 16 of the example.
 
 As before, if other link properties are required, fall back to calling the constructor for `Routed` and set the desired properties directly.
 
-Third is the method `Template` and the type `Templated`. This will create a templated link in the HAL+JSON serialization, which is a link with values to be filled in by the client in order to produce a followable link. This is not a common operation, but is most frequently used at the top level of an API. If a client only has access to a bare ID value – for example, from a search field on a website – it can seek a templated link with a known `rel` value and fill the value in. URL templates are defined to conform to [RFC 6570][].
+Third is the method `Template` and the type `Templated`. This will create a templated link in the HAL+JSON serialization, which is a link with values to be filled in by the client in order to produce a followable link. This is not a common operation, but is most frequently used at the top level of an API. If a client only has access to a bare ID value – for example, from a search field on a website – it can seek a templated link with a known `rel` value and fill the value in. URL templates are defined to conform to [RFC 6570][]. <small>(This library has chosen a particular URI Templates library to depend on.)</small>
 
 [RFC 6570]: https://tools.ietf.org/html/rfc6570
 
@@ -156,10 +156,10 @@ A special kind of link operation is the creation of a value's `self` link. No ot
 Note that on line 11 of the example, the transformation map is passed as a parameter to the method.
 
 ```csharp
-void IHalProfile.OnTransformationMapCreating(TransformationMap transformationMap)
+void IHalProfile.OnTransformationMapCreating(ITransformationMap transformationMap)
 ```
 
-There are no methods on the type `TransformationMap` other than `Self`. All further transformations are available on the type that `Self` returns. In this library, a `self` link is non-optional.
+There are no methods on the type `ITransformationMap` other than `Self`. All further transformations are available on the type that `Self` returns. In this library, a `self` link is non-optional.
 
 #### Linking Collections
 

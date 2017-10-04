@@ -3,12 +3,12 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using FsCheck;
 using FsCheck.Xunit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Moq;
 using Newtonsoft.Json;
@@ -94,7 +94,7 @@ namespace Test
         }
 
         [Property(DisplayName = "An unregistered type is serialized normally.")]
-        protected void UnregisteredType_NotModified(Guid id)
+        protected async Task UnregisteredType_NotModified(Guid id)
         {
             // arrange
             var dto = new Unregistered
@@ -117,7 +117,7 @@ namespace Test
                 dto);
 
             // act
-            sut.WriteResponseBodyAsync(context, Encoding.UTF8).Wait();
+            await sut.WriteResponseBodyAsync(context, Encoding.UTF8);
             var actual = JsonConvert.DeserializeObject<Unregistered>(writer.ToString(), serializerSettings);
 
             // assert
@@ -125,7 +125,7 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type creates its self link correctly.")]
-        protected void RegisteredType_SelfLink(Guid id, NonNull<string> route)
+        protected async Task RegisteredType_SelfLink(Guid id, NonNull<string> route)
         {
             // arrange
             var dto = new Registered
@@ -141,9 +141,9 @@ namespace Test
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = new TransformationMap.Builder<Registered>(
-                    r => LinkBuilder.Route(route.Get, new { r.Id }))
+                    r => LinkData.Route(route.Get, new { r.Id }))
             };
-            var repo = new HalRepository(Mock.Of<IActionContextAccessor>(), urlHelperFactory, map);
+            var repo = new HalRepository(map, Mock.Of<IServiceProvider>());
             var serializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new DefaultContractResolver
@@ -164,7 +164,7 @@ namespace Test
                 dto);
 
             // act
-            sut.WriteResponseBodyAsync(context, Encoding.UTF8).Wait();
+            await sut.WriteResponseBodyAsync(context, Encoding.UTF8);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert
@@ -179,7 +179,7 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type creates additional links correctly.")]
-        protected void RegisteredType_AdditionalLink(
+        protected async Task RegisteredType_AdditionalLink(
             Guid id,
             Guid parentId,
             UnequalNonNullPair<string> routes)
@@ -200,13 +200,13 @@ namespace Test
                 .Verifiable();
             var urlHelperFactory = Mock.Of<IUrlHelperFactory>(uhf =>
                 uhf.GetUrlHelper(It.IsAny<ActionContext>()) == urlHelper.Object);
-            var registeredMap = new TransformationMap.Builder<Registered>(r => LinkBuilder.Route(route, new { id = r.Id }));
-            ((ITransformationMap<Registered>)registeredMap).Link("up", r => LinkBuilder.Route(parentRoute, new { id = r.ParentId }));
+            var registeredMap = new TransformationMap.Builder<Registered>(r => LinkData.Route(route, new { id = r.Id }));
+            ((ITransformationMap<Registered>)registeredMap).Link("up", r => LinkData.Route(parentRoute, new { id = r.ParentId }));
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = registeredMap
             };
-            var repo = new HalRepository(Mock.Of<IActionContextAccessor>(), urlHelperFactory, map);
+            var repo = new HalRepository(map, Mock.Of<IServiceProvider>());
             var serializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new DefaultContractResolver
@@ -227,7 +227,7 @@ namespace Test
                 dto);
 
             // act
-            sut.WriteResponseBodyAsync(context, Encoding.UTF8).Wait();
+            await sut.WriteResponseBodyAsync(context, Encoding.UTF8);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert

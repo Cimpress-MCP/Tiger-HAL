@@ -17,34 +17,35 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using static System.StringComparison;
 
 namespace Tiger.Hal
 {
     /// <summary>Transforms a value into its HAL representation.</summary>
-    sealed class TypeTransformer
+    sealed partial class TypeTransformer
         : ITypeTransformer
     {
-        static readonly EqualityComparer s_comparer = new EqualityComparer(Ordinal);
+        static readonly KeyEqualityComparer s_comparer = new KeyEqualityComparer(Ordinal);
 
         readonly ITransformationInstructions _transformationInstructions;
-        readonly IUrlHelper _urlHelper;
+        readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeTransformer"/> class.
         /// </summary>
         /// <param name="transformationInstructions">The transformation map for a type.</param>
-        /// <param name="urlHelper">The application's URL generator.</param>
+        /// <param name="serviceProvider">The application's serviceProvider.</param>
         /// <exception cref="ArgumentNullException"><paramref name="transformationInstructions"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="urlHelper"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
         public TypeTransformer(
             [NotNull] ITransformationInstructions transformationInstructions,
-            [NotNull] IUrlHelper urlHelper)
+            [NotNull] IServiceProvider serviceProvider)
         {
             _transformationInstructions = transformationInstructions ?? throw new ArgumentNullException(nameof(transformationInstructions));
-            _urlHelper = urlHelper ?? throw new ArgumentNullException(nameof(urlHelper));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         /// <inheritdoc/>
@@ -57,6 +58,7 @@ namespace Tiger.Hal
         IReadOnlyCollection<string> ITypeTransformer.Ignores => _transformationInstructions.IgnoreInstructions;
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">A builder for the provided <see cref="ILinkData"/> could not be resolved.</exception>
         IReadOnlyDictionary<string, LinkCollection> ITypeTransformer.GenerateLinks(object value)
         {
             if (value == null) { throw new ArgumentNullException(nameof(value)); }
@@ -64,33 +66,26 @@ namespace Tiger.Hal
             return _transformationInstructions.LinkInstructions
                 .SelectMany(
                     kvp => kvp.Value.TransformToLinkBuilders(value),
-                    (kvp, lb) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular, link: lb.Build(_urlHelper)))
+                    (kvp, lb) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular, link: Build(lb)))
                 .ToLookup(kvp => (kvp.rel, kvp.isSingular), kvp => kvp.link, s_comparer)
                 .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
         }
 
-        /// <inheritdoc/>
-        sealed class EqualityComparer
-            : IEqualityComparer<(string rel, bool isSingular)>
+        /// <exception cref="InvalidOperationException">A builder for the provided <see cref="ILinkData"/> could not be resolved.</exception>
+        [NotNull]
+        Link Build([NotNull] ILinkData linkData)
         {
-            readonly StringComparison _comparison;
+            var dataType = linkData.GetType();
+            var builderType = typeof(ILinkBuilder<>).MakeGenericType(dataType);
+            var buildMethod = builderType.GetMethod(nameof(ILinkBuilder<ILinkData>.Build), new[] { dataType });
 
-            /// <summary>Initializes a new instance of the <see cref="EqualityComparer"/> class.</summary>
-            /// <param name="comparison">The type of string comparison to use for "rel".</param>
-            public EqualityComparer(StringComparison comparison)
+            object builder;
+            using (var scope = _serviceProvider.CreateScope())
             {
-                _comparison = comparison;
+                builder = scope.ServiceProvider.GetRequiredService(builderType);
             }
 
-            /// <inheritdoc/>
-            bool IEqualityComparer<(string rel, bool isSingular)>.Equals(
-                (string rel, bool isSingular) x,
-                (string rel, bool isSingular) y) => string.Equals(x.rel, y.rel, _comparison) &&
-                                                    x.isSingular == y.isSingular;
-
-            /// <inheritdoc/>
-            int IEqualityComparer<(string rel, bool isSingular)>.GetHashCode((string rel, bool isSingular) obj) =>
-                obj.GetHashCode();
+            return (Link)buildMethod.Invoke(builder, new object[] { linkData });
         }
     }
 }

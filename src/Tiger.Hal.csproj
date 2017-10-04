@@ -37,26 +37,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Link/LinkBuilder.Constant.cs">
-      <DependentUpon>Link/LinkBuilder.cs</DependentUpon>
+    <Compile Update="Link/LinkData.Constant.cs">
+      <DependentUpon>Link/LinkData.cs</DependentUpon>
     </Compile>
-    <Compile Update="Link/LinkBuilder.Convenience.cs">
-      <DependentUpon>Link/LinkBuilder.cs</DependentUpon>
+    <Compile Update="Link/LinkData.Routed.cs">
+      <DependentUpon>Link/LinkData.cs</DependentUpon>
     </Compile>
-    <Compile Update="Link/LinkBuilder.Routed.cs">
-      <DependentUpon>Link/LinkBuilder.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Link/LinkBuilder.Templated.cs">
-      <DependentUpon>Link/LinkBuilder.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Link/Link.NamingStrategy.cs">
-      <DependentUpon>Link/Link.cs</DependentUpon>
+    <Compile Update="Link/LinkData.Templated.cs">
+      <DependentUpon>Link/LinkData.cs</DependentUpon>
     </Compile>
     <Compile Update="Link/LinkCollection.Converter.cs">
       <DependentUpon>Link/LinkCollection.cs</DependentUpon>
     </Compile>
     <Compile Update="TransformationMap.Builder{T}.cs">
       <DependentUpon>TransformationMap.cs</DependentUpon>
+    </Compile>
+    <Compile Update="TypeTransformer.KeyEqualityComparer.cs">
+      <DependentUpon>TypeTransformer.cs</DependentUpon>
     </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>

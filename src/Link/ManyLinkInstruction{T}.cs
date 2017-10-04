@@ -25,14 +25,14 @@ namespace Tiger.Hal
     sealed class ManyLinkInstruction<T>
         : ILinkInstruction
     {
-        readonly Func<T, IEnumerable<LinkBuilder>> _selector;
+        readonly Func<T, IEnumerable<ILinkData>> _selector;
 
         /// <summary>Initializes a new instance of the <see cref="ManyLinkInstruction{T}"/> class.</summary>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="T"/>.
+        /// A function that creates a <see cref="LinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
-        public ManyLinkInstruction([NotNull] Func<T, IEnumerable<LinkBuilder>> linkSelector)
+        public ManyLinkInstruction([NotNull] Func<T, IEnumerable<ILinkData>> linkSelector)
         {
             _selector = linkSelector ?? throw new ArgumentNullException(nameof(linkSelector));
         }
@@ -41,6 +41,6 @@ namespace Tiger.Hal
         public bool IsSingular { get; } = false;
 
         /// <inheritdoc/>
-        IEnumerable<LinkBuilder> ILinkInstruction.TransformToLinkBuilders(object main) => _selector((T)main);
+        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main) => _selector((T)main);
     }
 }
