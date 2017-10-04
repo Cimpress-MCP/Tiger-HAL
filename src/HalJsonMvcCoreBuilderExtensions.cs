@@ -30,9 +30,7 @@ namespace Tiger.Hal
     [PublicAPI]
     public static class HalJsonMvcCoreBuilderExtensions
     {
-        /// <summary>
-        /// Adds HAL+JSON transformation and serialization to the application.
-        /// </summary>
+        /// <summary>Adds HAL+JSON transformation and serialization to the application.</summary>
         /// <typeparam name="TProfile">The type of the profile to add.</typeparam>
         /// <param name="builder">The application's MVC builder.</param>
         /// <returns>The modified MVC core builder.</returns>
@@ -46,6 +44,9 @@ namespace Tiger.Hal
 
             builder.Services.AddSingleton<IHalProfile, TProfile>();
             builder.Services.AddSingleton<HalRepositoryBuilder>();
+            builder.Services.AddScoped<ILinkBuilder<LinkData.Constant>, LinkBuilder.Constant>();
+            builder.Services.AddScoped<ILinkBuilder<LinkData.Templated>, LinkBuilder.Templated>();
+            builder.Services.AddScoped<ILinkBuilder<LinkData.Routed>, LinkBuilder.Routed>();
             builder.Services.AddSingleton(p =>
             {
                 var profile = p.GetRequiredService<IHalProfile>();

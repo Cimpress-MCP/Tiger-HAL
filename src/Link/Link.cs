@@ -17,20 +17,23 @@
 using System;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using static Newtonsoft.Json.DefaultValueHandling;
 using static Newtonsoft.Json.Required;
 
 namespace Tiger.Hal
 {
     /// <summary>Represents a relationship between resources.</summary>
-    [JsonObject(NamingStrategyType = typeof(NamingStrategy))]
-    public sealed partial class Link
+    [JsonObject(
+        NamingStrategyType = typeof(CamelCaseNamingStrategy),
+        NamingStrategyParameters = new object[] { false, true })]
+    public sealed class Link
     {
         /// <summary>Initializes a new instance of the <see cref="Link"/> class.</summary>
         /// <param name="href">The location of the target resource.</param>
         /// <param name="isTemplated">
-        /// Whether <paramref name="href"/> indicates a template which, when bound,
-        /// will be the location of the location of the target resource.
+        /// A value indicating whether <paramref name="href"/> indicates a template which,
+        /// when bound, will be the location of the location of the target resource.
         /// </param>
         /// <param name="type">
         /// A hint to indicate the media type expected when dereferencing the target resource.
@@ -48,7 +51,7 @@ namespace Tiger.Hal
         [JsonConstructor]
         internal Link(
             [NotNull] string href,
-            bool isTemplated,
+            [JsonProperty("Templated")] bool isTemplated,
             [CanBeNull] string type,
             [CanBeNull] Uri deprecation,
             [CanBeNull] string name,
@@ -77,7 +80,7 @@ namespace Tiger.Hal
         /// Gets a value indicating whether <see cref="Href"/> is a template which, when bound,
         /// will be the location of the location of the target resource.
         /// </summary>
-        [JsonProperty(DefaultValueHandling = Ignore)]
+        [JsonProperty("Templated", DefaultValueHandling = Ignore)]
         public bool IsTemplated { get; }
 
         /// <summary>
@@ -110,7 +113,7 @@ namespace Tiger.Hal
         public string Title { get; }
 
         /// <summary>Gets the language of the target resource.</summary>
-        [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]
+        [JsonProperty("Hreflang", DefaultValueHandling = Ignore), CanBeNull]
         public string HrefLang { get; }
     }
 }

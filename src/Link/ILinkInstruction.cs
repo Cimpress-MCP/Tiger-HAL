@@ -29,11 +29,11 @@ namespace Tiger.Hal
         bool IsSingular { get; }
 
         /// <summary>
-        /// Transforms this instance into a collection of instances of <see cref="LinkBuilder"/>.
+        /// Transforms this instance into a collection of instances of <see cref="ILinkData"/>.
         /// </summary>
         /// <param name="main">The main object from which to create a link collection.</param>
-        /// <returns>A collection of instances of <see cref="LinkBuilder"/>.</returns>
+        /// <returns>A collection of instances of <see cref="ILinkData"/>.</returns>
         [NotNull, ItemNotNull]
-        IEnumerable<LinkBuilder> TransformToLinkBuilders([NotNull] object main);
+        IEnumerable<ILinkData> TransformToLinkBuilders([NotNull] object main);
     }
 }

@@ -110,6 +110,7 @@
     <Rule Id="SA1124" Action="None" />
     <Rule Id="SA1133" Action="None" />
     <Rule Id="SA1200" Action="None" />
+    <Rule Id="SA1205" Action="None" />
     <Rule Id="SA1308" Action="None" />
     <Rule Id="SA1309" Action="None" />
     <Rule Id="SX1309" Action="Error" />

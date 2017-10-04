@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -54,7 +53,9 @@ namespace Tiger.Hal
                         serializer.Serialize(writer, linkCollection.Single(), typeof(Link));
                         return;
                     default:
-                        serializer.Serialize(writer, linkCollection.ToList(), typeof(List<Link>));
+                        writer.WriteStartArray();
+                        foreach (var link in linkCollection) { serializer.Serialize(writer, link); }
+                        writer.WriteEndArray();
                         return;
                 }
             }

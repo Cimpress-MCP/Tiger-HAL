@@ -33,7 +33,7 @@ namespace Tiger.Hal
         /// </param>
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/>
+        /// A function that creates a <see cref="LinkData"/>
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
@@ -44,7 +44,7 @@ namespace Tiger.Hal
         public static ITransformationMap<T> Link<T>(
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
-            [NotNull] Func<T, LinkBuilder> linkSelector)
+            [NotNull] Func<T, ILinkData> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
@@ -66,7 +66,7 @@ namespace Tiger.Hal
         /// A function that selects a collection from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="TMember"/>.
+        /// A function that creates a <see cref="LinkData"/> from a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
@@ -78,7 +78,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
             [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
-            [NotNull] Func<TMember, LinkBuilder> linkSelector)
+            [NotNull] Func<TMember, ILinkData> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
@@ -102,7 +102,7 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/> from a value of type <typeparamref name="TMember"/>.
+        /// A function that creates a <see cref="LinkData"/> from a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
@@ -114,7 +114,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
             [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
-            [NotNull] Func<T, TMember, LinkBuilder> linkSelector)
+            [NotNull] Func<T, TMember, ILinkData> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
@@ -139,7 +139,7 @@ namespace Tiger.Hal
         /// A function that selects a dictionary from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/> from a value of type
+        /// A function that creates a <see cref="LinkData"/> from a value of type
         /// <typeparamref name="TKey"/> and a value of type <typeparamref name="TValue"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
@@ -152,7 +152,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
             [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
-            [NotNull] Func<TKey, TValue, LinkBuilder> linkSelector)
+            [NotNull] Func<TKey, TValue, ILinkData> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
@@ -177,7 +177,7 @@ namespace Tiger.Hal
         /// A function that selects a dictionary from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/> from a value of type
+        /// A function that creates a <see cref="LinkData"/> from a value of type
         /// <typeparamref name="T"/>, a value of type <typeparamref name="TKey"/>,
         /// and a value of type <typeparamref name="TValue"/>.
         /// </param>
@@ -191,7 +191,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
             [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
-            [NotNull] Func<T, TKey, TValue, LinkBuilder> linkSelector)
+            [NotNull] Func<T, TKey, TValue, ILinkData> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
@@ -209,7 +209,7 @@ namespace Tiger.Hal
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="memberSelector">A function selecting a top-level member to embed.</param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/>
+        /// A function that creates a <see cref="LinkData"/>
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
@@ -223,7 +223,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
             [NotNull] Expression<Func<T, TMember>> memberSelector,
-            [NotNull] Func<T, LinkBuilder> linkSelector)
+            [NotNull] Func<T, ILinkData> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
@@ -242,7 +242,7 @@ namespace Tiger.Hal
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="memberSelector">A function selecting a top-level member to embed.</param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkBuilder"/> from a value of type
+        /// A function that creates a <see cref="LinkData"/> from a value of type
         /// <typeparamref name="T"/> and a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
@@ -255,7 +255,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
             [NotNull] Expression<Func<T, TMember>> memberSelector,
-            [NotNull] Func<T, TMember, LinkBuilder> linkSelector)
+            [NotNull] Func<T, TMember, ILinkData> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }

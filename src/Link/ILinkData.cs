@@ -1,4 +1,4 @@
-// <copyright file="IHalProfile.cs" company="Cimpress, Inc.">
+// <copyright file="ILinkData.cs" company="Cimpress, Inc.">
 //   Copyright 2017 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +18,13 @@ using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
-    /// <summary>Defines the HAL+JSON transformations for an application.</summary>
+    /// <summary>A marker interface representing a builder for <see cref="Link"/>.</summary>
+    /// <remarks><para>
+    /// A type implementing this interface must provide a method named "Build" returning a <see cref="Link"/>.
+    /// The parameters of that method will be resolved from the application's service provider.
+    /// </para></remarks>
     [PublicAPI]
-    public interface IHalProfile
+    public interface ILinkData
     {
-        /// <summary>Configures the transformation from a type to its HAL+JSON representation.</summary>
-        /// <param name="transformationMap">The application's map of HAL transformation.</param>
-        void OnTransformationMapCreating([NotNull] ITransformationMap transformationMap);
     }
 }

@@ -17,9 +17,6 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Tiger.Hal
 {
@@ -27,25 +24,20 @@ namespace Tiger.Hal
     sealed class HalRepository
         : IHalRepository
     {
-        readonly IActionContextAccessor _actionContextAccessor;
-        readonly IUrlHelperFactory _urlHelperFactory;
         readonly IReadOnlyDictionary<Type, ITransformationInstructions> _transformations;
+        readonly IServiceProvider _serviceProvider;
 
         /// <summary>Initializes a new instance of the <see cref="HalRepository"/> class.</summary>
-        /// <param name="actionContextAccessor">The application's accessor for <see cref="ActionContext"/>.</param>
-        /// <param name="urlHelperFactory">The application's factory for <see cref="IUrlHelper"/>.</param>
         /// <param name="transformations">A mapping of types to type transformation maps.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="actionContextAccessor"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="urlHelperFactory"/> is <see langword="null"/>.</exception>
+        /// <param name="serviceProvider">The application's service provider.</param>
         /// <exception cref="ArgumentNullException"><paramref name="transformations"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
         public HalRepository(
-            [NotNull] IActionContextAccessor actionContextAccessor,
-            [NotNull] IUrlHelperFactory urlHelperFactory,
-            [NotNull] IReadOnlyDictionary<Type, ITransformationInstructions> transformations)
+            [NotNull] IReadOnlyDictionary<Type, ITransformationInstructions> transformations,
+            [NotNull] IServiceProvider serviceProvider)
         {
-            _actionContextAccessor = actionContextAccessor ?? throw new ArgumentNullException(nameof(actionContextAccessor));
-            _urlHelperFactory = urlHelperFactory ?? throw new ArgumentNullException(nameof(urlHelperFactory));
             _transformations = transformations ?? throw new ArgumentNullException(nameof(transformations));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         /// <inheritdoc/>
@@ -67,8 +59,7 @@ namespace Tiger.Hal
                 return false;
             }
 
-            var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-            transformer = new TypeTransformer(transformationMap, urlHelper);
+            transformer = new TypeTransformer(transformationMap, _serviceProvider);
             return true;
         }
     }
