@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Test.Utility
 {
     /// <summary>Represents a language code, with nation.</summary>
-    public class LanguageCode
+    public struct LanguageCode
     {
         readonly string _language;
         readonly string _nation;
@@ -26,7 +26,7 @@ namespace Test.Utility
 
         /// <summary>Converts a language code to a string.</summary>
         /// <param name="lc">The language code to convert.</param>
-        [CanBeNull]
-        public static implicit operator string([CanBeNull] LanguageCode lc) => lc?.ToString();
+        [NotNull]
+        public static implicit operator string(LanguageCode lc) => lc.ToString();
     }
 }

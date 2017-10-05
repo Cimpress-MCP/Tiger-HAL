@@ -8,6 +8,8 @@ namespace Test.Utility
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     static class Generators
     {
+        static readonly char[] s_alphabet = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
+
         public static Arbitrary<Uri> Uri() => Arb.From(
             from hn in Arb.Generate<HostName>()
             from scheme in Gen.OneOf(Gen.Constant("http"), Gen.Constant("https"))
@@ -21,8 +23,8 @@ namespace Test.Utility
             .ToArbitrary()
             .Convert(t => new UnequalNonNullPair<T>(t), unnp => (unnp.Left, unnp.Right));
 
-        public static Arbitrary<LanguageCode> LanguageCode() => Gen.Choose('a', 'z')
-            .Select(i => (char)i).ArrayOf(2).Two()
+        public static Arbitrary<LanguageCode> LanguageCode() => Gen.Elements(s_alphabet)
+            .ArrayOf(2).Two()
             .Select(cs => (lang: new string(cs.Item1), nation: new string(cs.Item2)))
             .Select(t => new LanguageCode(t.lang, t.nation))
             .ToArbitrary();
