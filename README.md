@@ -291,7 +291,7 @@ Because a HAL+JSON response hangs on the keys "\_links" and "\_embedded", the to
 
 ### Hoist
 
-Related to the self-embedding nature of arrays is the `Hoist` operation. Calculated properties of values that serialize to arrays can be attached to the parent object (the object with "\_links" and "\_embedded" keys). This is most commonly used for a "count" key, the value of which is the number of member of the array. This is exacly what line 26 of the example does.
+Related to the self-embedding nature of arrays is the `Hoist` operation. Calculated properties of values that serialize to arrays can be attached to the parent object (the object with "\_links" and "\_embedded" keys). This is most commonly used for a "count" key, the value of which is the number of members of the array. This is exactly what line 26 of the example does.
 
 ```csharp
 .Hoist(pjec => pjec.Count);
