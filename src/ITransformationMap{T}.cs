@@ -24,6 +24,7 @@ namespace Tiger.Hal
 {
     /// <summary>Configures a created transformation map.</summary>
     /// <typeparam name="T">The type being transformed.</typeparam>
+    [PublicAPI]
     public interface ITransformationMap<T>
     {
         /// <summary>Creates a link for the given type.</summary>

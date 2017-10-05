@@ -18,11 +18,7 @@ using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
-    /// <summary>A marker interface representing a builder for <see cref="Link"/>.</summary>
-    /// <remarks><para>
-    /// A type implementing this interface must provide a method named "Build" returning a <see cref="Link"/>.
-    /// The parameters of that method will be resolved from the application's service provider.
-    /// </para></remarks>
+    /// <summary>A marker interface representing the data for building a <see cref="Link"/>.</summary>
     [PublicAPI]
     public interface ILinkData
     {

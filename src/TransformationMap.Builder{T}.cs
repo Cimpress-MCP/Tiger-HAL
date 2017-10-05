@@ -24,11 +24,10 @@ using static Tiger.Hal.Properties.Resources;
 namespace Tiger.Hal
 {
     /// <content>The builder for further transformations beyond "self".</content>
-    public sealed partial class TransformationMap
+    sealed partial class TransformationMap
     {
         /// <summary>Configures a created transformation map.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
-        [PublicAPI]
         internal class Builder<T>
             : ITransformationInstructions, ITransformationMap<T>
         {

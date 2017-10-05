@@ -21,13 +21,14 @@ using JetBrains.Annotations;
 namespace Tiger.Hal
 {
     /// <summary>Defines a series of transformations for a type to its HAL representation.</summary>
-    [PublicAPI]
     sealed partial class TransformationMap
         : ITransformationMap
     {
+        readonly Dictionary<Type, ITransformationInstructions> _maps = new Dictionary<Type, ITransformationInstructions>();
+
         /// <summary>Gets the mapping of transformation instructions.</summary>
-        internal IDictionary<Type, ITransformationInstructions> Maps { get; } =
-            new Dictionary<Type, ITransformationInstructions>();
+        [NotNull]
+        internal IReadOnlyDictionary<Type, ITransformationInstructions> Maps => _maps;
 
         /// <inheritdoc/>
         ITransformationMap<T> ITransformationMap.Self<T>(Func<T, ILinkData> selector)
@@ -35,7 +36,7 @@ namespace Tiger.Hal
             if (selector == null) { throw new ArgumentNullException(nameof(selector)); }
 
             var builder = new Builder<T>(selector);
-            Maps[typeof(T)] = builder;
+            _maps[typeof(T)] = builder;
             return builder;
         }
     }

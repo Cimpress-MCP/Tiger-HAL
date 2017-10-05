@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Immutable;
 using JetBrains.Annotations;
 using static JetBrains.Annotations.ImplicitUseTargetFlags;
 
@@ -45,8 +44,7 @@ namespace Tiger.Hal
         {
             var transformationMap = new TransformationMap();
             profile.OnTransformationMapCreating(transformationMap);
-            var transformations = transformationMap.Maps.ToImmutableDictionary();
-            return new HalRepository(transformations, _serviceProvider);
+            return new HalRepository(transformationMap.Maps, _serviceProvider);
         }
     }
 }

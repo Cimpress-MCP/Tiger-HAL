@@ -1,4 +1,4 @@
-image: microsoft/aspnetcore-build:1.0-1.1
+image: microsoft/aspnetcore-build
 
 before_script:
   - dotnet restore
@@ -15,11 +15,11 @@ build:
     - dotnet pack --no-build -c Release -o "$(pwd)/dist/"
   artifacts:
     paths:
-      - dist/
+      - ./dist/
 
 publish:
   stage: publish
-  script: dotnet nuget push dist/*.nupkg -k $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY
+  script: dotnet nuget push ./dist/*.nupkg -k $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY
   dependencies:
     - build
   only:

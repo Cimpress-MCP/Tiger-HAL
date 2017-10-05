@@ -20,6 +20,7 @@ using JetBrains.Annotations;
 namespace Tiger.Hal
 {
     /// <summary>Defines a series of transformations for a type to its HAL representation.</summary>
+    [PublicAPI]
     public interface ITransformationMap
     {
         /// <summary>Creates the "self" link relation for the given type.</summary>
