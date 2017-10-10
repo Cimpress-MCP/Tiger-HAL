@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Moq;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Test.Utility;
 using Tiger.Hal;
 using Xunit;
@@ -21,9 +20,8 @@ using Xunit;
 namespace Test
 {
     /// <summary>Tests related to the <see cref="HalJsonOutputFormatter"/> class.</summary>
-    [Properties(Arbitrary = new[] { typeof(Generators) })]
-    public abstract class HalJsonOutputFormatterTests<TNamingStrategy>
-        where TNamingStrategy : NamingStrategy, new()
+    [Properties(Arbitrary = new[] { typeof(Generators) }, QuietOnSuccess = true, MaxTest = 0x400)]
+    public static class HalJsonOutputFormatterTests
     {
         class Unregistered
         {
@@ -50,17 +48,10 @@ namespace Test
         }
 
         [Property(DisplayName = "An unregistered type cannot be written.")]
-        protected void UnregisteredType_CannotWriteResult()
+        static void UnregisteredType_CannotWriteResult(JsonSerializerSettings serializerSettings)
         {
             // arrange
             var repo = Mock.Of<IHalRepository>(r => r.CanTransform(It.IsAny<Type>()) == false);
-            var serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new TNamingStrategy()
-                }
-            };
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
             var context = Mock.Of<OutputFormatterCanWriteContext>(c => c.ObjectType == typeof(Unregistered));
 
@@ -72,17 +63,10 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type can be written.")]
-        protected void RegisteredType_CanWriteResult()
+        static void RegisteredType_CanWriteResult(JsonSerializerSettings serializerSettings)
         {
             // arrange
             var repo = Mock.Of<IHalRepository>(r => r.CanTransform(It.IsAny<Type>()) == true);
-            var serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new TNamingStrategy()
-                }
-            };
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
             var context = Mock.Of<OutputFormatterCanWriteContext>(c => c.ObjectType == typeof(Registered));
 
@@ -94,19 +78,12 @@ namespace Test
         }
 
         [Property(DisplayName = "An unregistered type is serialized normally.")]
-        protected async Task UnregisteredType_NotModified(Guid id)
+        static async Task UnregisteredType_NotModified(Guid id, JsonSerializerSettings serializerSettings)
         {
             // arrange
             var dto = new Unregistered
             {
                 Id = id
-            };
-            var serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new TNamingStrategy()
-                }
             };
             var sut = new HalJsonOutputFormatter(Mock.Of<IHalRepository>(), serializerSettings, ArrayPool<char>.Shared);
             var writer = new StringWriter();
@@ -125,7 +102,10 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type creates its self link correctly.")]
-        protected async Task RegisteredType_SelfLink(Guid id, NonNull<string> route)
+        static async Task RegisteredType_SelfLink(
+            Guid id,
+            NonNull<string> route,
+            JsonSerializerSettings serializerSettings)
         {
             // arrange
             var dto = new Registered
@@ -144,17 +124,7 @@ namespace Test
                     r => LinkData.Route(route.Get, new { r.Id }))
             };
             var repo = new HalRepository(map, Mock.Of<IServiceProvider>());
-            var serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new TNamingStrategy()
-                },
-                Converters =
-                {
-                    new LinkCollection.Converter()
-                }
-            };
+            serializerSettings.Converters.Add(new LinkCollection.Converter());
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
@@ -179,10 +149,11 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type creates additional links correctly.")]
-        protected async Task RegisteredType_AdditionalLink(
+        static async Task RegisteredType_AdditionalLink(
             Guid id,
             Guid parentId,
-            UnequalNonNullPair<string> routes)
+            UnequalNonNullPair<string> routes,
+            JsonSerializerSettings serializerSettings)
         {
             // arrange
             var dto = new Registered
@@ -207,17 +178,7 @@ namespace Test
                 [typeof(Registered)] = registeredMap
             };
             var repo = new HalRepository(map, Mock.Of<IServiceProvider>());
-            var serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new TNamingStrategy()
-                },
-                Converters =
-                {
-                    new LinkCollection.Converter()
-                }
-            };
+            serializerSettings.Converters.Add(new LinkCollection.Converter());
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
@@ -243,32 +204,5 @@ namespace Test
             Assert.NotNull(parent);
             Assert.Equal($"https://example.invalid/parent/{parentId}", parent.Href);
         }
-    }
-
-    /// <summary>
-    /// Tests related to the <see cref="HalJsonOutputFormatter"/> class
-    /// specialized for the <see cref="DefaultNamingStrategy"/> class.
-    /// </summary>
-    public sealed class DefaultHalJsonOutputFormatterTests
-        : HalJsonOutputFormatterTests<DefaultNamingStrategy>
-    {
-    }
-
-    /// <summary>
-    /// Tests related to the <see cref="HalJsonOutputFormatter"/> class
-    /// specialized for the <see cref="CamelCaseNamingStrategy"/> class.
-    /// </summary>
-    public sealed class CamelCaseHalJsonOutputFormatterTests
-        : HalJsonOutputFormatterTests<CamelCaseNamingStrategy>
-    {
-    }
-
-    /// <summary>
-    /// Tests related to the <see cref="HalJsonOutputFormatter"/> class
-    /// specialized for the <see cref="SnakeCaseNamingStrategy"/> class.
-    /// </summary>
-    public sealed class SnakeCaseHalJsonOutputFormatterTests
-        : HalJsonOutputFormatterTests<CamelCaseNamingStrategy>
-    {
     }
 }

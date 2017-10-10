@@ -18,14 +18,14 @@
 
   <ItemGroup>
     <PackageReference Include="FsCheck.Xunit" Version="3.0.0-alpha1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20170923-02" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20171009-10" />
     <PackageReference Include="Moq" Version="4.7.137" />
-    <PackageReference Include="xunit.assert.source" Version="2.3.0-rc3-build3818" />
-    <PackageReference Include="xunit.core" Version="2.3.0-rc3-build3818" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-rc3-build3818" />
+    <PackageReference Include="xunit.assert.source" Version="2.3.0" />
+    <PackageReference Include="xunit.core" Version="2.3.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" />
 
     <!-- The analyzer fails on code included by "xunit.assert.source". Enable on demand. -->
-    <!-- <PackageReference Include="xunit.analyzers" Version="0.7.0" /> -->
+    <!--<PackageReference Include="xunit.analyzers" Version="0.7.0" />--> 
   </ItemGroup>
 
   <ItemGroup>

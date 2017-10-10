@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace Test.Utility
@@ -7,22 +6,18 @@ namespace Test.Utility
     /// <summary>Represents a language code, with nation.</summary>
     public struct LanguageCode
     {
-        readonly string _language;
-        readonly string _nation;
+        readonly string _languageCode;
 
-        /// <summary>Initializes a new instance of the <see cref="LanguageCode"/> class.</summary>
-        /// <param name="language">The "language" portion of the code.</param>
-        /// <param name="nation">The "nation" portion of the code.</param>
-        [SuppressMessage("ReSharper", "ConstantConditionalAccessQualifier")]
-        public LanguageCode([NotNull] string language, [NotNull] string nation)
+        /// <summary>Initializes a new instance of the <see cref="LanguageCode"/> struct.</summary>
+        /// <param name="languageCode">The raw string language code.</param>
+        public LanguageCode([NotNull] string languageCode)
         {
-            _language = language?.ToLowerInvariant() ?? throw new ArgumentNullException(nameof(language));
-            _nation = nation?.ToUpperInvariant() ?? throw new ArgumentNullException(nameof(nation));
+            _languageCode = languageCode ?? throw new ArgumentNullException(nameof(languageCode));
         }
 
         /// <inheritdoc/>
         [NotNull, Pure]
-        public override string ToString() => $"{_language}-{_nation}";
+        public override string ToString() => _languageCode;
 
         /// <summary>Converts a language code to a string.</summary>
         /// <param name="lc">The language code to convert.</param>
