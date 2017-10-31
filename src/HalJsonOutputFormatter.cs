@@ -146,9 +146,10 @@ namespace Tiger.Hal
             }
 
             var links = transformer.GenerateLinks(value);
-            if (links.Count != 0)
+            var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
+            if (populatedLinks.Count != 0)
             {
-                jValue["_links"] = JObject.FromObject(links, CreateJsonSerializer());
+                jValue["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList.Create<JProperty>();
@@ -234,9 +235,10 @@ namespace Tiger.Hal
             var wrapperObject = new JObject();
 
             var links = transformer.GenerateLinks(value);
-            if (links.Count != 0)
+            var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
+            if (populatedLinks.Count != 0)
             {
-                wrapperObject["_links"] = JObject.FromObject(links, CreateJsonSerializer());
+                wrapperObject["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList.Create<JProperty>();
@@ -316,9 +318,10 @@ namespace Tiger.Hal
             }
 
             var links = transformer.GenerateLinks(value);
-            if (links.Count != 0)
+            var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
+            if (populatedLinks.Count != 0)
             {
-                jValue["_links"] = JObject.FromObject(links, CreateJsonSerializer());
+                jValue["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList.Create<JProperty>();

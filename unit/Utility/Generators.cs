@@ -16,12 +16,12 @@ namespace Test.Utility
         static readonly char[] s_alphabet = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
 
         [NotNull]
-        public static Arbitrary<AbsoluteUri> Uri() => Arb.From(
-            from scheme in Gen.OneOf(Gen.Constant("http"), Gen.Constant("https"))
-            from hn in Arb.Generate<HostName>()
-            select new UriBuilder(scheme, hn.Item) into ub
-            select ub.Uri)
-            .Convert(uri => new AbsoluteUri(uri), au => au);
+        public static Arbitrary<AbsoluteUri> AbsoluteUri() => Arb.From(
+                from scheme in Gen.Elements("http", "https")
+                from hn in Arb.Generate<HostName>()
+                select new UriBuilder(scheme, hn.ToString()) into ub
+                select ub.Uri)
+            .Convert(uri => new AbsoluteUri(uri), au => au.ToUri());
 
         [NotNull]
         public static Arbitrary<UnequalNonNullPair<T>> UnequalNonNullPair<T>()
@@ -32,13 +32,14 @@ namespace Test.Utility
             .Convert(t => new UnequalNonNullPair<T>(t), unnp => (unnp.Left, unnp.Right));
 
         [NotNull]
-        public static Arbitrary<LanguageCode> LanguageCode() => Arb.Generate<NonNull<CultureInfo>>()
+        public static Arbitrary<LanguageCode> LanguageCode => Arb
+            .Generate<NonNull<CultureInfo>>()
             .Select(ci => ci.Get.Name)
             .ToArbitrary()
             .Convert(lc => new LanguageCode(lc), lc => lc);
 
         [NotNull]
-        public static Arbitrary<Link> Link() => Arb.From(
+        public static Arbitrary<Link> Link => Arb.From(
             from href in Arb.Generate<AbsoluteUri>()
             from isTemplated in Arb.Generate<bool>()
             from type in Arb.Generate<string>()
@@ -47,31 +48,29 @@ namespace Test.Utility
             from profile in Arb.Generate<AbsoluteUri?>()
             from title in Arb.Generate<string>()
             from hrefLang in Arb.Generate<LanguageCode?>()
-            select new Link(href.Get.AbsoluteUri, isTemplated, type, deprecation, name, profile, title, hrefLang));
+            select new Link(href.ToString(), isTemplated, type, deprecation, name, profile, title, hrefLang));
 
-        [NotNull]
-        public static Arbitrary<NamingStrategy> NamingStrategy() => Gen.OneOf(
-                Gen.Fresh(() => (NamingStrategy)new CamelCaseNamingStrategy()),
-                Gen.Fresh(() => (NamingStrategy)new SnakeCaseNamingStrategy()),
-                Gen.Fresh(() => (NamingStrategy)new DefaultNamingStrategy()))
-            .ToArbitrary();
-
-        [NotNull]
-        public static Arbitrary<IContractResolver> ContractResolver() => Arb.From(
-            from namingStrategy in Arb.Generate<NamingStrategy>()
-            select (IContractResolver)new DefaultContractResolver
+        static readonly Gen<IContractResolver> s_contractResolver = Gen.OneOf(
+            Gen.Constant<IContractResolver>(new DefaultContractResolver
             {
-                NamingStrategy = namingStrategy
-            });
+                NamingStrategy = new CamelCaseNamingStrategy()
+            }),
+            Gen.Constant<IContractResolver>(new DefaultContractResolver
+            {
+                NamingStrategy = new SnakeCaseNamingStrategy()
+            }),
+            Gen.Constant<IContractResolver>(new DefaultContractResolver
+            {
+                NamingStrategy = new DefaultNamingStrategy()
+            }));
 
         [NotNull]
-        public static Arbitrary<JsonSerializerSettings> JsonSerializerSettings() => Arb.From(
-            from contractResolver in Arb.Generate<IContractResolver>()
+        public static Arbitrary<JsonSerializerSettings> JsonSerializerSettings => Arb.From(
+            from contractResolver in s_contractResolver
             select new JsonSerializerSettings
             {
                 ContractResolver = contractResolver,
-                DateParseHandling = DateParseHandling.DateTimeOffset,
-                Formatting = Formatting.Indented
+                DateParseHandling = DateParseHandling.DateTimeOffset
             });
     }
 }

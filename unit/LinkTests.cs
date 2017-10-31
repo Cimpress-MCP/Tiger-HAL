@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Test.Utility;
 using Tiger.Hal;
 using Xunit;
-
 // ReSharper disable All
 
 namespace Test
@@ -15,11 +14,10 @@ namespace Test
         [Property(DisplayName = "A link survives serialization.")]
         static void Serialization_RoundTrip(Link link, JsonSerializerSettings serializerSettings)
         {
-            // act
-            var linkString = JsonConvert.SerializeObject(link, serializerSettings);
-            var actual = JsonConvert.DeserializeObject<Link>(linkString, serializerSettings);
+            var actual = JsonConvert.DeserializeObject<Link>(
+                JsonConvert.SerializeObject(link, serializerSettings),
+                serializerSettings);
 
-            // assert
             Assert.Equal(link, actual, new LinkEqualityComparer());
         }
     }

@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 namespace Test.Utility
 {
     /// <summary>Represents a <see cref="Uri"/> with, at least, protocol and domain.</summary>
-    public struct AbsoluteUri
+    struct AbsoluteUri
     {
         readonly Uri _uri;
 
@@ -22,9 +22,10 @@ namespace Test.Utility
             _uri = uri;
         }
 
-        /// <summary>Gets the underlying <see cref="Uri"/> value of this instance.</summary>
-        [NotNull]
-        public Uri Get => _uri;
+        /// <summary>Converts an absolute URI to an undistinguished URI.</summary>
+        /// <returns>The underlying instance of <see cref="Uri"/>.</returns>
+        [NotNull, Pure]
+        public Uri ToUri() => _uri;
 
         /// <inheritdoc/>
         [NotNull, Pure]
