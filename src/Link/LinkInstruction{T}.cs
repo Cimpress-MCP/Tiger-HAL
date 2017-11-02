@@ -43,7 +43,11 @@ namespace Tiger.Hal
         /// <inheritdoc/>
         IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main)
         {
-            yield return _selector((T)main);
+            var link = _selector((T)main);
+            if (link != null)
+            {
+                yield return link;
+            }
         }
     }
 }

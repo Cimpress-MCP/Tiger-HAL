@@ -68,15 +68,13 @@ namespace Tiger.Hal
                     kvp => kvp.Value.TransformToLinkBuilders(value),
                     (kvp, lb) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular, link: Build(lb)))
                 .ToLookup(kvp => (kvp.rel, kvp.isSingular), kvp => kvp.link, s_comparer)
-                .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.Where(l => l != null).ToList(), g.Key.isSingular));
+                .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
         }
 
         /// <exception cref="InvalidOperationException">A builder for the provided <see cref="ILinkData"/> could not be resolved.</exception>
-        [CanBeNull]
-        Link Build([CanBeNull] ILinkData linkData)
+        [NotNull]
+        Link Build([NotNull] ILinkData linkData)
         {
-            if (linkData == null) { return null; }
-
             var dataType = linkData.GetType();
             var builderType = typeof(ILinkBuilder<>).MakeGenericType(dataType);
             var buildMethod = builderType.GetMethod(nameof(ILinkBuilder<ILinkData>.Build), new[] { dataType });

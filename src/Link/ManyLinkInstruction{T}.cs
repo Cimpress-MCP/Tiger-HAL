@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace Tiger.Hal
@@ -41,6 +42,7 @@ namespace Tiger.Hal
         public bool IsSingular { get; } = false;
 
         /// <inheritdoc/>
-        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main) => _selector((T)main);
+        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main) =>
+            _selector((T)main).Where(lb => lb != null);
     }
 }
