@@ -29,7 +29,7 @@ namespace Tiger.Hal
 
         /// <summary>Initializes a new instance of the <see cref="LinkInstruction{T}"/> class.</summary>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/> from a value of type <typeparamref name="T"/>.
+        /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
         public LinkInstruction([NotNull] Func<T, ILinkData> linkSelector)

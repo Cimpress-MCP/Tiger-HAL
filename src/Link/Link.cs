@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -88,6 +89,7 @@ namespace Tiger.Hal
         /// when dereferencing the target resource.
         /// </summary>
         [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]
+        [SuppressMessage("Microsoft:Guidelines", "CA1721", Justification = "That's what it's called.")]
         public string Type { get; }
 
         /// <summary>

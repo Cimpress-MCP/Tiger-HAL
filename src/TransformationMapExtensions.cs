@@ -28,13 +28,10 @@ namespace Tiger.Hal
     {
         /// <summary>Creates a link for the given type.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
-        /// <param name="transformationMap">
-        /// The transformation map to which to add the link.
-        /// </param>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/>
-        /// from a value of type <typeparamref name="T"/>.
+        /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
@@ -45,6 +42,31 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
             [NotNull] Func<T, ILinkData> linkSelector)
+        {
+            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+            if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+            return transformationMap.Link(relation.AbsoluteUri, linkSelector);
+        }
+
+        /// <summary>Creates a link for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Link<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] Uri relation,
+            [NotNull] Func<T, Uri> linkSelector)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
@@ -66,7 +88,7 @@ namespace Tiger.Hal
         /// A function that selects a collection from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/> from a value of type <typeparamref name="TMember"/>.
+        /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
@@ -102,7 +124,7 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/> from a value of type <typeparamref name="TMember"/>.
+        /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
@@ -139,7 +161,7 @@ namespace Tiger.Hal
         /// A function that selects a dictionary from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/> from a value of type
+        /// A function that creates an <see cref="ILinkData"/> from a value of type
         /// <typeparamref name="TKey"/> and a value of type <typeparamref name="TValue"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
@@ -177,7 +199,7 @@ namespace Tiger.Hal
         /// A function that selects a dictionary from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/> from a value of type
+        /// A function that creates an <see cref="ILinkData"/> from a value of type
         /// <typeparamref name="T"/>, a value of type <typeparamref name="TKey"/>,
         /// and a value of type <typeparamref name="TValue"/>.
         /// </param>
@@ -209,7 +231,7 @@ namespace Tiger.Hal
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="memberSelector">A function selecting a top-level member to embed.</param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/>
+        /// A function that creates an <see cref="ILinkData"/>
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
@@ -242,7 +264,7 @@ namespace Tiger.Hal
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="memberSelector">A function selecting a top-level member to embed.</param>
         /// <param name="linkSelector">
-        /// A function that creates a <see cref="LinkData"/> from a value of type
+        /// A function that creates an <see cref="ILinkData"/> from a value of type
         /// <typeparamref name="T"/> and a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>

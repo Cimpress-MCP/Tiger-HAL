@@ -39,6 +39,18 @@ namespace Tiger.Hal
         [NotNull]
         ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, ILinkData> linkSelector);
 
+        /// <summary>Creates a link for the given type.</summary>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, Uri> linkSelector);
+
         /// <summary>Creates a collection of links for the given type.</summary>
         /// <typeparam name="TMember">
         /// The member type of the return type of <paramref name="collectionSelector"/>.

@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace Tiger.Hal
@@ -56,6 +57,7 @@ namespace Tiger.Hal
             /// Gets or sets a hint to indicate the media type expected
             /// when dereferencing the target resource.
             /// </summary>
+            [SuppressMessage("Microsoft:Guidelines", "CA1721", Justification = "That's what it's called.")]
             public string Type { get; set; }
 
             /// <summary>

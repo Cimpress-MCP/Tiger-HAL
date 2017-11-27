@@ -1,4 +1,4 @@
-﻿// <copyright file="HalJsonMvcCoreBuilderExtensions.cs" company="Cimpress, Inc.">
+﻿// <copyright file="HalJsonMvcBuilderExtensions.cs" company="Cimpress, Inc.">
 //   Copyright 2017 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ namespace Tiger.Hal
 {
     /// <summary>Extends the functionality of <see cref="IServiceCollection"/> for HAL+JSON.</summary>
     [PublicAPI]
-    public static class HalJsonMvcCoreBuilderExtensions
+    public static class HalJsonMvcBuilderExtensions
     {
         /// <summary>Adds HAL+JSON transformation and serialization to the application.</summary>
         /// <typeparam name="TProfile">The type of the profile to add.</typeparam>
@@ -37,7 +37,7 @@ namespace Tiger.Hal
         /// <exception cref="ArgumentNullException"><paramref name="builder"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">A profile could not be added to the repository builder.</exception>
         [NotNull]
-        public static IMvcCoreBuilder AddHalJson<TProfile>([NotNull] this IMvcCoreBuilder builder)
+        public static IMvcBuilder AddHalJson<TProfile>([NotNull] this IMvcBuilder builder)
             where TProfile : class, IHalProfile
         {
             if (builder == null) { throw new ArgumentNullException(nameof(builder)); }
@@ -58,7 +58,7 @@ namespace Tiger.Hal
         }
 
         [NotNull]
-        static IMvcCoreBuilder AddHalJsonFormatter([NotNull] this IMvcCoreBuilder builder)
+        static IMvcBuilder AddHalJsonFormatter([NotNull] this IMvcBuilder builder)
         {
             AddHalJsonFormatterServices(builder.Services);
             return builder;
@@ -66,6 +66,7 @@ namespace Tiger.Hal
 
         static void AddHalJsonFormatterServices([NotNull] IServiceCollection services)
         {
+            services.AddOptions();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.TryAddSingleton<IUrlHelperFactory, UrlHelperFactory>();
             services.TryAddEnumerable(Transient<IConfigureOptions<MvcJsonOptions>, ConfigureMvcJsonOptions>());

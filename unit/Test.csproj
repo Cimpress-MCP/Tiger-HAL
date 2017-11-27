@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DebugType>portable</DebugType>
     <IsPackable>false</IsPackable>
+    <AssemblyName>Tiger.Hal.UnitTest</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -18,7 +19,6 @@
 
   <ItemGroup>
     <PackageReference Include="FsCheck.Xunit" Version="3.0.0-alpha2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20171031-01" />
     <PackageReference Include="xunit.assert.source" Version="2.3.1" />
     <PackageReference Include="xunit.core" Version="2.3.1" />

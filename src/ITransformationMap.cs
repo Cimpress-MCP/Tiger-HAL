@@ -26,7 +26,7 @@ namespace Tiger.Hal
         /// <summary>Creates the "self" link relation for the given type.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
         /// <param name="selector">
-        /// A function that creates a <see cref="LinkData"/>
+        /// A function that creates an <see cref="ILinkData"/>
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>A transformation map from which further transformations can be defined.</returns>

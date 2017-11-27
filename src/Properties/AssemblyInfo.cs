@@ -16,5 +16,5 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Test")]
+[assembly: InternalsVisibleTo("Tiger.Hal.UnitTest")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

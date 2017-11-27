@@ -14,12 +14,14 @@
 //   limitations under the License.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
     /// <summary>A marker interface representing the data for building a <see cref="Link"/>.</summary>
     [PublicAPI]
+    [SuppressMessage("Microsoft:Guidelines", "CA1040", Justification = "Marker interfaces are cool now.")]
     public interface ILinkData
     {
     }

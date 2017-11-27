@@ -38,7 +38,7 @@ namespace Tiger.Hal
 
             /// <summary>Initializes a new instance of the <see cref="Builder{T}"/> class.</summary>
             /// <param name="selfSelector">
-            /// A function that creates a <see cref="LinkData"/>
+            /// A function that creates an <see cref="ILinkData"/>
             /// from a value of type <typeparamref name="T"/>.
             /// </param>
             public Builder([NotNull] Func<T, ILinkData> selfSelector)
@@ -73,6 +73,18 @@ namespace Tiger.Hal
                 if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 _links[relation] = new LinkInstruction<T>(linkSelector);
+                return this;
+            }
+
+            /// <inheritdoc/>
+            ITransformationMap<T> ITransformationMap<T>.Link(
+                string relation,
+                Func<T, Uri> linkSelector)
+            {
+                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+                _links[relation] = new ConstantLinkInstruction<T>(linkSelector);
                 return this;
             }
 
