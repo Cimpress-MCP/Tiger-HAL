@@ -11,7 +11,6 @@
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>portable</DebugType>
-    <PreserveCompilationContext>false</PreserveCompilationContext>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisRuleSet>../Tiger.ruleset</CodeAnalysisRuleSet>
     <AssemblyName>Tiger.Hal</AssemblyName>
@@ -32,7 +31,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<AdditionalFiles Include="../.editorconfig" />-->
     <AdditionalFiles Include="../stylecop.json" />
     <None Remove="Tiger.Hal.csproj.DotSettings" />
   </ItemGroup>
