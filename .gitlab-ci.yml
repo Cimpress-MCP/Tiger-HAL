@@ -1,26 +1,37 @@
-image: microsoft/aspnetcore-build
-
-before_script:
-  - dotnet restore
+image: microsoft/aspnetcore-build:2.0
 
 stages:
   - build
-  - publish
+  - test-pack
+  - deploy
+
+cache:
+  key: "$CI_PIPELINE_ID"
 
 build:
   stage: build
   script:
     - dotnet build -c Release
+  artifacts:
+    untracked: true
+
+test:
+  stage: test-pack
+  script:
     - dotnet test --no-build -c Release ./unit/Test.csproj
+
+pack:
+  stage: test-pack
+  script:
     - dotnet pack --no-build -c Release -o "$(pwd)/dist/"
   artifacts:
+    untracked: false
     paths:
-      - ./dist/
+      - dist/
 
-publish:
-  stage: publish
-  script: dotnet nuget push ./dist/*.nupkg -k $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY
-  dependencies:
-    - build
+deploy:
+  stage: deploy
+  script:
+    - dotnet nuget push ./dist/*.nupkg -k $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY
   only:
     - master
