@@ -63,10 +63,10 @@ In order to set up a HAL+JSON transformation, this library provides four operati
 - [`Hoist`][]
 - [`Ignore`][]
 
-[`Link`]: https://github.com/Cimpress-MCP/Tiger-HAL/wiki/Link
-[`Embed`]: https://github.com/Cimpress-MCP/Tiger-HAL/wiki/Embed
-[`Hoist`]: https://github.com/Cimpress-MCP/Tiger-HAL/wiki/Hoist
-[`Ignore`]: https://github.com/Cimpress-MCP/Tiger-HAL/wiki/Ignore
+[`Link`]: wiki/Link
+[`Embed`]: wiki/Embed
+[`Hoist`]: wiki/Hoist
+[`Ignore`]: wiki/Ignore
 
 There are no operations that correspond to, represent, or manipulate the `curies` link relation. This functionality is not supported in this library. The specification is very confused when it comes to CURIEs and link relations, and it's better off pretending that they don't exist.
 
