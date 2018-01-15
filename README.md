@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Tiger.Hal is an ASP.NET Core library for defining declarative transformations from values to their HAL+JSON representation. It allows these transfomed values to be served when a client includes the content type `application/hal+json` in a request's `Accepts` header. This library conforms to a convervative subset of the JSON Hypertext Application Language [draft specification][].
+Tiger.Hal is an ASP.NET Core library for defining declarative transformations from values to their HAL+JSON representation. It allows these transformed values to be served when a client includes the content type `application/hal+json` in a request's `Accepts` header. This library conforms to a conservative subset of the JSON Hypertext Application Language [draft specification][].
 
 [draft specification]: https://tools.ietf.org/html/draft-kelly-json-hal-08
 
