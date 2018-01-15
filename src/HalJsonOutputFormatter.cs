@@ -152,7 +152,7 @@ namespace Tiger.Hal
                 jValue["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
-            var embeds = ImmutableList.Create<JProperty>();
+            var embeds = ImmutableList<JProperty>.Empty;
             var embedPairs =
                 from embedInstruction in transformer.Embeds
                 let embedIndex = embedInstruction.Index.ToString()
@@ -241,7 +241,7 @@ namespace Tiger.Hal
                 wrapperObject["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
-            var embeds = ImmutableList.Create<JProperty>();
+            var embeds = ImmutableList.Create(new JProperty("collection", jValue));
             var embedPairs =
                 from embedInstruction in transformer.Embeds
                 let embedValue = embedInstruction.GetEmbedValue(value)
@@ -260,7 +260,7 @@ namespace Tiger.Hal
             }
 
             // note(cosborn) We know embeds has at least one.
-            wrapperObject["_embedded"] = new JObject(embeds.Add(new JProperty("self", jValue)));
+            wrapperObject["_embedded"] = new JObject(embeds);
 
             if (transformer.Hoists.Count != 0)
             { // todo(cosborn) Check count because object contract creation is relatively expensive due to reflection.
@@ -324,7 +324,7 @@ namespace Tiger.Hal
                 jValue["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
-            var embeds = ImmutableList.Create<JProperty>();
+            var embeds = ImmutableList<JProperty>.Empty;
             var embedPairs =
                 from embedInstruction in transformer.Embeds
                 let nativeKey = embedInstruction.Index.ToString()

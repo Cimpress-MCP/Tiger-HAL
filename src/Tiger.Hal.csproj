@@ -5,7 +5,7 @@
     <Copyright>©Cimpress 2017</Copyright>
     <AssemblyTitle>Tiger Hal</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
@@ -18,11 +18,11 @@
     <PackageTags>hal;json;hal+json;link</PackageTags>
     <PackageReleaseNotes>⁃ Everything is new!
 </PackageReleaseNotes>
-    <PackageProjectUrl>https://cimpress.githost.io/cosborn/Tiger.HAL</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-HAL</PackageProjectUrl>
     <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <PackageIconUrl>https://cimpress.githost.io/cosborn/Tiger.HAL/raw/master/tiger_logo.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/Cimpress-MCP/Tiger-HAL/master/tiger_logo.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://cimpress.githost.io/cosborn/Tiger.HAL.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Cimpress-MCP/Tiger-HAL.git</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -65,11 +65,11 @@
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
     <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
 
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.3.0-beta1" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.3.0-beta1" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.3.0-beta1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.0-beta1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.0-beta1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.0-beta1" PrivateAssets="All" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
-    <PackageReference Include="Text.Analyzers" Version="2.3.0-beta1" PrivateAssets="All" />
+    <PackageReference Include="Text.Analyzers" Version="2.6.0-beta1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
