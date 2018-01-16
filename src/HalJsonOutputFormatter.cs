@@ -39,6 +39,9 @@ namespace Tiger.Hal
     public sealed class HalJsonOutputFormatter
         : JsonOutputFormatter
     {
+        const string LinksKey = "_links";
+        const string EmbeddedKey = "_embedded";
+
         readonly IHalRepository _halRepository;
 
         // note(cosborn) Cache the reflection; it's relatively expensive.
@@ -62,6 +65,7 @@ namespace Tiger.Hal
         {
             _halRepository = halRepository ?? throw new ArgumentNullException(nameof(halRepository));
 
+            SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add("application/hal+json");
         }
 
@@ -90,9 +94,7 @@ namespace Tiger.Hal
         protected override bool CanWriteType([NotNull] Type type) => _halRepository.CanTransform(type);
 
         [CanBeNull]
-        JToken Walk(
-            [NotNull] object value,
-            [NotNull] Type type)
+        JToken Walk([NotNull] object value, [NotNull] Type type)
         {
             switch (SerializerSettings.ContractResolver.ResolveContract(type))
             {
@@ -149,7 +151,7 @@ namespace Tiger.Hal
             var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
             if (populatedLinks.Count != 0)
             {
-                jValue["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
+                jValue[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList<JProperty>.Empty;
@@ -178,7 +180,7 @@ namespace Tiger.Hal
 
             if (embeds.Count != 0)
             {
-                jValue["_embedded"] = new JObject(embeds);
+                jValue[EmbeddedKey] = new JObject(embeds);
             }
 
             var ignores =
@@ -238,10 +240,10 @@ namespace Tiger.Hal
             var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
             if (populatedLinks.Count != 0)
             {
-                wrapperObject["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
+                wrapperObject[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
-            var embeds = ImmutableList.Create(new JProperty("collection", jValue));
+            var embeds = ImmutableList.Create(new JProperty("self", jValue));
             var embedPairs =
                 from embedInstruction in transformer.Embeds
                 let embedValue = embedInstruction.GetEmbedValue(value)
@@ -259,8 +261,8 @@ namespace Tiger.Hal
                 }
             }
 
-            // note(cosborn) We know embeds has at least one.
-            wrapperObject["_embedded"] = new JObject(embeds);
+            // note(cosborn) We know embeds has at least one. (It's "self".)
+            wrapperObject[EmbeddedKey] = new JObject(embeds);
 
             if (transformer.Hoists.Count != 0)
             { // todo(cosborn) Check count because object contract creation is relatively expensive due to reflection.
@@ -321,7 +323,7 @@ namespace Tiger.Hal
             var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
             if (populatedLinks.Count != 0)
             {
-                jValue["_links"] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
+                jValue[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList<JProperty>.Empty;
@@ -350,13 +352,14 @@ namespace Tiger.Hal
 
             if (embeds.Count != 0)
             {
-                jValue["_embedded"] = new JObject(embeds);
+                jValue[EmbeddedKey] = new JObject(embeds);
             }
 
             return jValue;
         }
 
-        JsonObjectContract CreateObjectContract(Type type) =>
+        [NotNull]
+        JsonObjectContract CreateObjectContract([NotNull] Type type) =>
             (JsonObjectContract)_cocInfo.Invoke(SerializerSettings.ContractResolver, new object[] { type });
     }
 }
