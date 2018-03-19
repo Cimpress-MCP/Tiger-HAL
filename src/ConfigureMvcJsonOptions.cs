@@ -27,9 +27,7 @@ namespace Tiger.Hal
         : IConfigureOptions<MvcJsonOptions>
     {
         /// <inheritdoc/>
-        void IConfigureOptions<MvcJsonOptions>.Configure([NotNull] MvcJsonOptions options)
-        {
+        void IConfigureOptions<MvcJsonOptions>.Configure([NotNull] MvcJsonOptions options) =>
             options.SerializerSettings.Converters.Add(new LinkCollection.Converter());
-        }
     }
 }

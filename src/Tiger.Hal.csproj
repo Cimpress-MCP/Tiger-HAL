@@ -5,7 +5,7 @@
     <Copyright>©Cimpress 2017</Copyright>
     <AssemblyTitle>Tiger Hal</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>2.0.1</VersionPrefix>
+    <VersionPrefix>2.0.2</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
@@ -16,8 +16,10 @@
     <AssemblyName>Tiger.Hal</AssemblyName>
     <PackageId>Tiger.Hal</PackageId>
     <PackageTags>hal;json;hal+json;link</PackageTags>
-    <PackageReleaseNotes>⁃ Everything is new!
-</PackageReleaseNotes>
+    <PackageReleaseNotes><![CDATA[➟ Release 2.0.2
+⁃ The ASP.NET Core compatibility has been widened.
+⁃ Self links created from parameterless routes have been made more convenient.
+]]></PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-HAL</PackageProjectUrl>
     <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/Cimpress-MCP/Tiger-HAL/master/tiger_logo.png</PackageIconUrl>
@@ -62,13 +64,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
     <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
 
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.0" PrivateAssets="All" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="1.7.0" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" PrivateAssets="All" />
     <PackageReference Include="Text.Analyzers" Version="2.6.0" PrivateAssets="All" />
   </ItemGroup>
 

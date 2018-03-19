@@ -70,6 +70,9 @@ namespace Tiger.Hal
                 .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
         }
 
+        /// <summary>Builds a link from the provided link data.</summary>
+        /// <param name="linkData">The data from which to build a link.</param>
+        /// <returns>A link.</returns>
         /// <exception cref="InvalidOperationException">A builder for the provided <see cref="ILinkData"/> could not be resolved.</exception>
         [NotNull]
         Link Build([NotNull] ILinkData linkData)

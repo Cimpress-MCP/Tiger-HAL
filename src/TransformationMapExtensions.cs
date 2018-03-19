@@ -26,6 +26,24 @@ namespace Tiger.Hal
     [PublicAPI]
     public static class TransformationMapExtensions
     {
+        /// <summary>Creates the "self" link relation for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="linkData">Data representing the "self" link for the provided type.</param>
+        /// <returns>A transformation map from which further transformations can be defined.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Self<T>(
+            this ITransformationMap transformationMap,
+            [NotNull] ILinkData linkData)
+        {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (linkData == null) { throw new ArgumentNullException(nameof(linkData)); }
+
+            return transformationMap.Self<T>(_ => linkData);
+        }
+
         /// <summary>Creates a link for the given type.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
         /// <param name="transformationMap">The transformation map to which to add the link.</param>
@@ -34,6 +52,7 @@ namespace Tiger.Hal
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
@@ -43,6 +62,7 @@ namespace Tiger.Hal
             [NotNull] Uri relation,
             [NotNull] Func<T, ILinkData> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
@@ -59,6 +79,7 @@ namespace Tiger.Hal
         /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
@@ -68,6 +89,7 @@ namespace Tiger.Hal
             [NotNull] Uri relation,
             [NotNull] Func<T, Uri> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
@@ -91,6 +113,7 @@ namespace Tiger.Hal
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
@@ -102,6 +125,7 @@ namespace Tiger.Hal
             [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
             [NotNull] Func<TMember, ILinkData> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
@@ -127,6 +151,7 @@ namespace Tiger.Hal
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
@@ -138,6 +163,7 @@ namespace Tiger.Hal
             [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
             [NotNull] Func<T, TMember, ILinkData> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
@@ -165,6 +191,7 @@ namespace Tiger.Hal
         /// <typeparamref name="TKey"/> and a value of type <typeparamref name="TValue"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="dictionarySelector"/> is <see langword="null"/>.</exception>
@@ -176,6 +203,7 @@ namespace Tiger.Hal
             [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
             [NotNull] Func<TKey, TValue, ILinkData> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
@@ -204,6 +232,7 @@ namespace Tiger.Hal
         /// and a value of type <typeparamref name="TValue"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="dictionarySelector"/> is <see langword="null"/>.</exception>
@@ -215,6 +244,7 @@ namespace Tiger.Hal
             [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
             [NotNull] Func<T, TKey, TValue, ILinkData> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
@@ -235,6 +265,7 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberSelector"/> is <see langword="null"/>.</exception>
@@ -247,6 +278,7 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, TMember>> memberSelector,
             [NotNull] Func<T, ILinkData> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
@@ -268,6 +300,7 @@ namespace Tiger.Hal
         /// <typeparamref name="T"/> and a value of type <typeparamref name="TMember"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberSelector"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="memberSelector"/> is malformed.</exception>
@@ -279,6 +312,7 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, TMember>> memberSelector,
             [NotNull] Func<T, TMember, ILinkData> linkSelector)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
             if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
@@ -304,6 +338,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Expression<Func<T, T1>> memberSelector1)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
 
             switch (memberSelector1.Body)
@@ -329,6 +364,7 @@ namespace Tiger.Hal
         /// A function selecting a top-level member of type <typeparamref name="T2"/> to ignore.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">A member of <paramref name="memberSelector1"/> is malformed.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberSelector2"/> is <see langword="null"/>.</exception>
@@ -339,6 +375,7 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, T1>> memberSelector1,
             [NotNull] Expression<Func<T, T2>> memberSelector2)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
             if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
 
@@ -381,6 +418,7 @@ namespace Tiger.Hal
         /// A function selecting a top-level member of type <typeparamref name="T3"/> to ignore.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberSelector1"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">A member of <paramref name="memberSelector1"/> is malformed.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberSelector2"/> is <see langword="null"/>.</exception>
@@ -394,6 +432,7 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, T2>> memberSelector2,
             [NotNull] Expression<Func<T, T3>> memberSelector3)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
             if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
             if (memberSelector3 == null) { throw new ArgumentNullException(nameof(memberSelector3)); }
@@ -435,6 +474,7 @@ namespace Tiger.Hal
         /// </param>
         /// <param name="memberSelectors">A collection of functions, each selecting a top-level member to ignore.</param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberSelectors"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">A member of <paramref name="memberSelectors"/> is malformed.</exception>
         [NotNull]
@@ -442,6 +482,7 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull, ItemNotNull] params Expression<Func<T, object>>[] memberSelectors)
         {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (memberSelectors == null) { throw new ArgumentNullException(nameof(memberSelectors)); }
 
             void IgnoreCore(Expression e)

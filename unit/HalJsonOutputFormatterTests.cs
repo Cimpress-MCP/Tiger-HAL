@@ -17,7 +17,6 @@ using Tiger.Hal;
 using Xunit;
 using static System.UriKind;
 using static Tiger.Hal.LinkData;
-// ReSharper disable All
 
 namespace Test
 {
@@ -25,12 +24,12 @@ namespace Test
     [Properties(Arbitrary = new[] { typeof(Generators) }, QuietOnSuccess = true, MaxTest = 0x400)]
     public static class HalJsonOutputFormatterTests
     {
-        class Unregistered
+        public class Unregistered
         {
             public Guid Id { get; set; }
         }
 
-        class Registered
+        public class Registered
         {
             public Guid Id { get; set; }
 
@@ -40,7 +39,7 @@ namespace Test
             public string Uninteresting { get; set; }
         }
 
-        class HollowHal
+        public class HollowHal
         {
             [JsonProperty("_embedded")]
             public IReadOnlyDictionary<string, object> Embedded { get; } = new Dictionary<string, object>();
@@ -50,12 +49,12 @@ namespace Test
         }
 
         [Property(DisplayName = "An unregistered type cannot be written.")]
-        static void UnregisteredType_CannotWriteResult(JsonSerializerSettings serializerSettings)
+        public static void UnregisteredType_CannotWriteResult(JsonSerializerSettings serializerSettings)
         {
             // arrange
             var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, new ServiceCollection().BuildServiceProvider());
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
-            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (s, e) => new StreamWriter(Stream.Null), typeof(Unregistered), null);
+            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Unregistered), null);
 
             // act
             var actual = sut.CanWriteResult(context);
@@ -65,16 +64,16 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type can be written.")]
-        static void RegisteredType_CanWriteResult(JsonSerializerSettings serializerSettings)
+        public static void RegisteredType_CanWriteResult(JsonSerializerSettings serializerSettings)
         {
             // arrange
             var map = new Dictionary<Type, ITransformationInstructions>
             {
-                [typeof(Registered)] = new TransformationMap.Builder<Registered>(r => Const(new Uri(@"about:blank", Absolute)))
+                [typeof(Registered)] = new TransformationMap.Builder<Registered>(_ => Const(new Uri("about:blank", Absolute)))
             };
             var repo = new HalRepository(map, new ServiceCollection().BuildServiceProvider());
             var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
-            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (s, e) => new StreamWriter(Stream.Null), typeof(Registered), null);
+            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Registered), null);
 
             // act
             var actual = sut.CanWriteResult(context);
@@ -84,7 +83,7 @@ namespace Test
         }
 
         [Property(DisplayName = "An unregistered type is serialized normally.")]
-        static async Task UnregisteredType_NotModified(Guid id, JsonSerializerSettings serializerSettings)
+        public static async Task UnregisteredType_NotModified(Guid id, JsonSerializerSettings serializerSettings)
         {
             // arrange
             var dto = new Unregistered
@@ -96,7 +95,7 @@ namespace Test
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (s, e) => writer,
+                (_, __) => writer,
                 typeof(Unregistered),
                 dto);
 
@@ -109,10 +108,7 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type creates its self link correctly.")]
-        static async Task RegisteredType_SelfLink(
-            Guid id,
-            NonEmptyString route,
-            JsonSerializerSettings serializerSettings)
+        public static async Task RegisteredType_SelfLink(Guid id, JsonSerializerSettings serializerSettings)
         {
             // arrange
             var dto = new Registered
@@ -122,7 +118,7 @@ namespace Test
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = new TransformationMap.Builder<Registered>(
-                    r => Const(new Uri($@"https://example.invalid/registered/{r.Id}")))
+                    r => Const(new Uri($"https://example.invalid/registered/{r.Id}")))
             };
             var serviceProvider = new ServiceCollection()
                 .AddScoped<ILinkBuilder<Constant>, LinkBuilder.Constant>()
@@ -133,7 +129,7 @@ namespace Test
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (s, e) => writer,
+                (_, __) => writer,
                 typeof(Registered),
                 dto);
 
@@ -152,7 +148,7 @@ namespace Test
         }
 
         [Property(DisplayName = "A registered type creates additional links correctly.")]
-        static async Task RegisteredType_AdditionalLink(
+        public static async Task RegisteredType_AdditionalLink(
             Guid id,
             Guid parentId,
             UnequalNonNullPair<NonEmptyString> routes,
@@ -165,9 +161,9 @@ namespace Test
                 ParentId = parentId
             };
             var (route, parentRoute) = routes;
-            var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($@"https://example.invalid/registered/{r.Id}")));
+            var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($"https://example.invalid/registered/{r.Id}")));
             var transformationMap = (ITransformationMap<Registered>)builder;
-            transformationMap.Link("up", r => Const(new Uri($@"https://example.invalid/parent/{r.ParentId}")));
+            transformationMap.Link("up", r => Const(new Uri($"https://example.invalid/parent/{r.ParentId}")));
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = builder
@@ -181,7 +177,7 @@ namespace Test
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (s, e) => writer,
+                (_, __) => writer,
                 typeof(Registered),
                 dto);
 
@@ -203,7 +199,7 @@ namespace Test
         }
 
         [Property(DisplayName = "A null link does not serialize.")]
-        static async Task RegisteredType_NullLink(
+        public static async Task RegisteredType_NullLink(
             Guid id,
             Guid parentId,
             UnequalNonNullPair<NonEmptyString> routes,
@@ -216,9 +212,9 @@ namespace Test
                 ParentId = parentId
             };
             var (route, parentRoute) = routes;
-            var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($@"https://example.invalid/registered/{r.Id}")));
+            var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($"https://example.invalid/registered/{r.Id}")));
             var transformationMap = (ITransformationMap<Registered>)builder;
-            transformationMap.Link("up", r => (ILinkData)null);
+            transformationMap.Link("up", _ => (ILinkData)null);
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = builder
@@ -232,7 +228,7 @@ namespace Test
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (s, e) => writer,
+                (_, __) => writer,
                 typeof(Registered),
                 dto);
 

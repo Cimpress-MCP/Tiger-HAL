@@ -21,7 +21,7 @@ using Newtonsoft.Json;
 
 namespace Tiger.Hal
 {
-    /// <content>Serialization control.</content>
+    /// <summary>Serialization control.</summary>
     public sealed partial class LinkCollection
     {
         /// <summary>Controls JSON serialization of the <see cref="LinkCollection"/> class.</summary>

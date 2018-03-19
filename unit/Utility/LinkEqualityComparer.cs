@@ -13,22 +13,22 @@ namespace Test.Utility
         public override bool Equals([CanBeNull] Link x, [CanBeNull] Link y)
         {
             if (ReferenceEquals(x, y)) { return true; }
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null)) { return false; }
+            if (x is null || y is null) { return false; }
 
-            return string.Equals(x.Href, y.Href, Ordinal) &&
-                   x.IsTemplated == y.IsTemplated &&
-                   string.Equals(x.Type, y.Type, Ordinal) &&
-                   x.Deprecation == y.Deprecation &&
-                   string.Equals(x.Name, y.Name, Ordinal) &&
-                   x.Profile == y.Profile &&
-                   string.Equals(x.Title, y.Title, Ordinal) &&
-                   string.Equals(x.HrefLang, y.HrefLang, OrdinalIgnoreCase);
+            return string.Equals(x.Href, y.Href, Ordinal)
+                && x.IsTemplated == y.IsTemplated
+                && string.Equals(x.Type, y.Type, Ordinal)
+                && x.Deprecation == y.Deprecation
+                && string.Equals(x.Name, y.Name, Ordinal)
+                && x.Profile == y.Profile
+                && string.Equals(x.Title, y.Title, Ordinal)
+                && string.Equals(x.HrefLang, y.HrefLang, OrdinalIgnoreCase);
         }
 
         /// <inheritdoc/>
         public override int GetHashCode([CanBeNull] Link obj)
         {
-            if (ReferenceEquals(obj, null)) { return 0; }
+            if (obj is null) { return 0; }
 
             unchecked
             {
