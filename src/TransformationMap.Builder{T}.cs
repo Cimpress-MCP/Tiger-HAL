@@ -23,7 +23,7 @@ using static Tiger.Hal.Properties.Resources;
 
 namespace Tiger.Hal
 {
-    /// <content>The builder for further transformations beyond "self".</content>
+    /// <summary>The builder for further transformations beyond "self".</summary>
     sealed partial class TransformationMap
     {
         /// <summary>Configures a created transformation map.</summary>

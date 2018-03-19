@@ -20,7 +20,7 @@ using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
-    /// <content>Routing support.</content>
+    /// <summary>Routing support.</summary>
     public static partial class LinkData
     {
         /// <summary>Represents a link from an ASP.NET MVC route.</summary>

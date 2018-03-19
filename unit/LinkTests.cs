@@ -12,7 +12,7 @@ namespace Test
     public static class LinkTests
     {
         [Property(DisplayName = "A link survives serialization.")]
-        static void Serialization_RoundTrip(Link link, JsonSerializerSettings serializerSettings)
+        public static void Serialization_RoundTrip(Link link, JsonSerializerSettings serializerSettings)
         {
             var actual = JsonConvert.DeserializeObject<Link>(
                 JsonConvert.SerializeObject(link, serializerSettings),

@@ -1,3 +1,8 @@
+### What's new in 2.0.2 (Released 2018-03-19)
+
+* ASP.NET Core compatibility has been widened.
+* Self links created from parameterless routes have been made more convenient.
+
 ### What's new in 2.0.1 (Released 2017-01-16)
 
 * `null` values intended to be used as links are ignored by the link creation.

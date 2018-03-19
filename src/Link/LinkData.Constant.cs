@@ -20,7 +20,7 @@ using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
-    /// <content>Consting (???) support.</content>
+    /// <summary>Consting (???) support.</summary>
     public static partial class LinkData
     {
         /// <summary>Represents a link from a constant URI.</summary>

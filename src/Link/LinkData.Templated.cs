@@ -21,7 +21,7 @@ using Tavis.UriTemplates;
 
 namespace Tiger.Hal
 {
-    /// <content>Templating support.</content>
+    /// <summary>Templating support.</summary>
     public static partial class LinkData
     {
         /// <summary>Represents a templated link from a URI template.</summary>
