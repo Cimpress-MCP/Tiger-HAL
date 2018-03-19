@@ -19,7 +19,7 @@ using System.Collections.Generic;
 
 namespace Tiger.Hal
 {
-    /// <content>Compares the keys of type transformation.</content>
+    /// <summary>Compares the keys of type transformation.</summary>
     sealed partial class TypeTransformer
     {
         /// <inheritdoc/>
@@ -38,8 +38,8 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             bool IEqualityComparer<(string rel, bool isSingular)>.Equals(
                 (string rel, bool isSingular) x,
-                (string rel, bool isSingular) y) => string.Equals(x.rel, y.rel, _comparison) &&
-                                                    x.isSingular == y.isSingular;
+                (string rel, bool isSingular) y) => string.Equals(x.rel, y.rel, _comparison)
+                                                    && x.isSingular == y.isSingular;
 
             /// <inheritdoc/>
             int IEqualityComparer<(string rel, bool isSingular)>.GetHashCode((string rel, bool isSingular) obj) =>

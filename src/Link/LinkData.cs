@@ -20,7 +20,7 @@ using Tavis.UriTemplates;
 
 namespace Tiger.Hal
 {
-    /// <content>Convenience methods for creating <see cref="ILinkData"/> instances.</content>
+    /// <summary>Convenience methods for creating <see cref="ILinkData"/> instances.</summary>
     [PublicAPI]
     public static partial class LinkData
     {
