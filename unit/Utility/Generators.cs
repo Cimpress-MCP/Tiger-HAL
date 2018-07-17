@@ -13,8 +13,6 @@ namespace Test.Utility
     [UsedImplicitly(Members)]
     static class Generators
     {
-        static readonly char[] s_alphabet = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
-
         [NotNull]
         public static Arbitrary<AbsoluteUri> AbsoluteUri() => Arb.From(
                 from scheme in Gen.Elements("http", "https")

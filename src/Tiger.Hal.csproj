@@ -7,7 +7,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <VersionPrefix>2.0.2</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>portable</DebugType>
@@ -16,9 +16,8 @@
     <AssemblyName>Tiger.Hal</AssemblyName>
     <PackageId>Tiger.Hal</PackageId>
     <PackageTags>hal;json;hal+json;link</PackageTags>
-    <PackageReleaseNotes><![CDATA[➟ Release 2.0.2
-⁃ The ASP.NET Core compatibility has been widened.
-⁃ Self links created from parameterless routes have been made more convenient.
+    <PackageReleaseNotes><![CDATA[➟ Release 3.0.0
+⁃ The library has been made ready for ASP.NET Core 2.1.
 ]]></PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-HAL</PackageProjectUrl>
     <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
@@ -34,7 +33,6 @@
 
   <ItemGroup>
     <AdditionalFiles Include="../stylecop.json" />
-    <None Remove="Tiger.Hal.csproj.DotSettings" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,15 +62,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
     <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
 
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.0" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="1.7.0" PrivateAssets="All" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" PrivateAssets="All" />
-    <PackageReference Include="Text.Analyzers" Version="2.6.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.1" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="1.9.0" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta008" PrivateAssets="All" />
+    <PackageReference Include="Text.Analyzers" Version="2.6.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

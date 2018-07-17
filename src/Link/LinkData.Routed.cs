@@ -24,7 +24,7 @@ namespace Tiger.Hal
     public static partial class LinkData
     {
         /// <summary>Represents a link from an ASP.NET MVC route.</summary>
-        /// <remarks>Did you name the route in your controller?</remarks>
+        /// <remarks>Be sure that you named the route in your controller.</remarks>
         public sealed class Routed
             : ILinkData
         {

@@ -35,7 +35,7 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             Link ILinkBuilder<LinkData.Constant>.Build(LinkData.Constant linkData)
             {
-                if (linkData == null) { throw new ArgumentNullException(nameof(linkData)); }
+                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
 
                 var href = linkData.Href.IsAbsoluteUri
                     ? linkData.Href.AbsoluteUri
@@ -62,7 +62,7 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             Link ILinkBuilder<LinkData.Templated>.Build(LinkData.Templated linkData)
             {
-                if (linkData == null) { throw new ArgumentNullException(nameof(linkData)); }
+                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
 
                 return new Link(
                     linkData.Template.Resolve(),
@@ -101,11 +101,11 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             Link ILinkBuilder<LinkData.Routed>.Build(LinkData.Routed linkData)
             {
-                if (linkData == null) { throw new ArgumentNullException(nameof(linkData)); }
+                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
 
                 var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
                 var href = urlHelper.Link(linkData.RouteName, linkData.RouteValues);
-                if (href == null)
+                if (href is null)
                 {
                     throw new InvalidOperationException(
                         string.Format(

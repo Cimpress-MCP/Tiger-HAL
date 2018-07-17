@@ -74,7 +74,7 @@ namespace Tiger.Hal
             [NotNull] OutputFormatterWriteContext context,
             Encoding selectedEncoding)
         {
-            if (context.Object == null)
+            if (context.Object is null)
             { // note(cosborn) What else are we supposed to do here, huh?
                 return base.WriteResponseBodyAsync(context, selectedEncoding);
             }
@@ -115,7 +115,7 @@ namespace Tiger.Hal
             [CanBeNull] JToken jValue,
             [CanBeNull] object value)
         {
-            if (value == null || jValue == null) { return null; }
+            if (value is null || jValue is null) { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonObjectContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
@@ -161,7 +161,7 @@ namespace Tiger.Hal
                 join property in jsonObjectContract.Properties
                     on embedIndex equals property.UnderlyingName
                 let embedValue = embedInstruction.GetEmbedValue(value)
-                let jEmbedValue = embedValue == null
+                let jEmbedValue = embedValue is null
                     ? JValue.CreateNull()
                     : Walk(embedValue, embedInstruction.Type)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
@@ -202,7 +202,7 @@ namespace Tiger.Hal
             [CanBeNull] JToken jValue,
             [CanBeNull] object value)
         {
-            if (value == null || jValue == null) { return null; }
+            if (value is null || jValue is null) { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonArrayContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
@@ -247,7 +247,7 @@ namespace Tiger.Hal
             var embedPairs =
                 from embedInstruction in transformer.Embeds
                 let embedValue = embedInstruction.GetEmbedValue(value)
-                let jEmbedValue = embedValue == null
+                let jEmbedValue = embedValue is null
                     ? JValue.CreateNull()
                     : Walk(embedValue, embedInstruction.Type)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
@@ -291,7 +291,7 @@ namespace Tiger.Hal
             [CanBeNull] JToken jValue,
             [CanBeNull] object value)
         {
-            if (value == null || jValue == null) { return null; }
+            if (value is null || jValue is null) { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonDictionaryContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
@@ -333,7 +333,7 @@ namespace Tiger.Hal
                 let embedKey = jsonDictionaryContract.DictionaryKeyResolver(nativeKey)
                 let index = embedKey ?? embedInstruction.Index
                 let embedValue = embedInstruction.GetEmbedValue(value)
-                let jEmbedValue = embedValue == null
+                let jEmbedValue = embedValue is null
                     ? JValue.CreateNull()
                     : Walk(embedValue, embedInstruction.Type)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)

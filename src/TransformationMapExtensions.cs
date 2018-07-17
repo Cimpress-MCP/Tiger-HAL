@@ -62,10 +62,10 @@ namespace Tiger.Hal
             [NotNull] Uri relation,
             [NotNull] Func<T, ILinkData> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
             return transformationMap.Link(relation.AbsoluteUri, linkSelector);
         }
@@ -89,10 +89,10 @@ namespace Tiger.Hal
             [NotNull] Uri relation,
             [NotNull] Func<T, Uri> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
             return transformationMap.Link(relation.AbsoluteUri, linkSelector);
         }
@@ -125,11 +125,11 @@ namespace Tiger.Hal
             [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
             [NotNull] Func<TMember, ILinkData> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
-            if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+            if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
             return transformationMap.Link(relation.AbsoluteUri, collectionSelector, linkSelector);
         }
@@ -163,10 +163,10 @@ namespace Tiger.Hal
             [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
             [NotNull] Func<T, TMember, ILinkData> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+            if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
 
             return transformationMap.Link(relation.AbsoluteUri, collectionSelector, linkSelector);
         }
@@ -203,10 +203,10 @@ namespace Tiger.Hal
             [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
             [NotNull] Func<TKey, TValue, ILinkData> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
+            if (dictionarySelector is null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
 
             return transformationMap.Link(relation.AbsoluteUri, dictionarySelector, linkSelector);
         }
@@ -244,10 +244,10 @@ namespace Tiger.Hal
             [NotNull] Func<T, IDictionary<TKey, TValue>> dictionarySelector,
             [NotNull] Func<T, TKey, TValue, ILinkData> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
+            if (dictionarySelector is null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
 
             return transformationMap.Link(relation.AbsoluteUri, dictionarySelector, linkSelector);
         }
@@ -278,11 +278,11 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, TMember>> memberSelector,
             [NotNull] Func<T, ILinkData> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
-            if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+            if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
             return transformationMap.Embed(relation.AbsoluteUri, memberSelector, linkSelector);
         }
@@ -312,11 +312,11 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, TMember>> memberSelector,
             [NotNull] Func<T, TMember, ILinkData> linkSelector)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
-            if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+            if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
             return transformationMap.Embed(relation.AbsoluteUri, memberSelector, linkSelector);
         }
@@ -338,8 +338,8 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Expression<Func<T, T1>> memberSelector1)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
 
             switch (memberSelector1.Body)
             {
@@ -375,9 +375,9 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, T1>> memberSelector1,
             [NotNull] Expression<Func<T, T2>> memberSelector2)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
-            if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+            if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
 
             switch (memberSelector1.Body)
             {
@@ -432,10 +432,10 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, T2>> memberSelector2,
             [NotNull] Expression<Func<T, T3>> memberSelector3)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
-            if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
-            if (memberSelector3 == null) { throw new ArgumentNullException(nameof(memberSelector3)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+            if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+            if (memberSelector3 is null) { throw new ArgumentNullException(nameof(memberSelector3)); }
 
             switch (memberSelector1.Body)
             {
@@ -482,8 +482,8 @@ namespace Tiger.Hal
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull, ItemNotNull] params Expression<Func<T, object>>[] memberSelectors)
         {
-            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
-            if (memberSelectors == null) { throw new ArgumentNullException(nameof(memberSelectors)); }
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (memberSelectors is null) { throw new ArgumentNullException(nameof(memberSelectors)); }
 
             void IgnoreCore(Expression e)
             {
