@@ -40,7 +40,7 @@ namespace Tiger.Hal
         public static IMvcBuilder AddHalJson<TProfile>([NotNull] this IMvcBuilder builder)
             where TProfile : class, IHalProfile
         {
-            if (builder == null) { throw new ArgumentNullException(nameof(builder)); }
+            if (builder is null) { throw new ArgumentNullException(nameof(builder)); }
 
             builder.Services.AddSingleton<IHalProfile, TProfile>();
             builder.Services.AddSingleton<HalRepositoryBuilder>();

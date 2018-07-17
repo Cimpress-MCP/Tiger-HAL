@@ -1,4 +1,4 @@
-// <copyright file="TypeTransformer.cs" company="Cimpress, Inc.">
+﻿// <copyright file="TypeTransformer.cs" company="Cimpress, Inc.">
 //   Copyright 2017 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");

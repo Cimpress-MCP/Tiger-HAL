@@ -41,7 +41,7 @@ namespace Tiger.Hal
             /// <exception cref="ArgumentNullException"><paramref name="template"/> is <see langword="null"/>.</exception>
             public Templated([NotNull] string template)
             {
-                if (template == null) { throw new ArgumentNullException(nameof(template)); }
+                if (template is null) { throw new ArgumentNullException(nameof(template)); }
 
                 Template = new UriTemplate(template, resolvePartially: true);
             }
