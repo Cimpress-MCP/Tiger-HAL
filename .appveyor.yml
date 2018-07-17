@@ -13,7 +13,7 @@
     publish_nuget: true
     verbosity: minimal
   test_script:
-    - ps: dotnet test -c Release --no-build ./unit/Test.csproj
+    - ps: dotnet test -c Release ./unit/Test.csproj
   deploy:
     provider: NuGet
     api_key:
@@ -32,6 +32,6 @@
     publish_nuget: true
     verbosity: minimal
   test_script:
-    - ps: dotnet test -c Release --no-build ./unit/Test.csproj
+    - ps: dotnet test -c Release ./unit/Test.csproj
   dotnet_csproj:
     patch: false

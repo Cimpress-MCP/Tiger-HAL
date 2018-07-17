@@ -41,7 +41,7 @@ namespace Tiger.Hal
             /// <exception cref="UriFormatException"><paramref name="href"/> does not represent a valid URI.</exception>
             public Constant([NotNull] string href)
             {
-                if (href == null) { throw new ArgumentNullException(nameof(href)); }
+                if (href is null) { throw new ArgumentNullException(nameof(href)); }
 
                 Href = new Uri(href);
             }

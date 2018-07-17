@@ -69,8 +69,8 @@ namespace Tiger.Hal
                 string relation,
                 Func<T, ILinkData> linkSelector)
             {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 _links[relation] = new LinkInstruction<T>(linkSelector);
                 return this;
@@ -81,8 +81,8 @@ namespace Tiger.Hal
                 string relation,
                 Func<T, Uri> linkSelector)
             {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 _links[relation] = new ConstantLinkInstruction<T>(linkSelector);
                 return this;
@@ -94,9 +94,9 @@ namespace Tiger.Hal
                 Func<T, IEnumerable<TMember>> collectionSelector,
                 Func<TMember, ILinkData> linkSelector)
             {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
-                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 _links[relation] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(linkSelector));
                 return this;
@@ -108,8 +108,8 @@ namespace Tiger.Hal
                 Func<T, IEnumerable<TMember>> collectionSelector,
                 Func<T, TMember, ILinkData> linkSelector)
             {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (collectionSelector == null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
 
                 _links[relation] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(tm => linkSelector(t, tm)));
                 return this;
@@ -121,8 +121,8 @@ namespace Tiger.Hal
                 Func<T, IDictionary<TKey, TValue>> dictionarySelector,
                 Func<TKey, TValue, ILinkData> linkSelector)
             {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (dictionarySelector is null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
 
                 _links[relation] = new ManyLinkInstruction<T>(
                     t => dictionarySelector(t).Select(kvp => linkSelector(kvp.Key, kvp.Value)));
@@ -135,8 +135,8 @@ namespace Tiger.Hal
                 Func<T, IDictionary<TKey, TValue>> dictionarySelector,
                 Func<T, TKey, TValue, ILinkData> linkSelector)
             {
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (dictionarySelector == null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (dictionarySelector is null) { throw new ArgumentNullException(nameof(dictionarySelector)); }
 
                 _links[relation] = new ManyLinkInstruction<T>(
                     t => dictionarySelector(t).Select(
@@ -154,9 +154,9 @@ namespace Tiger.Hal
                 Expression<Func<T, TMember>> memberSelector,
                 Func<T, ILinkData> linkSelector)
             {
-                if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 switch (memberSelector.Body)
                 {
@@ -176,9 +176,9 @@ namespace Tiger.Hal
                 Expression<Func<T, TMember>> memberSelector,
                 Func<T, TMember, ILinkData> linkSelector)
             {
-                if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
-                if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-                if (linkSelector == null) { throw new ArgumentNullException(nameof(linkSelector)); }
+                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 switch (memberSelector.Body)
                 { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
@@ -197,7 +197,7 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Hoist<TMember>(Expression<Func<T, TMember>> memberSelector)
             {
-                if (memberSelector == null) { throw new ArgumentNullException(nameof(memberSelector)); }
+                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
 
                 switch (memberSelector.Body)
                 {
@@ -215,7 +215,7 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Ignore(string memberSelector1)
             {
-                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+                if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
 
                 _ignores.Add(memberSelector1);
                 return this;
@@ -224,8 +224,8 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Ignore(string memberSelector1, string memberSelector2)
             {
-                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
-                if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+                if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+                if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
 
                 _ignores.Add(memberSelector1);
                 _ignores.Add(memberSelector2);
@@ -238,9 +238,9 @@ namespace Tiger.Hal
                 string memberSelector2,
                 string memberSelector3)
             {
-                if (memberSelector1 == null) { throw new ArgumentNullException(nameof(memberSelector1)); }
-                if (memberSelector2 == null) { throw new ArgumentNullException(nameof(memberSelector2)); }
-                if (memberSelector3 == null) { throw new ArgumentNullException(nameof(memberSelector3)); }
+                if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
+                if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
+                if (memberSelector3 is null) { throw new ArgumentNullException(nameof(memberSelector3)); }
 
                 _ignores.Add(memberSelector1);
                 _ignores.Add(memberSelector2);
@@ -251,7 +251,7 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Ignore(params string[] memberSelectors)
             {
-                if (memberSelectors == null) { throw new ArgumentNullException(nameof(memberSelectors)); }
+                if (memberSelectors is null) { throw new ArgumentNullException(nameof(memberSelectors)); }
 
                 _ignores.AddRange(memberSelectors);
                 return this;

@@ -20,7 +20,7 @@ using JetBrains.Annotations;
 namespace Tiger.Hal
 {
     /// <summary>Transforms implementations of <see cref="ILinkData"/> to <see cref="Link"/>.</summary>
-    /// <typeparam name="TLinkData">TKTKTKTK</typeparam>
+    /// <typeparam name="TLinkData">The type of link data.</typeparam>
     public interface ILinkBuilder<in TLinkData>
         where TLinkData : ILinkData
     {

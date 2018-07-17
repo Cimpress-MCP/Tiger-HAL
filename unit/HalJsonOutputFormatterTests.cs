@@ -100,7 +100,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8);
+            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<Unregistered>(writer.ToString(), serializerSettings);
 
             // assert
@@ -134,7 +134,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8);
+            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert
@@ -182,7 +182,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8);
+            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert
@@ -233,7 +233,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8);
+            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert

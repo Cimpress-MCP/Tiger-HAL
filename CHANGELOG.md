@@ -1,3 +1,7 @@
+﻿### What's new in 3.0.0 (Released 2017-07-17)
+
+* The library has been made ready for ASP.NET Core 2.1.
+
 ### What's new in 2.0.2 (Released 2018-03-19)
 
 * ASP.NET Core compatibility has been widened.

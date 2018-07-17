@@ -43,7 +43,7 @@ namespace Tiger.Hal
         /// <inheritdoc/>
         bool IHalRepository.CanTransform(Type type)
         {
-            if (type == null) { throw new ArgumentNullException(nameof(type)); }
+            if (type is null) { throw new ArgumentNullException(nameof(type)); }
 
             return _transformations.ContainsKey(type);
         }
@@ -51,7 +51,7 @@ namespace Tiger.Hal
         /// <inheritdoc/>
         bool IHalRepository.TryGetTransformer(Type type, out ITypeTransformer transformer)
         {
-            if (type == null) { throw new ArgumentNullException(nameof(type)); }
+            if (type is null) { throw new ArgumentNullException(nameof(type)); }
 
             if (!_transformations.TryGetValue(type, out var transformationMap))
             {

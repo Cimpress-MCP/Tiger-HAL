@@ -33,7 +33,7 @@ namespace Tiger.Hal
         /// <inheritdoc/>
         ITransformationMap<T> ITransformationMap.Self<T>(Func<T, ILinkData> selector)
         {
-            if (selector == null) { throw new ArgumentNullException(nameof(selector)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
             var builder = new Builder<T>(selector);
             _maps[typeof(T)] = builder;

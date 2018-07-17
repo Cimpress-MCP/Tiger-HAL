@@ -37,7 +37,7 @@ namespace Tiger.Hal
                 [CanBeNull] object value,
                 [NotNull] JsonSerializer serializer)
             {
-                if (value == null)
+                if (value is null)
                 { // note(cosborn) Frankly, something has gone wrong.
                     serializer.Serialize(writer, null);
                     return;
