@@ -72,6 +72,14 @@ There are no operations that correspond to, represent, or manipulate the `curies
 
 <!-- Specifically, the specification gets two things wrong with respect to link relations. First, link relations mostly cannot be barewords. The bareword link relations (such as "index", "next", and "prev") are limited in number and curated in a global repository. The specification uses a made-up bareword every time it wants to return an array from an endpoint. Second, CURIEs must, accoring to their spec, be surrounded by square brackets so that they are not confused with normal, non-compact links. They should look like this: `[fen:pool]`. Including these square brackets confused every client I tried this out with, so it's better to just leave the whole feature aside. -->
 
+## Use
+
+Once the profile for transformation has been created, the transformations can be made active in the `ConfigureServices` method of an ASP.NET Core application after a call to `AddMvc`.
+
+```csharp
+services.AddMvc().AddHalJson<HalProfile>();
+```
+
 ## Going Further
 
 This is only an overview of the operations available in Tiger.Hal. The public methods of the library are extensively annotated with documentation comments, so they should provide finer detail on each operation and it overloads.
