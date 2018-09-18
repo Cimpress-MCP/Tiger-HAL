@@ -19,12 +19,12 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Tiger.Hal;
 using static Microsoft.Extensions.DependencyInjection.ServiceDescriptor;
 
-namespace Tiger.Hal
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>Extends the functionality of <see cref="IServiceCollection"/> for HAL+JSON.</summary>
     [PublicAPI]

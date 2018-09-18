@@ -48,6 +48,30 @@ namespace Tiger.Hal
         /// <typeparam name="T">The type being transformed.</typeparam>
         /// <param name="transformationMap">The transformation map to which to add the link.</param>
         /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="linkData">Data representing the link for the provided type.</param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Link<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] Uri relation,
+            [NotNull] ILinkData linkData)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+            if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
+
+            return transformationMap.Link(relation.AbsoluteUri, linkData);
+        }
+
+        /// <summary>Creates a link for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="linkSelector">
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
@@ -87,7 +111,7 @@ namespace Tiger.Hal
         public static ITransformationMap<T> Link<T>(
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
-            [NotNull] Func<T, Uri> linkSelector)
+            [NotNull] Expression<Func<T, Uri>> linkSelector)
         {
             if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation is null) { throw new ArgumentNullException(nameof(relation)); }

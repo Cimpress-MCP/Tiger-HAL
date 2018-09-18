@@ -1,4 +1,11 @@
-﻿### What's new in 3.0.0 (Released 2017-07-17)
+﻿### What's new in 4.0.0 (Released 2018-09-18)
+
+* Properties may now be ignored automatically if they meet certain criteria.
+* Dependencies have been greatly rationalized.
+* Namespaces have been adjusted.
+* More utility methods have been added.
+
+### What's new in 3.0.0 (Released 2018-07-17)
 
 * The library has been made ready for ASP.NET Core 2.1.
 
@@ -15,6 +22,6 @@
 
 * Quarantined due to a bug.
 
-### What's new in 1.0.0 (Released 2017-11-27)
+### What's new in 1.0.0 (Released 2016-11-27)
 
 * Everything is new!

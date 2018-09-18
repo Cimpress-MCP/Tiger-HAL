@@ -1,9 +1,9 @@
-﻿using FsCheck.Xunit;
+﻿using FsCheck;
+using FsCheck.Xunit;
 using Newtonsoft.Json;
 using Test.Utility;
 using Tiger.Hal;
 using Xunit;
-// ReSharper disable All
 
 namespace Test
 {
