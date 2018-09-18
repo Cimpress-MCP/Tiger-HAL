@@ -1,5 +1,5 @@
 ﻿// <copyright file="ITransformationMap{T}.cs" company="Cimpress, Inc.">
-//   Copyright 2017 Cimpress, Inc.
+//   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -29,6 +29,18 @@ namespace Tiger.Hal
     {
         /// <summary>Creates a link for the given type.</summary>
         /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="linkData">
+        /// A function that creates an <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="T"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        ITransformationMap<T> Link([NotNull] string relation, [NotNull] ILinkData linkData);
+
+        /// <summary>Creates a link for the given type.</summary>
+        /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="linkSelector">
         /// A function that creates an <see cref="ILinkData"/>
         /// from a value of type <typeparamref name="T"/>.
@@ -45,11 +57,17 @@ namespace Tiger.Hal
         /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
         /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
         /// </param>
+        /// <param name="ignore">
+        /// If <paramref name="linkSelector"/> is a simple member selector, controls whether the member
+        /// selected by <paramref name="linkSelector"/> is not represented in the HAL+JSON serialization
+        /// of a value. This value is <see langword="true"/> by default.
+        /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <seealso cref="TransformationMapExtensions.Ignore{T, T1}(ITransformationMap{T}, Expression{Func{T, T1}})"/>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
         [NotNull]
-        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, Uri> linkSelector);
+        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Expression<Func<T, Uri>> linkSelector, bool ignore = true);
 
         /// <summary>Creates a collection of links for the given type.</summary>
         /// <typeparam name="TMember">

@@ -1,5 +1,5 @@
 ﻿// <copyright file="TransformationMap.Builder{T}.cs" company="Cimpress, Inc.">
-//   Copyright 2017 Cimpress, Inc.
+//   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -65,6 +65,16 @@ namespace Tiger.Hal
             #region Link
 
             /// <inheritdoc/>
+            ITransformationMap<T> ITransformationMap<T>.Link(string relation, ILinkData linkData)
+            {
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
+
+                _links[relation] = new LinkInstruction<T>(_ => linkData);
+                return this;
+            }
+
+            /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Link(
                 string relation,
                 Func<T, ILinkData> linkSelector)
@@ -77,14 +87,17 @@ namespace Tiger.Hal
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Link(
-                string relation,
-                Func<T, Uri> linkSelector)
+            ITransformationMap<T> ITransformationMap<T>.Link(string relation, Expression<Func<T, Uri>> linkSelector, bool ignore)
             {
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
                 if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
-                _links[relation] = new ConstantLinkInstruction<T>(linkSelector);
+                if (ignore && linkSelector.Body is MemberExpression me)
+                {
+                    _ignores.Add(me.Member.Name);
+                }
+
+                _links[relation] = new ConstantLinkInstruction<T>(linkSelector.Compile());
                 return this;
             }
 

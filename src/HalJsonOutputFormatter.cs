@@ -1,5 +1,5 @@
 ﻿// <copyright file="HalJsonOutputFormatter.cs" company="Cimpress, Inc.">
-//   Copyright 2017 Cimpress, Inc.
+//   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ namespace Tiger.Hal
                 return base.WriteResponseBodyAsync(context, selectedEncoding);
             }
 
-            var halValue = Walk(context.Object, context.ObjectType);
+            var halValue = Visit(context.Object, context.ObjectType);
 
             var newContext = new OutputFormatterWriteContext(
                 context.HttpContext,
@@ -94,53 +94,53 @@ namespace Tiger.Hal
         protected override bool CanWriteType([NotNull] Type type) => _halRepository.CanTransform(type);
 
         [CanBeNull]
-        JToken Walk([NotNull] object value, [NotNull] Type type)
+        JToken Visit([NotNull] object value, [NotNull] Type type)
         {
             switch (SerializerSettings.ContractResolver.ResolveContract(type))
             {
                 case JsonObjectContract joc:
-                    return WalkObject(joc, JObject.FromObject(value, CreateJsonSerializer()), value);
+                    return VisitObject(joc, JObject.FromObject(value, CreateJsonSerializer()), value);
                 case JsonArrayContract jac:
-                    return WalkArray(jac, JArray.FromObject(value, CreateJsonSerializer()), value);
+                    return VisitArray(jac, JArray.FromObject(value, CreateJsonSerializer()), (IEnumerable)value);
                 case JsonDictionaryContract jdc: // note(cosborn) Don't support defining these yet, but sure why not
-                    return WalkDictionary(jdc, JObject.FromObject(value, CreateJsonSerializer()), value);
+                    return VisitDictionary(jdc, JObject.FromObject(value, CreateJsonSerializer()), (IDictionary)value);
                 default: // todo(cosborn) Dynamic? Something else?
                     return JToken.FromObject(value, CreateJsonSerializer());
             }
         }
 
         [CanBeNull]
-        JToken WalkObject(
+        JToken VisitObject(
             [NotNull] JsonObjectContract jsonObjectContract,
-            [CanBeNull] JToken jValue,
+            [CanBeNull] JObject jObject,
             [CanBeNull] object value)
         {
-            if (value is null || jValue is null) { return null; }
+            if (value is null || jObject is null) { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonObjectContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
-                return jValue;
+                return jObject;
             }
 
-            var walkQuads =
+            var visitQuads =
                 from property in jsonObjectContract.Properties
-                let jPropertyValue = jValue[property.PropertyName]
+                let jPropertyValue = jObject[property.PropertyName]
                 where jPropertyValue != null
                 let nativeValue = property.ValueProvider.GetValue(value)
                 let contract = SerializerSettings.ContractResolver.ResolveContract(property.PropertyType)
                 select (name: property.PropertyName, jPropertyValue, nativeValue, contract);
-            foreach (var (name, jPropertyValue, nativeValue, contract) in walkQuads)
+            foreach (var (name, jPropertyValue, nativeValue, contract) in visitQuads)
             {
                 switch (contract)
                 {
                     case JsonObjectContract joc:
-                        jValue[name] = WalkObject(joc, jPropertyValue, nativeValue);
+                        jObject[name] = VisitObject(joc, (JObject)jPropertyValue, nativeValue);
                         break;
                     case JsonArrayContract jac:
-                        jValue[name] = WalkArray(jac, jPropertyValue, nativeValue);
+                        jObject[name] = VisitArray(jac, (JArray)jPropertyValue, (IEnumerable)nativeValue);
                         break;
                     case JsonDictionaryContract jdc:
-                        jValue[name] = WalkDictionary(jdc, jPropertyValue, nativeValue);
+                        jObject[name] = VisitDictionary(jdc, (JObject)jPropertyValue, (IDictionary)nativeValue);
                         break;
 
                     // todo(cosborn) Dynamic? Something else?
@@ -151,7 +151,7 @@ namespace Tiger.Hal
             var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
             if (populatedLinks.Count != 0)
             {
-                jValue[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
+                jObject[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList<JProperty>.Empty;
@@ -163,7 +163,7 @@ namespace Tiger.Hal
                 let embedValue = embedInstruction.GetEmbedValue(value)
                 let jEmbedValue = embedValue is null
                     ? JValue.CreateNull()
-                    : Walk(embedValue, embedInstruction.Type)
+                    : Visit(embedValue, embedInstruction.Type)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
                 select (index: property.PropertyName, jProperty);
             foreach (var (index, jProperty) in embedPairs)
@@ -175,12 +175,12 @@ namespace Tiger.Hal
                  * (what would that mean?), so we move up one level to remove
                  * the entire property from the parent object.
                  */
-                jValue[index]?.Parent.Remove();
+                jObject[index]?.Parent.Remove();
             }
 
             if (embeds.Count != 0)
             {
-                jValue[EmbeddedKey] = new JObject(embeds);
+                jObject[EmbeddedKey] = new JObject(embeds);
             }
 
             var ignores =
@@ -190,43 +190,42 @@ namespace Tiger.Hal
                 select p.PropertyName;
             foreach (var ignore in ignores)
             {
-                jValue[ignore]?.Parent.Remove();
+                jObject[ignore]?.Parent.Remove();
             }
 
-            return jValue;
+            return jObject;
         }
 
         [CanBeNull]
-        JToken WalkArray(
+        JToken VisitArray(
             [NotNull] JsonArrayContract jsonArrayContract,
-            [CanBeNull] JToken jValue,
-            [CanBeNull] object value)
+            [CanBeNull] JArray jArray,
+            [CanBeNull] IEnumerable value)
         {
-            if (value is null || jValue is null) { return null; }
+            if (value is null || jArray is null) { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonArrayContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
-                return jValue;
+                return jArray;
             }
 
             var collectionItemContract = SerializerSettings.ContractResolver.ResolveContract(jsonArrayContract.CollectionItemType);
-            var arrayValue = ((IEnumerable)value).Cast<object>();
-            var walkPairs =
-                from indexPair in arrayValue.Select((o, i) => (index: i, nativeValue: o))
-                let jIndexValue = jValue[indexPair.index]
+            var visitPairs =
+                from indexPair in value.Cast<object>().Select((o, i) => (index: i, nativeValue: o))
+                let jIndexValue = jArray[indexPair.index]
                 select (indexPair, jIndexValue);
-            foreach (var ((index, nativeValue), jIndexValue) in walkPairs)
+            foreach (var ((index, nativeValue), jIndexValue) in visitPairs)
             {
                 switch (collectionItemContract)
                 {
                     case JsonObjectContract joc:
-                        jValue[index] = WalkObject(joc, jIndexValue, nativeValue);
+                        jArray[index] = VisitObject(joc, (JObject)jIndexValue, nativeValue);
                         break;
                     case JsonArrayContract jac:
-                        jValue[index] = WalkArray(jac, jIndexValue, nativeValue);
+                        jArray[index] = VisitArray(jac, (JArray)jIndexValue, (IEnumerable)nativeValue);
                         break;
                     case JsonDictionaryContract jdc:
-                        jValue[index] = WalkDictionary(jdc, jIndexValue, nativeValue);
+                        jArray[index] = VisitDictionary(jdc, (JObject)jIndexValue, (IDictionary)nativeValue);
                         break;
 
                     // todo(cosborn) Dynamic? Something else?
@@ -243,13 +242,13 @@ namespace Tiger.Hal
                 wrapperObject[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
-            var embeds = ImmutableList.Create(new JProperty("self", jValue));
+            var embeds = ImmutableList.Create(new JProperty("self", jArray));
             var embedPairs =
                 from embedInstruction in transformer.Embeds
                 let embedValue = embedInstruction.GetEmbedValue(value)
                 let jEmbedValue = embedValue is null
                     ? JValue.CreateNull()
-                    : Walk(embedValue, embedInstruction.Type)
+                    : Visit(embedValue, embedInstruction.Type)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
                 select (index: embedInstruction.Index, jProperty);
             foreach (var (index, jProperty) in embedPairs)
@@ -257,7 +256,7 @@ namespace Tiger.Hal
                 embeds = embeds.Add(jProperty);
                 if (index is int arrayIndex)
                 { // note(cosborn) Json.NET will panic if we send in anything but an int.
-                    jValue[arrayIndex]?.Remove();
+                    jArray[arrayIndex]?.Remove();
                 }
             }
 
@@ -286,33 +285,32 @@ namespace Tiger.Hal
         }
 
         [CanBeNull]
-        JToken WalkDictionary(
+        JToken VisitDictionary(
             [NotNull] JsonDictionaryContract jsonDictionaryContract,
-            [CanBeNull] JToken jValue,
-            [CanBeNull] object value)
+            [CanBeNull] JObject jObject,
+            [CanBeNull] IDictionary value)
         {
-            if (value is null || jValue is null) { return null; }
+            if (value is null || jObject is null) { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonDictionaryContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
-                return jValue;
+                return jObject;
             }
 
-            var dictValue = (IDictionary)value;
             var dictionaryValueContract = SerializerSettings.ContractResolver.ResolveContract(jsonDictionaryContract.DictionaryValueType);
-            foreach (var key in dictValue.Keys)
+            foreach (var key in value.Keys)
             {
                 var jKey = jsonDictionaryContract.DictionaryKeyResolver(key.ToString());
                 switch (dictionaryValueContract)
                 {
                     case JsonObjectContract joc:
-                        jValue[jKey] = new JProperty(jKey, WalkObject(joc, jValue[jKey], dictValue[key]));
+                        jObject[jKey] = new JProperty(jKey, VisitObject(joc, (JObject)jObject[jKey], value[key]));
                         break;
                     case JsonArrayContract jac:
-                        jValue[jKey] = new JProperty(jKey, WalkArray(jac, jValue[jKey], dictValue[key]));
+                        jObject[jKey] = new JProperty(jKey, VisitArray(jac, (JArray)jObject[jKey], (IEnumerable)value[key]));
                         break;
                     case JsonDictionaryContract jdc:
-                        jValue[jKey] = new JProperty(jKey, WalkDictionary(jdc, jValue[jKey], dictValue[key]));
+                        jObject[jKey] = new JProperty(jKey, VisitDictionary(jdc, (JObject)jObject[jKey], (IDictionary)value[key]));
                         break;
 
                     // todo(cosborn) Dynamic? Something else?
@@ -323,7 +321,7 @@ namespace Tiger.Hal
             var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
             if (populatedLinks.Count != 0)
             {
-                jValue[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
+                jObject[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList<JProperty>.Empty;
@@ -335,7 +333,7 @@ namespace Tiger.Hal
                 let embedValue = embedInstruction.GetEmbedValue(value)
                 let jEmbedValue = embedValue is null
                     ? JValue.CreateNull()
-                    : Walk(embedValue, embedInstruction.Type)
+                    : Visit(embedValue, embedInstruction.Type)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
                 select (index, jProperty);
             foreach (var (index, jProperty) in embedPairs)
@@ -347,15 +345,15 @@ namespace Tiger.Hal
                  * (what would that mean?), so we move up one level to remove
                  * the entire property from the parent object.
                  */
-                jValue[index]?.Parent.Remove();
+                jObject[index]?.Parent.Remove();
             }
 
             if (embeds.Count != 0)
             {
-                jValue[EmbeddedKey] = new JObject(embeds);
+                jObject[EmbeddedKey] = new JObject(embeds);
             }
 
-            return jValue;
+            return jObject;
         }
 
         [NotNull]

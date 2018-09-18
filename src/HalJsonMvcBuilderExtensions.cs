@@ -1,5 +1,5 @@
 ﻿// <copyright file="HalJsonMvcBuilderExtensions.cs" company="Cimpress, Inc.">
-//   Copyright 2017 Cimpress, Inc.
+//   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Tiger.Hal;
 using static Microsoft.Extensions.DependencyInjection.ServiceDescriptor;
 
-namespace Tiger.Hal
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>Extends the functionality of <see cref="IServiceCollection"/> for HAL+JSON.</summary>
     [PublicAPI]

@@ -100,7 +100,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
+            await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<Unregistered>(writer.ToString(), serializerSettings);
 
             // assert
@@ -134,7 +134,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
+            await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert
@@ -162,7 +162,7 @@ namespace Test
             };
             var (route, parentRoute) = routes;
             var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($"https://example.invalid/registered/{r.Id}")));
-            var transformationMap = (ITransformationMap<Registered>)builder;
+            ITransformationMap<Registered> transformationMap = builder;
             transformationMap.Link("up", r => Const(new Uri($"https://example.invalid/parent/{r.ParentId}")));
             var map = new Dictionary<Type, ITransformationInstructions>
             {
@@ -182,7 +182,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
+            await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert
@@ -213,8 +213,8 @@ namespace Test
             };
             var (route, parentRoute) = routes;
             var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($"https://example.invalid/registered/{r.Id}")));
-            var transformationMap = (ITransformationMap<Registered>)builder;
-            transformationMap.Link("up", _ => (ILinkData)null);
+            ITransformationMap<Registered> transformationMap = builder;
+            transformationMap.Link("up", _ => null);
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = builder
@@ -233,7 +233,7 @@ namespace Test
                 dto);
 
             // act
-            await sut.WriteResponseBodyAsync(context, Encoding.UTF8).ConfigureAwait(false);
+            await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
             // assert

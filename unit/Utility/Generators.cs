@@ -14,7 +14,7 @@ namespace Test.Utility
     static class Generators
     {
         [NotNull]
-        public static Arbitrary<AbsoluteUri> AbsoluteUri() => Arb.From(
+        public static Arbitrary<AbsoluteUri> AbsoluteUri { get; } = Arb.From(
                 from scheme in Gen.Elements("http", "https")
                 from hn in Arb.Generate<HostName>()
                 select new UriBuilder(scheme, hn.ToString()) into ub
@@ -30,14 +30,14 @@ namespace Test.Utility
             .Convert(t => new UnequalNonNullPair<T>(t), unnp => (unnp.Left, unnp.Right));
 
         [NotNull]
-        public static Arbitrary<LanguageCode> LanguageCode => Arb
+        public static Arbitrary<LanguageCode> LanguageCode { get; } = Arb
             .Generate<NonNull<CultureInfo>>()
             .Select(ci => ci.Get.Name)
             .ToArbitrary()
             .Convert(lc => new LanguageCode(lc), lc => lc);
 
         [NotNull]
-        public static Arbitrary<Link> Link => Arb.From(
+        public static Arbitrary<Link> Link { get; } = Arb.From(
             from href in Arb.Generate<AbsoluteUri>()
             from isTemplated in Arb.Generate<bool>()
             from type in Arb.Generate<string>()
@@ -63,7 +63,7 @@ namespace Test.Utility
             }));
 
         [NotNull]
-        public static Arbitrary<JsonSerializerSettings> JsonSerializerSettings => Arb.From(
+        public static Arbitrary<JsonSerializerSettings> JsonSerializerSettings { get; } = Arb.From(
             from contractResolver in s_contractResolver
             select new JsonSerializerSettings
             {
