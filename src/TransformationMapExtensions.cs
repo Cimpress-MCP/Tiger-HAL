@@ -111,7 +111,7 @@ namespace Tiger.Hal
         public static ITransformationMap<T> Link<T>(
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
-            [NotNull] Expression<Func<T, Uri>> linkSelector)
+            [NotNull] Func<T, Uri> linkSelector)
         {
             if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
@@ -119,6 +119,74 @@ namespace Tiger.Hal
             if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
             return transformationMap.Link(relation.AbsoluteUri, linkSelector);
+        }
+
+        /// <summary>
+        /// Creates a link for the given type and ignores the member selected to create that links.
+        /// </summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
+        /// If the function is not a simple property selector, nothing will be ignored.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <seealso cref="Link{T}(ITransformationMap{T}, Uri, Func{T, Uri})"/>
+        /// <seealso cref="Ignore{T, T1}(ITransformationMap{T}, Expression{Func{T, T1}})"/>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> LinkAndIgnore<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] string relation,
+            [NotNull] Expression<Func<T, Uri>> linkSelector)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+            if (linkSelector.Body is MemberExpression me)
+            {
+                transformationMap.Ignore(linkSelector);
+            }
+
+            return transformationMap.Link(relation, linkSelector.Compile());
+        }
+
+        /// <summary>
+        /// Creates a link for the given type and ignores the member selected to create that links.
+        /// </summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
+        /// If the function is not a simple property selector, nothing will be ignored.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <seealso cref="Link{T}(ITransformationMap{T}, Uri, Func{T, Uri})"/>
+        /// <seealso cref="Ignore{T, T1}(ITransformationMap{T}, Expression{Func{T, T1}})"/>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> LinkAndIgnore<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] Uri relation,
+            [NotNull] Expression<Func<T, Uri>> linkSelector)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+            return transformationMap.LinkAndIgnore(relation.AbsoluteUri, linkSelector);
         }
 
         /// <summary>Creates a collection of links for the given type.</summary>

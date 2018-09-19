@@ -1,4 +1,4 @@
-﻿### What's new in 4.0.0 (Released 2018-09-18)
+﻿### What's new in 3.1.0 (Released 2018-09-22)
 
 * Properties may now be ignored automatically if they meet certain criteria.
 * Dependencies have been greatly rationalized.

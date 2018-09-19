@@ -87,17 +87,14 @@ namespace Tiger.Hal
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Link(string relation, Expression<Func<T, Uri>> linkSelector, bool ignore)
+            ITransformationMap<T> ITransformationMap<T>.Link(
+                string relation,
+                Func<T, Uri> linkSelector)
             {
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
                 if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
-                if (ignore && linkSelector.Body is MemberExpression me)
-                {
-                    _ignores.Add(me.Member.Name);
-                }
-
-                _links[relation] = new ConstantLinkInstruction<T>(linkSelector.Compile());
+                _links[relation] = new ConstantLinkInstruction<T>(linkSelector);
                 return this;
             }
 

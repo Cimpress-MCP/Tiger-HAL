@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using FsCheck;
 using FsCheck.Xunit;
 using Test.Utility;
 using Tiger.Hal;
@@ -9,7 +10,7 @@ using static Tiger.Hal.LinkData;
 namespace Test
 {
     /// <summary>
-    /// Tests related to the <see cref="ITransformationMap{T}.Link(string, Expression{Func{T, Uri}}, bool)"/> method.
+    /// Tests related to the <see cref="TransformationMapExtensions.LinkAndIgnore{T}(ITransformationMap{T}, string, Expression{Func{T, Uri}})"/> method.
     /// </summary>
     [Properties(Arbitrary = new[] { typeof(Generators) }, QuietOnSuccess = true, MaxTest = 0x400)]
     public static class ComplicatedLinkingTests
@@ -23,35 +24,24 @@ namespace Test
 
         static T Id<T>(T value) => value;
 
-        [Property(DisplayName = "Simple property selectors are ignored by default.")]
-        public static void Property_Ignored()
+        [Property(DisplayName = "Simple property selectors can be ignored.")]
+        public static void Property_Ignored(NonEmptyString relation)
         {
             var builder = new TransformationMap.Builder<Linker>(l => Const(l.Id));
             ITransformationMap<Linker> transformationMap = builder;
-            transformationMap.Link("wow", l => l.Link);
+            transformationMap.LinkAndIgnore(relation.Get, l => l.Link);
 
             ITransformationInstructions transformationInstructions = builder;
             Assert.Single(transformationInstructions.IgnoreInstructions);
         }
 
-        [Property(DisplayName = "Simple property selectors can opt out of being ignored.")]
-        public static void Property_NotIgnored()
-        {
-            var builder = new TransformationMap.Builder<Linker>(l => Const(l.Id));
-            ITransformationMap<Linker> transformationMap = builder;
-            transformationMap.Link("wow", l => l.Link, ignore: false);
-
-            ITransformationInstructions transformationInstructions = builder;
-            Assert.Empty(transformationInstructions.IgnoreInstructions);
-        }
-
         [Property(DisplayName = "Selectors which are not simple property selectors cannot be ignored.")]
         // note(cosborn) Neither can I.
-        public static void AnythingElse_NotIgnored(bool ignore)
+        public static void AnythingElse_NotIgnored(NonEmptyString relation, bool ignore)
         {
             var builder = new TransformationMap.Builder<Linker>(l => Const(l.Id));
             ITransformationMap<Linker> transformationMap = builder;
-            transformationMap.Link("wow", l => Id(l.Link), ignore: ignore);
+            transformationMap.LinkAndIgnore(relation.Get, l => Id(l.Link));
 
             ITransformationInstructions transformationInstructions = builder;
             Assert.Empty(transformationInstructions.IgnoreInstructions);

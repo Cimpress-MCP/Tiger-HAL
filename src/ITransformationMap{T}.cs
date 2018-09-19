@@ -57,17 +57,11 @@ namespace Tiger.Hal
         /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
         /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
         /// </param>
-        /// <param name="ignore">
-        /// If <paramref name="linkSelector"/> is a simple member selector, controls whether the member
-        /// selected by <paramref name="linkSelector"/> is not represented in the HAL+JSON serialization
-        /// of a value. This value is <see langword="true"/> by default.
-        /// </param>
         /// <returns>The modified transformation map.</returns>
-        /// <seealso cref="TransformationMapExtensions.Ignore{T, T1}(ITransformationMap{T}, Expression{Func{T, T1}})"/>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
         [NotNull]
-        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Expression<Func<T, Uri>> linkSelector, bool ignore = true);
+        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, Uri> linkSelector);
 
         /// <summary>Creates a collection of links for the given type.</summary>
         /// <typeparam name="TMember">
