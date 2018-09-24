@@ -1,4 +1,4 @@
-// <copyright file="ConstantLinkInstruction.cs" company="Cimpress, Inc.">
+// <copyright file="LinkInstruction{T}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,33 +20,33 @@ using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
-    /// <summary>Represents a link instruction represented by an unwrapped <see cref="Uri"/>.</summary>
+    /// <summary>Represents a link instruction that has parameters of a single object.</summary>
     /// <typeparam name="T">The type of the object being linked.</typeparam>
-    sealed class ConstantLinkInstruction<T>
+    sealed class LinkInstruction<T>
         : ILinkInstruction
     {
-        readonly Func<T, Uri> _selector;
+        readonly Func<T, ILinkData> _selector;
 
-        /// <summary>Initializes a new instance of the <see cref="ConstantLinkInstruction{T}"/> class.</summary>
-        /// <param name="linkSelector">
+        /// <summary>Initializes a new instance of the <see cref="LinkInstruction{T}"/> class.</summary>
+        /// <param name="selector">
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
-        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
-        public ConstantLinkInstruction([NotNull] Func<T, Uri> linkSelector)
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        public LinkInstruction([NotNull] Func<T, ILinkData> selector)
         {
-            _selector = linkSelector ?? throw new ArgumentNullException(nameof(linkSelector));
+            _selector = selector ?? throw new ArgumentNullException(nameof(selector));
         }
 
         /// <inheritdoc/>
         public bool IsSingular { get; } = true;
 
         /// <inheritdoc/>
-        public IEnumerable<ILinkData> TransformToLinkBuilders(object main)
+        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main)
         {
             var link = _selector((T)main);
             if (link != null)
             {
-                yield return LinkData.Const(link);
+                yield return link;
             }
         }
     }

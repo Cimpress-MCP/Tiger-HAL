@@ -12,18 +12,16 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>portable</DebugType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <CodeAnalysisRuleSet>../Tiger.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../../Tiger.ruleset</CodeAnalysisRuleSet>
     <AssemblyName>Tiger.Hal</AssemblyName>
     <PackageId>Tiger.Hal</PackageId>
     <PackageTags>hal;json;hal+json;link</PackageTags>
-    <PackageReleaseNotes><![CDATA[➟ Release 3.1.0
+    <PackageReleaseNotes><![CDATA[➟ Release 4.0.0
+⁃ A companion library of analyzers has been created: Tiger.Hal.Analyzers.
 ⁃ Properties may now be ignored automatically if they meet certain criteria.
 ⁃ Dependencies have been greatly rationalized.
 ⁃ Namespaces have been adjusted.
 ⁃ More utility methods have been added.
-
-➟ Release 3.0.0
-⁃ The library has been made ready for ASP.NET Core 2.1.
 ]]></PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-HAL</PackageProjectUrl>
     <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
@@ -38,7 +36,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="../stylecop.json" />
+    <AdditionalFiles Include="../../stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>

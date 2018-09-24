@@ -41,27 +41,27 @@ namespace Tiger.Hal
 
         /// <summary>Creates a link for the given type.</summary>
         /// <param name="relation">The name of the link relation to establish.</param>
-        /// <param name="linkSelector">
+        /// <param name="selector">
         /// A function that creates an <see cref="ILinkData"/>
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
         [NotNull]
-        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, ILinkData> linkSelector);
+        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, ILinkData> selector);
 
         /// <summary>Creates a link for the given type.</summary>
         /// <param name="relation">The name of the link relation to establish.</param>
-        /// <param name="linkSelector">
+        /// <param name="selector">
         /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
         /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
         [NotNull]
-        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, Uri> linkSelector);
+        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, Uri> selector);
 
         /// <summary>Creates a collection of links for the given type.</summary>
         /// <typeparam name="TMember">
