@@ -78,12 +78,8 @@ namespace Tiger.Hal
                 {
                     switch (body)
                     {
-                        case BlockExpression be when be.Expressions.Count == 1:
-                            return GetIgnoreNameCore(name, be.Expressions[0]);
                         case MemberExpression me when me.Expression is ParameterExpression pe && pe.Name == name:
                             return me.Member.Name;
-                        case GotoExpression ge when ge.Kind == GotoExpressionKind.Return:
-                            return GetIgnoreNameCore(name, ge.Value);
                         case UnaryExpression ue when ue.NodeType == ExpressionType.Convert:
                             return GetIgnoreNameCore(name, ue.Operand);
                         default:

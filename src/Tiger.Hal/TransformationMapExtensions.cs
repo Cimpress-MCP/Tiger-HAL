@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
+using static Tiger.Hal.LinkData;
 using static Tiger.Hal.Properties.Resources;
 
 namespace Tiger.Hal
@@ -35,13 +36,33 @@ namespace Tiger.Hal
         /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
         [NotNull]
         public static ITransformationMap<T> Self<T>(
-            this ITransformationMap transformationMap,
+            [NotNull] this ITransformationMap transformationMap,
             [NotNull] ILinkData linkData)
         {
             if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (linkData == null) { throw new ArgumentNullException(nameof(linkData)); }
 
             return transformationMap.Self<T>(_ => linkData);
+        }
+
+        /// <summary>Creates the "self" link relation for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="selector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// </param>
+        /// <returns>A transformation map from which further transformations can be defined.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Self<T>(
+            [NotNull] this ITransformationMap transformationMap,
+            [NotNull] Func<T, Uri> selector)
+        {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+
+            return transformationMap.Self<T>(t => Const(selector(t)));
         }
 
         /// <summary>Creates a link for the given type.</summary>
