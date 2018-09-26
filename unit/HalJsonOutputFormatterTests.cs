@@ -214,7 +214,7 @@ namespace Test
             var (route, parentRoute) = routes;
             var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($"https://example.invalid/registered/{r.Id}")));
             ITransformationMap<Registered> transformationMap = builder;
-            transformationMap.Link("up", _ => null);
+            transformationMap.Link("up", _ => (ILinkData)null);
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = builder

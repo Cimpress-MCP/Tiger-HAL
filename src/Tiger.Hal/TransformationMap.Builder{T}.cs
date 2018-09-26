@@ -58,6 +58,36 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             IReadOnlyCollection<string> ITransformationInstructions.IgnoreInstructions => _ignores;
 
+            /// <summary>
+            /// Gets the name of the selected property from <paramref name="selector"/>,
+            /// if <paramref name="selector"/> represents a simple property selector.
+            /// </summary>
+            /// <typeparam name="TProperty">The return type of the selector.</typeparam>
+            /// <param name="selector">The selector from wihch to get the name.</param>
+            /// <returns>
+            /// The name of the selected property, if <paramref name="selector"/> represents
+            /// a simple property selector; otherwise, <see langword="null"/>.
+            /// </returns>
+            public static string GetSelectorName<TProperty>(Expression<Func<T, TProperty>> selector)
+            {
+                var parameter = selector.Parameters[0];
+
+                return GetIgnoreNameCore(parameter.Name, selector.Body);
+
+                string GetIgnoreNameCore(string name, Expression body)
+                {
+                    switch (body)
+                    {
+                        case MemberExpression me when me.Expression is ParameterExpression pe && pe.Name == name:
+                            return me.Member.Name;
+                        case UnaryExpression ue when ue.NodeType == ExpressionType.Convert:
+                            return GetIgnoreNameCore(name, ue.Operand);
+                        default:
+                            return null;
+                    }
+                }
+            }
+
             /* todo(cosborn)
              * Should expressions allow indexing, in the case of collections and dictionaries?
              */
@@ -77,27 +107,24 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Link(
                 string relation,
-                Func<T, ILinkData> linkSelector)
+                Func<T, ILinkData> selector)
             {
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+                if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
-                _links[relation] = new LinkInstruction<T>(linkSelector);
+                _links[relation] = new LinkInstruction<T>(selector);
                 return this;
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Link(string relation, Expression<Func<T, Uri>> linkSelector, bool ignore)
+            ITransformationMap<T> ITransformationMap<T>.Link(
+                string relation,
+                Func<T, Uri> selector)
             {
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+                if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
-                if (ignore && linkSelector.Body is MemberExpression me)
-                {
-                    _ignores.Add(me.Member.Name);
-                }
-
-                _links[relation] = new ConstantLinkInstruction<T>(linkSelector.Compile());
+                _links[relation] = new ConstantLinkInstruction<T>(selector);
                 return this;
             }
 
@@ -212,15 +239,15 @@ namespace Tiger.Hal
             {
                 if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
 
-                switch (memberSelector.Body)
+                var name = GetSelectorName(memberSelector);
+                if (name is null)
                 {
-                    case MemberExpression me:
-                        var valueSelector = memberSelector.Compile();
-                        _hoists.Add(new MemberHoistInstruction<T, TMember>(me.Member.Name, valueSelector));
-                        return this;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector);
+                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelector));
                 }
+
+                var valueSelector = memberSelector.Compile();
+                _hoists.Add(new MemberHoistInstruction<T, TMember>(name, valueSelector));
+                return this;
             }
 
             #region Ignore

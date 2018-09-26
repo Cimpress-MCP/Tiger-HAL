@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
+using static Tiger.Hal.LinkData;
 using static Tiger.Hal.Properties.Resources;
 
 namespace Tiger.Hal
@@ -35,13 +36,33 @@ namespace Tiger.Hal
         /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
         [NotNull]
         public static ITransformationMap<T> Self<T>(
-            this ITransformationMap transformationMap,
+            [NotNull] this ITransformationMap transformationMap,
             [NotNull] ILinkData linkData)
         {
             if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (linkData == null) { throw new ArgumentNullException(nameof(linkData)); }
 
             return transformationMap.Self<T>(_ => linkData);
+        }
+
+        /// <summary>Creates the "self" link relation for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="selector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// </param>
+        /// <returns>A transformation map from which further transformations can be defined.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Self<T>(
+            [NotNull] this ITransformationMap transformationMap,
+            [NotNull] Func<T, Uri> selector)
+        {
+            if (transformationMap == null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+
+            return transformationMap.Self<T>(t => Const(selector(t)));
         }
 
         /// <summary>Creates a link for the given type.</summary>
@@ -72,33 +93,33 @@ namespace Tiger.Hal
         /// <typeparam name="T">The type being transformed.</typeparam>
         /// <param name="transformationMap">The transformation map to which to add the link.</param>
         /// <param name="relation">The name of the link relation to establish.</param>
-        /// <param name="linkSelector">
+        /// <param name="selector">
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
         [NotNull]
         public static ITransformationMap<T> Link<T>(
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
-            [NotNull] Func<T, ILinkData> linkSelector)
+            [NotNull] Func<T, ILinkData> selector)
         {
             if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
-            return transformationMap.Link(relation.AbsoluteUri, linkSelector);
+            return transformationMap.Link(relation.AbsoluteUri, selector);
         }
 
         /// <summary>Creates a link for the given type.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
         /// <param name="transformationMap">The transformation map to which to add the link.</param>
         /// <param name="relation">The name of the link relation to establish.</param>
-        /// <param name="linkSelector">
+        /// <param name="selector">
         /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
         /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
         /// </param>
@@ -106,19 +127,84 @@ namespace Tiger.Hal
         /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
         [NotNull]
         public static ITransformationMap<T> Link<T>(
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] Uri relation,
-            [NotNull] Expression<Func<T, Uri>> linkSelector)
+            [NotNull] Func<T, Uri> selector)
         {
             if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
-            return transformationMap.Link(relation.AbsoluteUri, linkSelector);
+            return transformationMap.Link(relation.AbsoluteUri, selector);
+        }
+
+        /// <summary>
+        /// Creates a link for the given type and ignores the member selected to create that links.
+        /// </summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="selector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
+        /// If the function is not a simple property selector, nothing will be ignored.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <seealso cref="Link{T}(ITransformationMap{T}, Uri, Func{T, Uri})"/>
+        /// <seealso cref="Ignore{T, T1}(ITransformationMap{T}, Expression{Func{T, T1}})"/>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> LinkAndIgnore<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] string relation,
+            [NotNull] Expression<Func<T, Uri>> selector)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+
+            return transformationMap
+                .Link(relation, selector.Compile())
+                .Ignore(selector);
+        }
+
+        /// <summary>
+        /// Creates a link for the given type and ignores the member selected to create that links.
+        /// </summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="selector">
+        /// A function that creates a <see cref="Uri"/> from a value of type <typeparamref name="T"/>.
+        /// If the <see cref="Uri"/> that is created is <see langword="null"/>, no link will be created.
+        /// If the function is not a simple property selector, nothing will be ignored.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <seealso cref="Link{T}(ITransformationMap{T}, Uri, Func{T, Uri})"/>
+        /// <seealso cref="Ignore{T, T1}(ITransformationMap{T}, Expression{Func{T, T1}})"/>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> LinkAndIgnore<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] Uri relation,
+            [NotNull] Expression<Func<T, Uri>> selector)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+
+            return transformationMap.LinkAndIgnore(relation.AbsoluteUri, selector);
         }
 
         /// <summary>Creates a collection of links for the given type.</summary>
@@ -365,13 +451,13 @@ namespace Tiger.Hal
             if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
 
-            switch (memberSelector1.Body)
+            var name = TransformationMap.Builder<T>.GetSelectorName(memberSelector1);
+            if (name is null)
             {
-                case MemberExpression me:
-                    return transformationMap.Ignore(me.Member.Name);
-                default:
-                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
+                throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
             }
+
+            return transformationMap.Ignore(name);
         }
 
         /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
@@ -403,25 +489,19 @@ namespace Tiger.Hal
             if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
             if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
 
-            switch (memberSelector1.Body)
+            var name1 = TransformationMap.Builder<T>.GetSelectorName(memberSelector1);
+            if (name1 is null)
             {
-                case MemberExpression me:
-                    transformationMap.Ignore(me.Member.Name);
-                    break;
-                default:
-                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
+                throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
             }
 
-            switch (memberSelector2.Body)
-            { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
-                case MemberExpression me:
-                    transformationMap.Ignore(me.Member.Name);
-                    break;
-                default:
-                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelector2));
+            var name2 = TransformationMap.Builder<T>.GetSelectorName(memberSelector2);
+            if (name2 is null)
+            {
+                throw new ArgumentException(MalformedValueSelector, nameof(memberSelector2));
             }
 
-            return transformationMap;
+            return transformationMap.Ignore(name1).Ignore(name2);
         }
 
         /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
@@ -461,34 +541,25 @@ namespace Tiger.Hal
             if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
             if (memberSelector3 is null) { throw new ArgumentNullException(nameof(memberSelector3)); }
 
-            switch (memberSelector1.Body)
+            var name1 = TransformationMap.Builder<T>.GetSelectorName(memberSelector1);
+            if (name1 is null)
             {
-                case MemberExpression me:
-                    transformationMap.Ignore(me.Member.Name);
-                    break;
-                default:
-                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
+                throw new ArgumentException(MalformedValueSelector, nameof(memberSelector1));
             }
 
-            switch (memberSelector2.Body)
+            var name2 = TransformationMap.Builder<T>.GetSelectorName(memberSelector2);
+            if (name2 is null)
             {
-                case MemberExpression me:
-                    transformationMap.Ignore(me.Member.Name);
-                    break;
-                default:
-                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelector2));
+                throw new ArgumentException(MalformedValueSelector, nameof(memberSelector2));
             }
 
-            switch (memberSelector3.Body)
+            var name3 = TransformationMap.Builder<T>.GetSelectorName(memberSelector3);
+            if (name3 is null)
             {
-                case MemberExpression me:
-                    transformationMap.Ignore(me.Member.Name);
-                    break;
-                default:
-                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelector3));
+                throw new ArgumentException(MalformedValueSelector, nameof(memberSelector3));
             }
 
-            return transformationMap;
+            return transformationMap.Ignore(name1).Ignore(name2).Ignore(name3);
         }
 
         /// <summary>Causes members not to be represented in the HAL+JSON serialization of a value.</summary>
@@ -509,34 +580,21 @@ namespace Tiger.Hal
             if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (memberSelectors is null) { throw new ArgumentNullException(nameof(memberSelectors)); }
 
-            void IgnoreCore(Expression e)
+            for (var i = 0; i < memberSelectors.Length; i += 1)
             {
-                switch (e)
+                var name = TransformationMap.Builder<T>.GetSelectorName(memberSelectors[i]);
+                if (name is null)
                 {
-                    case UnaryExpression ue when ue.NodeType == ExpressionType.Convert:
-                        /* note(cosborn)
-                         * Because we have to fall back to Expression<Func<T, object>>,
-                         * value types will be wrapped in a Convert call by the compiler.
-                         */
-                        IgnoreCore(ue.Operand);
-                        break;
-                    case MemberExpression me:
-                        transformationMap.Ignore(me.Member.Name);
-                        break;
-                    default:
-                        throw new ArgumentException(MalformedValueSelector, nameof(memberSelectors))
+                    throw new ArgumentException(MalformedValueSelector, nameof(memberSelectors))
+                    {
+                        Data =
                         {
-                            Data =
-                            {
-                                ["selector"] = e
-                            }
-                        };
+                            ["selector"] = memberSelectors[i]
+                        }
+                    };
                 }
-            }
 
-            foreach (var memberSelector in memberSelectors)
-            {
-                IgnoreCore(memberSelector.Body);
+                transformationMap.Ignore(name);
             }
 
             return transformationMap;
