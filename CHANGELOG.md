@@ -1,4 +1,4 @@
-﻿### What's new in 4.0.0 (Released ????-??-??)
+﻿### What's new in 4.0.0 (Released 2018-09-26)
 
 * A companion library of analyzers has been created: Tiger.Hal.Analyzers.
 * Properties may now be ignored automatically if they meet certain criteria.
