@@ -1,0 +1,37 @@
+image: microsoft/dotnet:2.1-sdk-alpine
+
+stages:
+  - build
+  - test-pack
+  - deploy
+
+cache:
+  key: "$CI_PIPELINE_ID"
+
+build:
+  stage: build
+  script:
+    - dotnet build -c Release
+  artifacts:
+    untracked: true
+
+test:
+  stage: test-pack
+  script:
+    - dotnet test -c Release ./unit/Test.csproj
+
+pack:
+  stage: test-pack
+  script:
+    - dotnet pack -c Release -o "$(pwd)/dist/"
+  artifacts:
+    untracked: false
+    paths:
+      - dist/
+
+deploy:
+  stage: deploy
+  script:
+    - dotnet nuget push ./dist/*.nupkg -k $NUGET_API_KEY
+  only:
+    - master

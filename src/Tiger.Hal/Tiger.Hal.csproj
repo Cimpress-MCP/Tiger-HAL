@@ -1,0 +1,93 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>A transformer for ASP.NET Core to produce HAL+JSON responses.</Description>
+    <Copyright>©Cimpress 2017</Copyright>
+    <AssemblyTitle>Tiger Hal</AssemblyTitle>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <VersionPrefix>4.0.0</VersionPrefix>
+    <Authors>cosborn@cimpress.com</Authors>
+    <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>portable</DebugType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <CodeAnalysisRuleSet>../../Tiger.ruleset</CodeAnalysisRuleSet>
+    <AssemblyName>Tiger.Hal</AssemblyName>
+    <PackageId>Tiger.Hal</PackageId>
+    <PackageTags>hal;json;hal+json;link</PackageTags>
+    <PackageReleaseNotes><![CDATA[➟ Release 4.0.0
+⁃ A companion library of analyzers has been created: Tiger.Hal.Analyzers.
+⁃ Properties may now be ignored automatically if they meet certain criteria.
+⁃ Dependencies have been greatly rationalized.
+⁃ Namespaces have been adjusted.
+⁃ More utility methods have been added.
+]]></PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-HAL</PackageProjectUrl>
+    <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/Cimpress-MCP/Tiger-HAL/master/tiger_logo.png</PackageIconUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Cimpress-MCP/Tiger-HAL.git</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Features>IOperation</Features>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../../stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Link/LinkData.Constant.cs">
+      <DependentUpon>Link/LinkData.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Link/LinkData.Routed.cs">
+      <DependentUpon>Link/LinkData.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Link/LinkData.Templated.cs">
+      <DependentUpon>Link/LinkData.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Link/LinkCollection.Converter.cs">
+      <DependentUpon>Link/LinkCollection.cs</DependentUpon>
+    </Compile>
+    <Compile Update="TransformationMap.Builder{T}.cs">
+      <DependentUpon>TransformationMap.cs</DependentUpon>
+    </Compile>
+    <Compile Update="TypeTransformer.KeyEqualityComparer.cs">
+      <DependentUpon>TypeTransformer.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.1.0" />
+    <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
+
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.1" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="1.9.0" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta008" PrivateAssets="All" />
+    <PackageReference Include="Text.Analyzers" Version="2.6.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  
+</Project>
