@@ -30,11 +30,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using static System.Reflection.BindingFlags;
+using static Tiger.Hal.ItemsEmbedInstruction;
 
 namespace Tiger.Hal
 {
     /// <summary>A <see cref="JsonOutputFormatter"/> for HAL+JSON content.</summary>
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = @"Ending with ""Contract"" is OK.")]
     [PublicAPI]
     public sealed class HalJsonOutputFormatter
         : JsonOutputFormatter
@@ -49,18 +49,20 @@ namespace Tiger.Hal
             .GetMethod("CreateObjectContract", Instance | NonPublic);
 
         /// <summary>Initializes a new instance of the <see cref="HalJsonOutputFormatter"/> class.</summary>
-        /// <param name="halRepository">The application's HAL+JSON repository.</param>
         /// <param name="serializerSettings">
         /// The <see cref="JsonSerializerSettings"/>. Should be either the application-wide settings
         /// (<see cref="MvcJsonOptions.SerializerSettings"/>) or an instance
         /// <see cref="JsonSerializerSettingsProvider.CreateSerializerSettings"/> initially returned.
         /// </param>
         /// <param name="charPool">The <see cref="ArrayPool{T}"/>.</param>
+        /// <param name="halRepository">The application's HAL+JSON repository.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="serializerSettings"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="charPool"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="halRepository"/> is <see langword="null"/>.</exception>
         public HalJsonOutputFormatter(
-            [NotNull] IHalRepository halRepository,
             [NotNull] JsonSerializerSettings serializerSettings,
-            [NotNull] ArrayPool<char> charPool)
+            [NotNull] ArrayPool<char> charPool,
+            [NotNull] IHalRepository halRepository)
             : base(serializerSettings, charPool)
         {
             _halRepository = halRepository ?? throw new ArgumentNullException(nameof(halRepository));
@@ -127,19 +129,19 @@ namespace Tiger.Hal
                 let jPropertyValue = jObject[property.PropertyName]
                 where jPropertyValue != null
                 let nativeValue = property.ValueProvider.GetValue(value)
-                let contract = SerializerSettings.ContractResolver.ResolveContract(property.PropertyType)
-                select (name: property.PropertyName, jPropertyValue, nativeValue, contract);
-            foreach (var (name, jPropertyValue, nativeValue, contract) in visitQuads)
+                let propertyValueContract = SerializerSettings.ContractResolver.ResolveContract(property.PropertyType)
+                select (name: property.PropertyName, jPropertyValue, nativeValue, propertyValueContract);
+            foreach (var (name, jPropertyValue, nativeValue, propertyValueContract) in visitQuads)
             {
-                switch (contract)
+                switch ((propertyValueContract, jPropertyValue.Type))
                 {
-                    case JsonObjectContract joc:
+                    case var tuple when tuple.propertyValueContract is JsonObjectContract joc && tuple.Type == JTokenType.Object:
                         jObject[name] = VisitObject(joc, (JObject)jPropertyValue, nativeValue);
                         break;
-                    case JsonArrayContract jac:
+                    case var tuple when tuple.propertyValueContract is JsonArrayContract jac && tuple.Type == JTokenType.Array:
                         jObject[name] = VisitArray(jac, (JArray)jPropertyValue, (IEnumerable)nativeValue);
                         break;
-                    case JsonDictionaryContract jdc:
+                    case var tuple when tuple.propertyValueContract is JsonDictionaryContract jdc && tuple.Type == JTokenType.Object:
                         jObject[name] = VisitDictionary(jdc, (JObject)jPropertyValue, (IDictionary)nativeValue);
                         break;
 
@@ -216,15 +218,15 @@ namespace Tiger.Hal
                 select (indexPair, jIndexValue);
             foreach (var ((index, nativeValue), jIndexValue) in visitPairs)
             {
-                switch (collectionItemContract)
+                switch ((collectionItemContract, jIndexValue.Type))
                 {
-                    case JsonObjectContract joc:
+                    case var tuple when tuple.collectionItemContract is JsonObjectContract joc && tuple.Type == JTokenType.Object:
                         jArray[index] = VisitObject(joc, (JObject)jIndexValue, nativeValue);
                         break;
-                    case JsonArrayContract jac:
+                    case var tuple when tuple.collectionItemContract is JsonArrayContract jac && tuple.Type == JTokenType.Array:
                         jArray[index] = VisitArray(jac, (JArray)jIndexValue, (IEnumerable)nativeValue);
                         break;
-                    case JsonDictionaryContract jdc:
+                    case var tuple when tuple.collectionItemContract is JsonDictionaryContract jdc && tuple.Type == JTokenType.Object:
                         jArray[index] = VisitDictionary(jdc, (JObject)jIndexValue, (IDictionary)nativeValue);
                         break;
 
@@ -242,9 +244,10 @@ namespace Tiger.Hal
                 wrapperObject[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
             }
 
-            var embeds = ImmutableList.Create(new JProperty("self", jArray));
+            var embeds = ImmutableArray<JProperty>.Empty;
             var embedPairs =
                 from embedInstruction in transformer.Embeds
+                where !(embedInstruction.Index is string index && index == ElementsIndex)
                 let embedValue = embedInstruction.GetEmbedValue(value)
                 let jEmbedValue = embedValue is null
                     ? JValue.CreateNull()
@@ -260,8 +263,16 @@ namespace Tiger.Hal
                 }
             }
 
-            // note(cosborn) We know embeds has at least one. (It's "self".)
-            wrapperObject[EmbeddedKey] = new JObject(embeds);
+            var embedItems = transformer.Embeds.SingleOrDefault(i => i.Index is string index && index == ElementsIndex);
+            if (embedItems != null)
+            {
+                embeds = embeds.Add(new JProperty(embedItems.Relation, jArray));
+            }
+
+            if (embeds.Length != 0)
+            {
+                wrapperObject[EmbeddedKey] = new JObject(embeds);
+            }
 
             if (transformer.Hoists.Count != 0)
             { // todo(cosborn) Check count because object contract creation is relatively expensive due to reflection.
@@ -274,7 +285,6 @@ namespace Tiger.Hal
                     let hoistValue = hoist.GetHoistValue(value)
                     let jTokenValue = JToken.FromObject(hoistValue, CreateJsonSerializer())
                     select (name: property.PropertyName, jTokenValue);
-
                 foreach (var (name, jTokenValue) in pairs)
                 {
                     wrapperObject[name] = jTokenValue;
@@ -301,15 +311,16 @@ namespace Tiger.Hal
             foreach (var key in value.Keys)
             {
                 var jKey = jsonDictionaryContract.DictionaryKeyResolver(key.ToString());
-                switch (dictionaryValueContract)
+                var jValue = jObject[jKey];
+                switch ((dictionaryValueContract, jValue.Type))
                 {
-                    case JsonObjectContract joc:
+                    case var tuple when tuple.dictionaryValueContract is JsonObjectContract joc && tuple.Type == JTokenType.Object:
                         jObject[jKey] = new JProperty(jKey, VisitObject(joc, (JObject)jObject[jKey], value[key]));
                         break;
-                    case JsonArrayContract jac:
+                    case var tuple when tuple.dictionaryValueContract is JsonArrayContract jac && tuple.Type == JTokenType.Array:
                         jObject[jKey] = new JProperty(jKey, VisitArray(jac, (JArray)jObject[jKey], (IEnumerable)value[key]));
                         break;
-                    case JsonDictionaryContract jdc:
+                    case var tuple when tuple.dictionaryValueContract is JsonDictionaryContract jdc && tuple.Type == JTokenType.Object:
                         jObject[jKey] = new JProperty(jKey, VisitDictionary(jdc, (JObject)jObject[jKey], (IDictionary)value[key]));
                         break;
 
@@ -357,6 +368,7 @@ namespace Tiger.Hal
         }
 
         [NotNull]
+        [SuppressMessage("ReSharper", "InconsistentNaming", Justification = @"Ending with ""Contract"" is OK.")]
         JsonObjectContract CreateObjectContract([NotNull] Type type) =>
             (JsonObjectContract)_cocInfo.Invoke(SerializerSettings.ContractResolver, new object[] { type });
     }

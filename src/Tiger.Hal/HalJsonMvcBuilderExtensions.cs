@@ -18,7 +18,6 @@ using System;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Tiger.Hal;
@@ -42,11 +41,11 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (builder is null) { throw new ArgumentNullException(nameof(builder)); }
 
-            builder.Services.AddSingleton<IHalProfile, TProfile>();
+            builder.Services.AddTransient<IHalProfile, TProfile>();
             builder.Services.AddSingleton<HalRepositoryBuilder>();
-            builder.Services.AddScoped<ILinkBuilder<LinkData.Constant>, LinkBuilder.Constant>();
-            builder.Services.AddScoped<ILinkBuilder<LinkData.Templated>, LinkBuilder.Templated>();
-            builder.Services.AddScoped<ILinkBuilder<LinkData.Routed>, LinkBuilder.Routed>();
+            builder.Services.AddTransient<ILinkBuilder<LinkData.Constant>, LinkBuilder.Constant>();
+            builder.Services.AddTransient<ILinkBuilder<LinkData.Templated>, LinkBuilder.Templated>();
+            builder.Services.AddTransient<ILinkBuilder<LinkData.Routed>, LinkBuilder.Routed>();
             builder.Services.AddSingleton(p =>
             {
                 var profile = p.GetRequiredService<IHalProfile>();
@@ -68,7 +67,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.TryAddSingleton<IUrlHelperFactory, UrlHelperFactory>();
             services.TryAddEnumerable(Transient<IConfigureOptions<MvcJsonOptions>, ConfigureMvcJsonOptions>());
             services.TryAddEnumerable(Transient<IConfigureOptions<MvcOptions>, MvcHalJsonMvcOptionsSetup>());
         }

@@ -20,7 +20,7 @@ namespace Tiger.Hal
     public static class Relations
     {
         /// <summary>
-        /// The target URI points to a resource which represents
+        /// The target IRI points to a resource which represents
         /// the collection resource for the context IRI.
         /// </summary>
         public const string Collection = "collection";
@@ -30,12 +30,6 @@ namespace Tiger.Hal
         /// a collection of resources.
         /// </summary>
         public const string Current = "current";
-
-        /// <summary>
-        /// Refers to a resource whose available representations are byte-for-byte
-        /// identical with the corresponding representations of the context URI.
-        /// </summary>
-        public const string Duplicate = "duplicate";
 
         /// <summary>
         /// A URI that refers to the furthest preceding resource
@@ -70,10 +64,32 @@ namespace Tiger.Hal
         /// </summary>
         public const string Prev = "prev";
 
+        /// <summary>
+        /// Identifying that a resource representation conforms to
+        /// a certain profile, without affecting the non-profile
+        /// semantics of the resource representation.
+        /// </summary>
+        /// <remarks><para>
+        /// Profile URIs are primarily intended to be used as identifiers,
+        /// and thus clients SHOULD NOT indiscriminately access profile URIs.
+        /// </para></remarks>
+        public const string Profile = "profile";
+
+        /// <summary>
+        /// Refers to a resource that can be used to search through
+        /// the link's context and related resources.
+        /// </summary>
+        public const string Search = "search";
+
         /// <summary>Conveys an identifier for the link's context.</summary>
         public const string Self = "self";
 
         /// <summary>Refers to a parent document in a hierarchy of documents.</summary>
         public const string Up = "up";
+
+        /// <summary>
+        /// Identifies a resource that is the source of the information in the link's context.
+        /// </summary>
+        public const string Via = "via";
     }
 }

@@ -14,7 +14,7 @@ namespace Test.Utility
         /// <exception cref="ArgumentException"><paramref name="uri"/> is not absolute.</exception>
         public AbsoluteUri([NotNull] Uri uri)
         {
-            if (uri == null) { throw new ArgumentNullException(nameof(uri)); }
+            if (uri is null) { throw new ArgumentNullException(nameof(uri)); }
             if (!uri.IsAbsoluteUri)
             {
                 throw new ArgumentException("URI must be absolute.", nameof(uri));
@@ -29,7 +29,7 @@ namespace Test.Utility
 
         /// <inheritdoc/>
         [NotNull, Pure]
-        public override string ToString() => _uri.ToString();
+        public override string ToString() => _uri.AbsoluteUri;
 
         /// <summary>Converts an absolute URI to an undistinguished URI.</summary>
         /// <param name="uri">The URI to convert.</param>
