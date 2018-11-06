@@ -1,4 +1,8 @@
-﻿### What's new in 4.0.0 (Released 2018-09-26)
+﻿### What's new in 5.0.0 (Released 2018-11-??)
+
+* The library has grown special support for transformation maps of collection types.
+
+### What's new in 4.0.0 (Released 2018-09-26)
 
 * A companion library of analyzers has been created: Tiger.Hal.Analyzers.
 * Properties may now be ignored automatically if they meet certain criteria.

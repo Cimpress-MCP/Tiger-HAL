@@ -38,32 +38,32 @@ namespace Tiger.Hal
     {
         /// <summary>Initializes a new instance of the <see cref="MvcHalJsonMvcOptionsSetup"/> class.</summary>
         /// <param name="jsonOptions">The application's MVC JSON configuration.</param>
-        /// <param name="halRepository">The application's HAL+JSON repository.</param>
         /// <param name="charPool">A pool of <see cref="char"/>.</param>
+        /// <param name="halRepository">The application's HAL+JSON repository.</param>
         public MvcHalJsonMvcOptionsSetup(
             IOptions<MvcJsonOptions> jsonOptions,
-            IHalRepository halRepository,
-            ArrayPool<char> charPool)
+            ArrayPool<char> charPool,
+            IHalRepository halRepository)
             : base(options => ConfigureMvc(
                 options,
-                halRepository,
                 jsonOptions.Value.SerializerSettings,
-                charPool))
+                charPool,
+                halRepository))
         {
         }
 
         /// <summary>Configures the options.</summary>
         /// <param name="options">The application's MVC JSON configuration.</param>
-        /// <param name="halRepository">The application's HAL+JSON repository.</param>
         /// <param name="serializerSettings">The application's JSON serialization settings.</param>
         /// <param name="charPool">A pool of <see cref="char"/>.</param>
+        /// <param name="halRepository">The application's HAL+JSON repository.</param>
         static void ConfigureMvc(
             [NotNull] MvcOptions options,
-            [NotNull] IHalRepository halRepository,
             [NotNull] JsonSerializerSettings serializerSettings,
-            [NotNull] ArrayPool<char> charPool)
+            [NotNull] ArrayPool<char> charPool,
+            [NotNull] IHalRepository halRepository)
         {
-            var outputFormatter = new HalJsonOutputFormatter(halRepository, serializerSettings, charPool);
+            var outputFormatter = new HalJsonOutputFormatter(serializerSettings, charPool, halRepository);
             options.OutputFormatters.Add(outputFormatter);
         }
     }

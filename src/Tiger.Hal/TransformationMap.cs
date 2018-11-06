@@ -31,12 +31,24 @@ namespace Tiger.Hal
         internal IReadOnlyDictionary<Type, ITransformationInstructions> Maps => _maps;
 
         /// <inheritdoc/>
-        ITransformationMap<T> ITransformationMap.Self<T>(Func<T, ILinkData> selector)
+        ITransformationMap<T> ITransformationMap.Self<T>(
+            Func<T, ILinkData> self)
         {
-            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+            if (self is null) { throw new ArgumentNullException(nameof(self)); }
 
-            var builder = new Builder<T>(selector);
+            var builder = new Builder<T>(self);
             _maps[typeof(T)] = builder;
+            return builder;
+        }
+
+        /// <inheritdoc/>
+        IElementTransformationMap<TCollection, TElement> ITransformationMap.Self<TCollection, TElement>(
+            Func<TCollection, ILinkData> self)
+        {
+            if (self is null) { throw new ArgumentNullException(nameof(self)); }
+
+            var builder = new Builder<TCollection, TElement>(self);
+            _maps[typeof(TCollection)] = builder;
             return builder;
         }
     }

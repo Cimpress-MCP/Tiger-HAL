@@ -1,4 +1,4 @@
-﻿// <copyright file="TransformationMap.Builder{T}.cs" company="Cimpress, Inc.">
+﻿// <copyright file="TransformationMap.Builder{TCollection,TElement}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
 using static Tiger.Hal.Properties.Resources;
-using static Tiger.Hal.Relations;
 
 namespace Tiger.Hal
 {
@@ -29,21 +27,23 @@ namespace Tiger.Hal
     sealed partial class TransformationMap
     {
         /// <summary>Configures a created transformation map.</summary>
-        /// <typeparam name="T">The type being transformed.</typeparam>
-        internal class Builder<T>
-            : ITransformationInstructions, ITransformationMap<T>
+        /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
+        /// <typeparam name="TElement">The element type of the collection type being transformed.</typeparam>
+        internal class Builder<TCollection, TElement>
+            : Builder<TCollection>, ITransformationInstructions, IElementTransformationMap<TCollection, TElement>, ITransformationMap<TCollection, TElement>
+            where TCollection : IReadOnlyCollection<TElement>
         {
-            /// <summary>Initializes a new instance of the <see cref="Builder{T}"/> class.</summary>
+            readonly List<IHoistInstruction> _hoists = new List<IHoistInstruction>();
+
+            /// <summary>Initializes a new instance of the <see cref="Builder{TCollection, TElement}"/> class.</summary>
             /// <param name="self">
             /// A function that creates an <see cref="ILinkData"/>
-            /// from a value of type <typeparamref name="T"/>.
+            /// from a value of type <typeparamref name="TCollection"/>.
             /// </param>
             /// <exception cref="ArgumentNullException"><paramref name="self"/> is <see langword="null"/>.</exception>
-            public Builder([NotNull] Func<T, ILinkData> self)
+            public Builder([NotNull] Func<TCollection, ILinkData> self)
+                : base(self)
             {
-                if (self is null) { throw new ArgumentNullException(nameof(self)); }
-
-                Links[Self] = new LinkInstruction<T>(self);
             }
 
             /// <inheritdoc/>
@@ -53,79 +53,81 @@ namespace Tiger.Hal
             IReadOnlyCollection<IEmbedInstruction> ITransformationInstructions.EmbedInstructions => Embeds;
 
             /// <inheritdoc/>
-            IReadOnlyCollection<IHoistInstruction> ITransformationInstructions.HoistInstructions => ImmutableArray<IHoistInstruction>.Empty;
+            IReadOnlyCollection<IHoistInstruction> ITransformationInstructions.HoistInstructions => _hoists;
 
             /// <inheritdoc/>
             IReadOnlyCollection<string> ITransformationInstructions.IgnoreInstructions => Ignores;
 
-            /// <summary>Gets the collection of link instructions.</summary>
-            protected Dictionary<string, ILinkInstruction> Links { get; } = new Dictionary<string, ILinkInstruction>();
-
-            /// <summary>Gets the collection of embed instructions.</summary>
-            protected List<IEmbedInstruction> Embeds { get; } = new List<IEmbedInstruction>();
-
-            /// <summary>Gets the collection of ignore instructions.</summary>
-            protected List<string> Ignores { get; } = new List<string>();
-
-            /// <summary>
-            /// Gets the name of the selected property from <paramref name="selector"/>,
-            /// if <paramref name="selector"/> represents a simple property selector.
-            /// </summary>
-            /// <typeparam name="TProperty">The return type of the selector.</typeparam>
-            /// <param name="selector">The selector from wihch to get the name.</param>
-            /// <returns>
-            /// The name of the selected property, if <paramref name="selector"/> represents
-            /// a simple property selector; otherwise, <see langword="null"/>.
-            /// </returns>
-            public static string GetSelectorName<TProperty>(Expression<Func<T, TProperty>> selector)
+            /// <inheritdoc/>
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Hoist<TMember>(Expression<Func<TCollection, TMember>> selector)
             {
-                var parameter = selector.Parameters[0];
+                if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
-                return GetIgnoreNameCore(parameter.Name, selector.Body);
-
-                string GetIgnoreNameCore(string name, Expression body)
+                var name = GetSelectorName(selector);
+                if (name is null)
                 {
-                    switch (body)
-                    {
-                        case MemberExpression me when me.Expression is ParameterExpression pe && pe.Name == name:
-                            return me.Member.Name;
-                        case UnaryExpression ue when ue.NodeType == ExpressionType.Convert:
-                            return GetIgnoreNameCore(name, ue.Operand);
-                        default:
-                            return null;
-                    }
+                    throw new ArgumentException(MalformedValueSelector, nameof(selector));
                 }
+
+                var valueSelector = selector.Compile();
+                _hoists.Add(new MemberHoistInstruction<TCollection, TMember>(name, valueSelector));
+                return this;
             }
 
-            /* todo(cosborn)
-             * Should expressions allow indexing, in the case of collections and dictionaries?
-             */
-
-            #region Link
+            #region Element Transformation Map
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Link(
+            ITransformationMap<TCollection, TElement> IElementTransformationMap<TCollection, TElement>.LinkElements(
                 string relation,
-                Func<T, ILinkData> selector)
+                Func<TElement, ILinkData> selector)
             {
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
                 if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
-                Links[relation] = new LinkInstruction<T>(selector);
+                Links[relation] = new ManyLinkInstruction<TCollection>(c => c.Select(selector));
                 return this;
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Link<TMember>(
+            ITransformationMap<TCollection, TElement> IElementTransformationMap<TCollection, TElement>.EmbedElements(
                 string relation,
-                Func<T, IEnumerable<TMember>> collectionSelector,
-                Func<T, TMember, ILinkData> linkSelector)
+                Func<TElement, ILinkData> selector)
+            {
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+
+                Links[relation] = new ManyLinkInstruction<TCollection>(c => c.Select(selector));
+                Embeds.Add(new ItemsEmbedInstruction<TCollection, TElement>(relation));
+
+                return this;
+            }
+
+            #endregion
+
+            #region Link
+
+            /// <inheritdoc/>
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Link(
+                string relation,
+                Func<TCollection, ILinkData> selector)
+            {
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+
+                Links[relation] = new LinkInstruction<TCollection>(selector);
+                return this;
+            }
+
+            /// <inheritdoc/>
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Link<TMember>(
+                string relation,
+                Func<TCollection, IEnumerable<TMember>> collectionSelector,
+                Func<TCollection, TMember, ILinkData> linkSelector)
             {
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
                 if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
-                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
-                Links[relation] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(tm => linkSelector(t, tm)));
+                Links[relation] = new ManyLinkInstruction<TCollection>(t => collectionSelector(t).Select(tm => linkSelector(t, tm)));
                 return this;
             }
 
@@ -134,21 +136,21 @@ namespace Tiger.Hal
             #region Embed
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Embed<TMember>(
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Embed<TMember>(
                 string relation,
-                Expression<Func<T, TMember>> memberSelector,
-                Func<T, ILinkData> linkSelector)
+                Expression<Func<TCollection, TMember>> memberSelector,
+                Func<TCollection, ILinkData> linkSelector)
             {
-                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 switch (memberSelector.Body)
                 {
                     case MemberExpression me:
                         var valueSelector = memberSelector.Compile();
-                        Links[relation] = new LinkInstruction<T>(linkSelector);
-                        Embeds.Add(new MemberEmbedInstruction<T, TMember>(relation, me.Member.Name, valueSelector));
+                        Links[relation] = new LinkInstruction<TCollection>(linkSelector);
+                        Embeds.Add(new MemberEmbedInstruction<TCollection, TMember>(relation, me.Member.Name, valueSelector));
                         return this;
                     default:
                         throw new ArgumentException(MalformedValueSelector);
@@ -156,21 +158,21 @@ namespace Tiger.Hal
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Embed<TMember>(
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Embed<TMember>(
                 string relation,
-                Expression<Func<T, TMember>> memberSelector,
-                Func<T, TMember, ILinkData> linkSelector)
+                Expression<Func<TCollection, TMember>> memberSelector,
+                Func<TCollection, TMember, ILinkData> linkSelector)
             {
-                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 switch (memberSelector.Body)
                 { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
                     case MemberExpression me:
                         var valueSelector = memberSelector.Compile();
-                        Links[relation] = new LinkInstruction<T>(t => linkSelector(t, valueSelector(t)));
-                        Embeds.Add(new MemberEmbedInstruction<T, TMember>(relation, me.Member.Name, valueSelector));
+                        Links[relation] = new LinkInstruction<TCollection>(t => linkSelector(t, valueSelector(t)));
+                        Embeds.Add(new MemberEmbedInstruction<TCollection, TMember>(relation, me.Member.Name, valueSelector));
                         return this;
                     default:
                         throw new ArgumentException(MalformedValueSelector);
@@ -182,7 +184,7 @@ namespace Tiger.Hal
             #region Ignore
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Ignore(string memberSelector1)
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Ignore(string memberSelector1)
             {
                 if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
 
@@ -191,7 +193,7 @@ namespace Tiger.Hal
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Ignore(string memberSelector1, string memberSelector2)
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Ignore(string memberSelector1, string memberSelector2)
             {
                 if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
                 if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
@@ -202,7 +204,7 @@ namespace Tiger.Hal
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Ignore(
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Ignore(
                 string memberSelector1,
                 string memberSelector2,
                 string memberSelector3)
@@ -218,7 +220,7 @@ namespace Tiger.Hal
             }
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Ignore(params string[] memberSelectors)
+            ITransformationMap<TCollection, TElement> ITransformationMap<TCollection, TElement>.Ignore(params string[] memberSelectors)
             {
                 if (memberSelectors is null) { throw new ArgumentNullException(nameof(memberSelectors)); }
 

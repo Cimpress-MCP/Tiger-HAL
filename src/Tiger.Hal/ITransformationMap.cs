@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace Tiger.Hal
@@ -25,13 +26,29 @@ namespace Tiger.Hal
     {
         /// <summary>Creates the "self" link relation for the given type.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
-        /// <param name="selector">
+        /// <param name="self">
         /// A function that creates an <see cref="ILinkData"/>
-        /// from a value of type <typeparamref name="T"/>.
+        /// from a value of type <typeparamref name="T"/>
+        /// for the "self" relation.
         /// </param>
         /// <returns>A transformation map from which further transformations can be defined.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="self"/> is <see langword="null"/>.</exception>
         [NotNull]
-        ITransformationMap<T> Self<T>([NotNull] Func<T, ILinkData> selector);
+        ITransformationMap<T> Self<T>([NotNull] Func<T, ILinkData> self);
+
+        /// <summary>Creates the "self" link relation for the given type.</summary>
+        /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
+        /// <typeparam name="TElement">The element type of <typeparamref name="TCollection"/>.</typeparam>
+        /// <param name="self">
+        /// A function that creates an <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="TCollection"/>
+        /// for the "self" relation.
+        /// </param>
+        /// <returns>A transformation map from which further transformations can be defined.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="self"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        IElementTransformationMap<TCollection, TElement> Self<TCollection, TElement>(
+            [NotNull] Func<TCollection, ILinkData> self)
+            where TCollection : IReadOnlyCollection<TElement>;
     }
 }

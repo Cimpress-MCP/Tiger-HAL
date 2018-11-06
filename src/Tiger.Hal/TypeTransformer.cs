@@ -60,7 +60,7 @@ namespace Tiger.Hal
         /// <exception cref="InvalidOperationException">A builder for the provided <see cref="ILinkData"/> could not be resolved.</exception>
         IReadOnlyDictionary<string, LinkCollection> ITypeTransformer.GenerateLinks(object value)
         {
-            if (value == null) { throw new ArgumentNullException(nameof(value)); }
+            if (value is null) { throw new ArgumentNullException(nameof(value)); }
 
             return _transformationInstructions.LinkInstructions
                 .SelectMany(

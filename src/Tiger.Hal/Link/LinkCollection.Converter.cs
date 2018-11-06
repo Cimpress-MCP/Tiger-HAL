@@ -26,15 +26,15 @@ namespace Tiger.Hal
     {
         /// <summary>Controls JSON serialization of the <see cref="LinkCollection"/> class.</summary>
         internal sealed class Converter
-            : JsonConverter
+            : JsonConverter<LinkCollection>
         {
             /// <inheritdoc/>
-            public override bool CanRead { get; } = false;
+            public override bool CanRead => false;
 
             /// <inheritdoc/>
             public override void WriteJson(
                 JsonWriter writer,
-                [CanBeNull] object value,
+                [CanBeNull] LinkCollection value,
                 [NotNull] JsonSerializer serializer)
             {
                 if (value is null)
@@ -43,18 +43,21 @@ namespace Tiger.Hal
                     return;
                 }
 
-                var linkCollection = (LinkCollection)value;
-                switch (linkCollection.Count)
+                switch (value.Count)
                 {
                     case 0:
                         return;
                     case 1:
-                        if (!linkCollection._isSingular) { goto default; }
-                        serializer.Serialize(writer, linkCollection.Single(), typeof(Link));
+                        if (!value._isSingular) { goto default; }
+                        serializer.Serialize(writer, value.Single(), typeof(Link));
                         return;
                     default:
                         writer.WriteStartArray();
-                        foreach (var link in linkCollection) { serializer.Serialize(writer, link); }
+                        foreach (var link in value)
+                        {
+                            serializer.Serialize(writer, link);
+                        }
+
                         writer.WriteEndArray();
                         return;
                 }
@@ -62,16 +65,13 @@ namespace Tiger.Hal
 
             /// <inheritdoc/>
             /// <exception cref="NotSupportedException"><see cref="CanRead"/> is <see langword="false"/>.</exception>
-            public override object ReadJson(
+            public override LinkCollection ReadJson(
                 JsonReader reader,
                 Type objectType,
-                object existingValue,
+                LinkCollection existingValue,
+                bool hasExistingValue,
                 JsonSerializer serializer) =>
                 throw new NotSupportedException("CanRead is false.");
-
-            /// <inheritdoc/>
-            public override bool CanConvert([NotNull] Type objectType) =>
-                objectType == typeof(LinkCollection);
         }
     }
 }

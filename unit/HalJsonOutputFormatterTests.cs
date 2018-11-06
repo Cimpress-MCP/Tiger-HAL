@@ -53,7 +53,7 @@ namespace Test
         {
             // arrange
             var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, new ServiceCollection().BuildServiceProvider());
-            var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
             var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Unregistered), null);
 
             // act
@@ -72,7 +72,7 @@ namespace Test
                 [typeof(Registered)] = new TransformationMap.Builder<Registered>(_ => Const(new Uri("about:blank", Absolute)))
             };
             var repo = new HalRepository(map, new ServiceCollection().BuildServiceProvider());
-            var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
             var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Registered), null);
 
             // act
@@ -91,7 +91,7 @@ namespace Test
                 Id = id
             };
             var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, new ServiceContainer());
-            var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
@@ -125,7 +125,7 @@ namespace Test
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
@@ -142,7 +142,7 @@ namespace Test
             Assert.Empty(actual.Embedded);
             Assert.NotNull(actual.Links);
             Assert.Equal(1, actual.Links.Count);
-            var self = Assert.Contains("self", actual.Links);
+            var self = Assert.Contains(Relations.Self, actual.Links);
             Assert.NotNull(self);
             Assert.Equal($"https://example.invalid/registered/{id}", self.Href);
         }
@@ -173,7 +173,7 @@ namespace Test
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
@@ -224,7 +224,7 @@ namespace Test
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(repo, serializerSettings, ArrayPool<char>.Shared);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
