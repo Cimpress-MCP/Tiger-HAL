@@ -1,4 +1,4 @@
-﻿// <copyright file="HalJsonOutputFormatter.cs" company="Cimpress, Inc.">
+// <copyright file="HalJsonOutputFormatter.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -145,7 +145,7 @@ namespace Tiger.Hal
                         jObject[name] = VisitDictionary(jdc, (JObject)jPropertyValue, (IDictionary)nativeValue);
                         break;
 
-                    // todo(cosborn) Dynamic? Something else?
+                        // todo(cosborn) Dynamic? Something else?
                 }
             }
 
@@ -230,7 +230,7 @@ namespace Tiger.Hal
                         jArray[index] = VisitDictionary(jdc, (JObject)jIndexValue, (IDictionary)nativeValue);
                         break;
 
-                    // todo(cosborn) Dynamic? Something else?
+                        // todo(cosborn) Dynamic? Something else?
                 }
             }
 
@@ -324,7 +324,7 @@ namespace Tiger.Hal
                         jObject[jKey] = new JProperty(jKey, VisitDictionary(jdc, (JObject)jObject[jKey], (IDictionary)value[key]));
                         break;
 
-                    // todo(cosborn) Dynamic? Something else?
+                        // todo(cosborn) Dynamic? Something else?
                 }
             }
 

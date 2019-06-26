@@ -1,4 +1,4 @@
-﻿// <copyright file="TransformationMap.Builder{TCollection,TElement}.cs" company="Cimpress, Inc.">
+// <copyright file="TransformationMap.Builder{TCollection,TElement}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
