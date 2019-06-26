@@ -39,10 +39,10 @@ namespace Tiger.Hal
         }
 
         /// <inheritdoc/>
-        public bool IsSingular { get; } = false;
+        public bool IsSingular(object main) => false;
 
         /// <inheritdoc/>
         IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main) =>
-            _selector((T)main).Where(lb => lb != null);
+            _selector((T)main).Where(ld => ld != null);
     }
 }

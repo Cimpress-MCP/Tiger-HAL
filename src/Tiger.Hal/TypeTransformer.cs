@@ -1,4 +1,4 @@
-﻿// <copyright file="TypeTransformer.cs" company="Cimpress, Inc.">
+// <copyright file="TypeTransformer.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,7 +65,7 @@ namespace Tiger.Hal
             return _transformationInstructions.LinkInstructions
                 .SelectMany(
                     kvp => kvp.Value.TransformToLinkBuilders(value),
-                    (kvp, lb) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular, link: Build(lb)))
+                    (kvp, ld) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular(value), link: Build(ld)))
                 .ToLookup(kvp => (kvp.rel, kvp.isSingular), kvp => kvp.link, s_comparer)
                 .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
         }

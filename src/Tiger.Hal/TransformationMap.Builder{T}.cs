@@ -1,4 +1,4 @@
-﻿// <copyright file="TransformationMap.Builder{T}.cs" company="Cimpress, Inc.">
+// <copyright file="TransformationMap.Builder{T}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,28 +104,12 @@ namespace Tiger.Hal
             #region Link
 
             /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Link(
-                string relation,
-                Func<T, ILinkData> selector)
+            ITransformationMap<T> ITransformationMap<T>.Link(string relation, ILinkInstruction instruction)
             {
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+                if (instruction is null) { throw new ArgumentNullException(nameof(instruction)); }
 
-                Links[relation] = new LinkInstruction<T>(selector);
-                return this;
-            }
-
-            /// <inheritdoc/>
-            ITransformationMap<T> ITransformationMap<T>.Link<TMember>(
-                string relation,
-                Func<T, IEnumerable<TMember>> collectionSelector,
-                Func<T, TMember, ILinkData> linkSelector)
-            {
-                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
-                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
-
-                Links[relation] = new ManyLinkInstruction<T>(t => collectionSelector(t).Select(tm => linkSelector(t, tm)));
+                Links[relation] = instruction;
                 return this;
             }
 
