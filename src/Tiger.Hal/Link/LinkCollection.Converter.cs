@@ -1,4 +1,4 @@
-﻿// <copyright file="LinkCollection.Converter.cs" company="Cimpress, Inc.">
+// <copyright file="LinkCollection.Converter.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,10 +45,9 @@ namespace Tiger.Hal
 
                 switch (value.Count)
                 {
-                    case 0:
+                    case 0 when value._isSingular:
                         return;
-                    case 1:
-                        if (!value._isSingular) { goto default; }
+                    case 1 when value._isSingular:
                         serializer.Serialize(writer, value.Single(), typeof(Link));
                         return;
                     default:

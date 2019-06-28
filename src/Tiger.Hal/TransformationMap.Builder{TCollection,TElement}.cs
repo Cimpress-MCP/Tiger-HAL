@@ -97,7 +97,7 @@ namespace Tiger.Hal
                 if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
                 Links[relation] = new ManyLinkInstruction<TCollection>(c => c.Select(selector));
-                Embeds.Add(new ItemsEmbedInstruction<TCollection, TElement>(relation));
+                Embeds.Add(new ManyEmbedInstruction<TCollection, TElement>(relation, "[*]", _ => _));
 
                 return this;
             }

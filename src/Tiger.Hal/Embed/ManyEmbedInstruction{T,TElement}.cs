@@ -1,4 +1,4 @@
-// <copyright file="MemberEmbedInstruction{T,TMember}.cs" company="Cimpress, Inc.">
+// <copyright file="ManyEmbedInstruction{T,TElement}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,8 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 
@@ -22,14 +24,14 @@ namespace Tiger.Hal
 {
     /// <summary>Represents an instruction for embedding a value in a HAL response.</summary>
     /// <typeparam name="T">The parent type of the value to embed.</typeparam>
-    /// <typeparam name="TMember">The type of the value to embed.</typeparam>
-    sealed class MemberEmbedInstruction<T, TMember>
+    /// <typeparam name="TElement">The element type of the return type of the value selector.</typeparam>
+    sealed class ManyEmbedInstruction<T, TElement>
         : IEmbedInstruction
     {
-        readonly Func<T, TMember> _valueSelector;
+        readonly Func<T, IReadOnlyCollection<TElement>> _valueSelector;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemberEmbedInstruction{T,TSelected}"/> class.
+        /// Initializes a new instance of the <see cref="ManyEmbedInstruction{T, TElement}"/> class.
         /// </summary>
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="memberName">The path into the object to select the value to embed.</param>
@@ -37,10 +39,10 @@ namespace Tiger.Hal
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="memberName"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="valueSelector"/> is <see langword="null"/>.</exception>
-        public MemberEmbedInstruction(
+        public ManyEmbedInstruction(
             [NotNull] string relation,
             [NotNull] string memberName,
-            [NotNull] Func<T, TMember> valueSelector)
+            [NotNull] Func<T, IReadOnlyCollection<TElement>> valueSelector)
         {
             Relation = relation ?? throw new ArgumentNullException(nameof(relation));
             Index = memberName ?? throw new ArgumentNullException(nameof(memberName));
@@ -61,7 +63,7 @@ namespace Tiger.Hal
                 return JValue.CreateNull();
             }
 
-            return visitor(_valueSelector((T)main), typeof(TMember));
+            return JArray.FromObject(_valueSelector((T)main).Select(o => visitor(o, typeof(TElement))));
         }
     }
 }

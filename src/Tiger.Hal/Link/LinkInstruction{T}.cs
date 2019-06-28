@@ -41,7 +41,7 @@ namespace Tiger.Hal
         public bool IsSingular(object main) => true;
 
         /// <inheritdoc/>
-        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main)
+        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkData(object main)
         {
             var link = _selector((T)main);
             if (link != null)

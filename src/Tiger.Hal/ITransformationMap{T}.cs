@@ -73,6 +73,27 @@ namespace Tiger.Hal
             [NotNull] Expression<Func<T, TMember>> memberSelector,
             [NotNull] Func<T, TMember, ILinkData> linkSelector);
 
+        /// <summary>
+        /// Creates an embed for the given type, using the main object and the elements of the selected object.
+        /// </summary>
+        /// <typeparam name="TElement">The type of the elements of the selected value.</typeparam>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="collectionSelector">A function selecting a top-level member whose elements to embed.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="TElement"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="collectionSelector"/> is malformed.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        ITransformationMap<T> EmbedElements<TElement>(
+            [NotNull] string relation,
+            [NotNull] Expression<Func<T, IReadOnlyCollection<TElement>>> collectionSelector,
+            [NotNull] Func<TElement, ILinkData> linkSelector);
+
         /// <summary>Causes a member not to be represented in the HAL+JSON serialization of a value.</summary>
         /// <param name="memberSelector1">
         /// The name of a top-level member of type <typeparamref name="T"/> to ignore.

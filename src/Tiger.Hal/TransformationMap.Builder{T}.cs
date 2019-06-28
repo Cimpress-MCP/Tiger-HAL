@@ -118,13 +118,35 @@ namespace Tiger.Hal
             #region Embed
 
             /// <inheritdoc/>
+            ITransformationMap<T> ITransformationMap<T>.EmbedElements<TElement>(
+                string relation,
+                Expression<Func<T, IReadOnlyCollection<TElement>>> collectionSelector,
+                Func<TElement, ILinkData> linkSelector)
+            {
+                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+                switch (collectionSelector.Body)
+                {
+                    case MemberExpression me:
+                        var valueSelector = collectionSelector.Compile();
+                        Links[relation] = new ManyLinkInstruction<T>(c => valueSelector(c).Select(linkSelector));
+                        Embeds.Add(new ManyEmbedInstruction<T, TElement>(relation, me.Member.Name, t => valueSelector(t)));
+                        return this;
+                    default:
+                        throw new ArgumentException(MalformedValueSelector);
+                }
+            }
+
+            /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Embed<TMember>(
                 string relation,
                 Expression<Func<T, TMember>> memberSelector,
                 Func<T, ILinkData> linkSelector)
             {
-                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 switch (memberSelector.Body)
@@ -145,8 +167,8 @@ namespace Tiger.Hal
                 Expression<Func<T, TMember>> memberSelector,
                 Func<T, TMember, ILinkData> linkSelector)
             {
-                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
                 if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
 
                 switch (memberSelector.Body)

@@ -30,7 +30,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using static System.Reflection.BindingFlags;
-using static Tiger.Hal.ItemsEmbedInstruction;
 
 namespace Tiger.Hal
 {
@@ -150,22 +149,17 @@ namespace Tiger.Hal
             }
 
             var links = transformer.GenerateLinks(value);
-            var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
-            if (populatedLinks.Count != 0)
+            if (links.Count != 0)
             {
-                jObject[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
+                jObject[LinksKey] = JObject.FromObject(links, CreateJsonSerializer());
             }
 
             var embeds = ImmutableList<JProperty>.Empty;
             var embedPairs =
                 from embedInstruction in transformer.Embeds
-                let embedIndex = embedInstruction.Index.ToString()
                 join property in jsonObjectContract.Properties
-                    on embedIndex equals property.UnderlyingName
-                let embedValue = embedInstruction.GetEmbedValue(value)
-                let jEmbedValue = embedValue is null
-                    ? JValue.CreateNull()
-                    : Visit(embedValue, embedInstruction.Type)
+                    on embedInstruction.Index equals property.UnderlyingName
+                let jEmbedValue = embedInstruction.GetEmbedValue(value, Visit)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
                 select (index: property.PropertyName, jProperty);
             foreach (var (index, jProperty) in embedPairs)
@@ -237,36 +231,21 @@ namespace Tiger.Hal
             // note(cosborn) Lists embed themselves in a wrapper object.
             var wrapperObject = new JObject();
 
-            var links = transformer.GenerateLinks(value);
-            var populatedLinks = links.Where(kvp => kvp.Value.Count != 0).ToImmutableDictionary();
-            if (populatedLinks.Count != 0)
+            var links = transformer.GenerateLinks(value).ToImmutableDictionary();
+            if (links.Count != 0)
             {
-                wrapperObject[LinksKey] = JObject.FromObject(populatedLinks, CreateJsonSerializer());
+                wrapperObject[LinksKey] = JObject.FromObject(links, CreateJsonSerializer());
             }
 
             var embeds = ImmutableArray<JProperty>.Empty;
-            var embedPairs =
+            var embedProperties =
                 from embedInstruction in transformer.Embeds
-                where !(embedInstruction.Index is string index && index == ElementsIndex)
-                let embedValue = embedInstruction.GetEmbedValue(value)
-                let jEmbedValue = embedValue is null
-                    ? JValue.CreateNull()
-                    : Visit(embedValue, embedInstruction.Type)
+                let jEmbedValue = embedInstruction.GetEmbedValue(value, Visit)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
-                select (index: embedInstruction.Index, jProperty);
-            foreach (var (index, jProperty) in embedPairs)
+                select jProperty;
+            foreach (var jProperty in embedProperties)
             {
                 embeds = embeds.Add(jProperty);
-                if (index is int arrayIndex)
-                { // note(cosborn) Json.NET will panic if we send in anything but an int.
-                    jArray[arrayIndex]?.Remove();
-                }
-            }
-
-            var embedItems = transformer.Embeds.SingleOrDefault(i => i.Index is string index && index == ElementsIndex);
-            if (embedItems != null)
-            {
-                embeds = embeds.Add(new JProperty(embedItems.Relation, jArray));
             }
 
             if (embeds.Length != 0)
@@ -274,8 +253,9 @@ namespace Tiger.Hal
                 wrapperObject[EmbeddedKey] = new JObject(embeds);
             }
 
+            // note(cosborn) Check count because object contract creation is relatively expensive due to reflection.
             if (transformer.Hoists.Count != 0)
-            { // todo(cosborn) Check count because object contract creation is relatively expensive due to reflection.
+            {
                 var objectContract = CreateObjectContract(jsonArrayContract.UnderlyingType);
 
                 var pairs =
@@ -338,13 +318,9 @@ namespace Tiger.Hal
             var embeds = ImmutableList<JProperty>.Empty;
             var embedPairs =
                 from embedInstruction in transformer.Embeds
-                let nativeKey = embedInstruction.Index.ToString()
-                let embedKey = jsonDictionaryContract.DictionaryKeyResolver(nativeKey)
+                let embedKey = jsonDictionaryContract.DictionaryKeyResolver(embedInstruction.Index)
                 let index = embedKey ?? embedInstruction.Index
-                let embedValue = embedInstruction.GetEmbedValue(value)
-                let jEmbedValue = embedValue is null
-                    ? JValue.CreateNull()
-                    : Visit(embedValue, embedInstruction.Type)
+                let jEmbedValue = embedInstruction.GetEmbedValue(value, Visit)
                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
                 select (index, jProperty);
             foreach (var (index, jProperty) in embedPairs)

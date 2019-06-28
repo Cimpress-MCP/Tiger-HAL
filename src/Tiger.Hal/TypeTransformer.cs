@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,12 +63,20 @@ namespace Tiger.Hal
         {
             if (value is null) { throw new ArgumentNullException(nameof(value)); }
 
-            return _transformationInstructions.LinkInstructions
+            var dict = _transformationInstructions
+                .LinkInstructions
                 .SelectMany(
-                    kvp => kvp.Value.TransformToLinkBuilders(value),
+                    kvp => kvp.Value.TransformToLinkData(value),
                     (kvp, ld) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular(value), link: Build(ld)))
                 .ToLookup(kvp => (kvp.rel, kvp.isSingular), kvp => kvp.link, s_comparer)
-                .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
+                .ToImmutableDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
+            var allowedEmpty = _transformationInstructions
+                .LinkInstructions
+                .Where(kvp => !kvp.Value.IsSingular(value))
+                .Select(kvp => kvp.Key)
+                .Where(k => !dict.ContainsKey(k))
+                .Select(k => new KeyValuePair<string, LinkCollection>(k, new LinkCollection(ImmutableArray<Link>.Empty, isSingular: false)));
+            return dict.AddRange(allowedEmpty);
         }
 
         /// <summary>Builds a link from the provided link data.</summary>

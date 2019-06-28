@@ -9,11 +9,15 @@ root = true
 [*]
 insert_final_newline = true
 indent_style         = space
-indent_size          = 4
 charset              = utf-8
+
+# YAML files
+[*.yml]
+indent_size = 2
 
 # C# files
 [*.cs]
+indent_size                                                              = 4
 # "this." and "Me." qualifiers
 dotnet_style_qualification_for_field                                     = false : suggestion
 dotnet_style_qualification_for_property                                  = false : suggestion

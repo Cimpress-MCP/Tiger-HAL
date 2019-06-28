@@ -16,6 +16,7 @@
 
 using System;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 
 namespace Tiger.Hal
 {
@@ -37,16 +38,13 @@ namespace Tiger.Hal
 
         /// <summary>Gets the path into the object to select the value to embed.</summary>
         [NotNull]
-        object Index { get; }
-
-        /// <summary>Gets the type of the value to embed.</summary>
-        [NotNull]
-        Type Type { get; }
+        string Index { get; }
 
         /// <summary>Retrieves the value to embed from the given main object.</summary>
         /// <param name="main">The main object.</param>
+        /// <param name="visitor">The default visitor.</param>
         /// <returns>The value to embed.</returns>
         [NotNull]
-        object GetEmbedValue([NotNull] object main);
+        JToken GetEmbedValue([NotNull] object main, [NotNull] Func<object, Type, JToken> visitor);
     }
 }
