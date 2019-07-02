@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>A transformer for ASP.NET Core to produce HAL+JSON responses.</Description>
     <Copyright>©Cimpress 2017</Copyright>
     <AssemblyTitle>Tiger Hal</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>5.0.0</VersionPrefix>
+    <VersionPrefix>6.0.0</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
     <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
@@ -14,9 +14,19 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisRuleSet>../../Tiger.ruleset</CodeAnalysisRuleSet>
     <AssemblyName>Tiger.Hal</AssemblyName>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageId>Tiger.Hal</PackageId>
     <PackageTags>hal;json;hal+json;link</PackageTags>
-    <PackageReleaseNotes><![CDATA[➟ Release 5.0.0
+    <PackageReleaseNotes><![CDATA[➟ Release 6.0.0
+⁃ The library has grown support for custom rules for producing links.
+  ⁃ Standard rules go through this single entry point, so Tiger.HAL is implemented on the same base as your rules.
+⁃ The elements of collections can be embedded without linking to the collection itself.
+  ⁃ Because this is the same results as the `EmbedElements` command on base collections, it has the same name.
+⁃ Debug Symbols and SourceLink are now published to NuGet.
+
+➟ Release 5.0.0
 ⁃ The library has grown special support for transformation maps of collection types.
 
 ➟ Release 4.0.0
@@ -81,12 +91,11 @@
     <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
     <PackageReference Include="Tiger.Types" Version="5.0.0" />
 
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="2.0.0" PrivateAssets="All" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta009" PrivateAssets="All" />
-    <PackageReference Include="Text.Analyzers" Version="2.6.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Analyzers" Version="2.1.3" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19351-01" PrivateAssets="All"/>
+    <PackageReference Include="Roslynator.Analyzers" Version="2.1.0-rc" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

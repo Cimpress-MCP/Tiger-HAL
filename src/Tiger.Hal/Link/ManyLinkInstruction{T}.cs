@@ -1,4 +1,4 @@
-﻿// <copyright file="ManyLinkInstruction{T}.cs" company="Cimpress, Inc.">
+// <copyright file="ManyLinkInstruction{T}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,10 +39,10 @@ namespace Tiger.Hal
         }
 
         /// <inheritdoc/>
-        public bool IsSingular { get; } = false;
+        public bool IsSingular(object main) => false;
 
         /// <inheritdoc/>
-        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkBuilders(object main) =>
-            _selector((T)main).Where(lb => lb != null);
+        IEnumerable<ILinkData> ILinkInstruction.TransformToLinkData(object main) =>
+            _selector((T)main).Where(ld => ld != null);
     }
 }

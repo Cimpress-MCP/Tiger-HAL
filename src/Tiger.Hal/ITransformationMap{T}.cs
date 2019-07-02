@@ -1,4 +1,4 @@
-﻿// <copyright file="ITransformationMap{T}.cs" company="Cimpress, Inc.">
+// <copyright file="ITransformationMap{T}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,39 +26,14 @@ namespace Tiger.Hal
     [PublicAPI]
     public interface ITransformationMap<T>
     {
-        /// <summary>Creates a link for the given type.</summary>
+        /// <summary>Manually creates a link for the given type.</summary>
         /// <param name="relation">The name of the link relation to establish.</param>
-        /// <param name="selector">
-        /// A function that creates an <see cref="ILinkData"/>
-        /// from a value of type <typeparamref name="T"/>.
-        /// </param>
+        /// <param name="instruction">A linking instruction.</param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="instruction"/> is <see langword="null"/>.</exception>
         [NotNull]
-        ITransformationMap<T> Link([NotNull] string relation, [NotNull] Func<T, ILinkData> selector);
-
-        /// <summary>Creates a collection of links for the given type.</summary>
-        /// <typeparam name="TMember">
-        /// The member type of the return type of <paramref name="collectionSelector"/>.
-        /// </typeparam>
-        /// <param name="relation">The name of the link relation to establish.</param>
-        /// <param name="collectionSelector">
-        /// A function that selects a collection of values of type <typeparamref name="TMember"/>
-        /// from a value of type <typeparamref name="T"/>.
-        /// </param>
-        /// <param name="linkSelector">
-        /// A function that creates a <see cref="ILinkData"/> from a value of type <typeparamref name="TMember"/>.
-        /// </param>
-        /// <returns>The modified transformation map.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
-        [NotNull]
-        ITransformationMap<T> Link<TMember>(
-            [NotNull] string relation,
-            [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
-            [NotNull] Func<T, TMember, ILinkData> linkSelector);
+        ITransformationMap<T> Link([NotNull] string relation, [NotNull] ILinkInstruction instruction);
 
         /// <summary>Creates an embed for the given type, using only the main object.</summary>
         /// <typeparam name="TMember">The type of the selected value.</typeparam>
@@ -97,6 +72,27 @@ namespace Tiger.Hal
             [NotNull] string relation,
             [NotNull] Expression<Func<T, TMember>> memberSelector,
             [NotNull] Func<T, TMember, ILinkData> linkSelector);
+
+        /// <summary>
+        /// Creates an embed for the given type, using the main object and the elements of the selected object.
+        /// </summary>
+        /// <typeparam name="TElement">The type of the elements of the selected value.</typeparam>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="collectionSelector">A function selecting a top-level member whose elements to embed.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="TElement"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="collectionSelector"/> is malformed.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        ITransformationMap<T> EmbedElements<TElement>(
+            [NotNull] string relation,
+            [NotNull] Expression<Func<T, IReadOnlyCollection<TElement>>> collectionSelector,
+            [NotNull] Func<TElement, ILinkData> linkSelector);
 
         /// <summary>Causes a member not to be represented in the HAL+JSON serialization of a value.</summary>
         /// <param name="memberSelector1">

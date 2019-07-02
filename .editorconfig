@@ -9,10 +9,15 @@ root = true
 [*]
 insert_final_newline = true
 indent_style         = space
-indent_size          = 4
+charset              = utf-8
+
+# YAML files
+[*.yml]
+indent_size = 2
 
 # C# files
 [*.cs]
+indent_size                                                              = 4
 # "this." and "Me." qualifiers
 dotnet_style_qualification_for_field                                     = false : suggestion
 dotnet_style_qualification_for_property                                  = false : suggestion
@@ -130,8 +135,3 @@ indent_size = 2
 [*.{props,targets,config,nuspec}]
 indent_size = 2
 
-# Shell scripts
-[*.sh]
-end_of_line = lf
-[*.{cmd,bat}]
-end_of_line = crlf

@@ -1,4 +1,4 @@
-﻿// <copyright file="TransformationMap.Builder{TCollection,TElement}.cs" company="Cimpress, Inc.">
+// <copyright file="TransformationMap.Builder{TCollection,TElement}.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,7 +97,7 @@ namespace Tiger.Hal
                 if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
                 Links[relation] = new ManyLinkInstruction<TCollection>(c => c.Select(selector));
-                Embeds.Add(new ItemsEmbedInstruction<TCollection, TElement>(relation));
+                Embeds.Add(new ManyEmbedInstruction<TCollection, TElement>(relation, "[*]", _ => _));
 
                 return this;
             }

@@ -1,4 +1,12 @@
-﻿### What's new in 5.0.0 (Released 2018-11-??)
+﻿### What's new in 6.0.0 (Released 2019-07-04)
+
+* The library has grown support for custom rules for producing links.
+  * Standard rules go through this single entry point, so Tiger.HAL is implemented on the same base as your rules.
+* The elements of collections can be embedded without linking to the collection itself.
+  * Because this is the same results as the `EmbedElements` command on base collections, it has the same name.
+* Debug Symbols and SourceLink are now published to NuGet.
+
+### What's new in 5.0.0 (Released 2018-11-15)
 
 * The library has grown special support for transformation maps of collection types.
 

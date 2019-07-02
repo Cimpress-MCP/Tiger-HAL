@@ -1,4 +1,4 @@
-﻿// <copyright file="TransformationMapExtensions.cs" company="Cimpress, Inc.">
+// <copyright file="TransformationMapExtensions.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
 using Tiger.Types;
@@ -120,6 +121,89 @@ namespace Tiger.Hal
 
         #region Link
 
+        /// <summary>Manually creates a link for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="instruction">A linking instruction.</param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="instruction"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Link<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] Uri relation,
+            [NotNull] ILinkInstruction instruction)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
+            if (instruction is null) { throw new ArgumentNullException(nameof(instruction)); }
+
+            return transformationMap.Link(relation.AbsoluteUri, instruction);
+        }
+
+        /// <summary>Creates a link for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="selector">
+        /// A function that creates an <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="T"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Link<T>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] string relation,
+            [NotNull] Func<T, ILinkData> selector)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
+
+            return transformationMap.Link(relation, new LinkInstruction<T>(selector));
+        }
+
+        /// <summary>Creates a collection of links for the given type.</summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <typeparam name="TMember">
+        /// The member type of the return type of <paramref name="collectionSelector"/>.
+        /// </typeparam>
+        /// <param name="transformationMap">The transformation map to which to add the link.</param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="collectionSelector">
+        /// A function that selects a collection of values of type <typeparamref name="TMember"/>
+        /// from a value of type <typeparamref name="T"/>.
+        /// </param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="ILinkData"/> from a value of type <typeparamref name="TMember"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="collectionSelector"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
+        [NotNull]
+        public static ITransformationMap<T> Link<T, TMember>(
+            [NotNull] this ITransformationMap<T> transformationMap,
+            [NotNull] string relation,
+            [NotNull] Func<T, IEnumerable<TMember>> collectionSelector,
+            [NotNull] Func<T, TMember, ILinkData> linkSelector)
+        {
+            if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
+            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
+            if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
+            if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
+
+            return transformationMap.Link(relation, new ManyLinkInstruction<T>(t => collectionSelector(t).Select(tm => linkSelector(t, tm))));
+        }
+
         /// <summary>Creates a link for the given type.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
         /// <param name="transformationMap">The transformation map to which to add the link.</param>
@@ -129,6 +213,7 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
         [NotNull]
@@ -154,6 +239,7 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="TCollection"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
         [NotNull]

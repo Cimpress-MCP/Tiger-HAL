@@ -1,4 +1,4 @@
-﻿// <copyright file="HalJsonMvcBuilderExtensions.cs" company="Cimpress, Inc.">
+// <copyright file="HalJsonMvcBuilderExtensions.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,6 +59,9 @@ namespace Microsoft.Extensions.DependencyInjection
         [NotNull]
         static IMvcBuilder AddHalJsonFormatter([NotNull] this IMvcBuilder builder)
         {
+            builder
+                .AddJsonOptions(o => o.SerializerSettings.Converters.Add(new LinkCollection.Converter()));
+
             AddHalJsonFormatterServices(builder.Services);
             return builder;
         }
@@ -67,7 +70,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddOptions();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.TryAddEnumerable(Transient<IConfigureOptions<MvcJsonOptions>, ConfigureMvcJsonOptions>());
             services.TryAddEnumerable(Transient<IConfigureOptions<MvcOptions>, MvcHalJsonMvcOptionsSetup>());
         }
     }
