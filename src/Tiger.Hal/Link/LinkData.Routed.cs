@@ -1,4 +1,4 @@
-﻿// <copyright file="LinkData.Routed.cs" company="Cimpress, Inc.">
+// <copyright file="LinkData.Routed.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Tiger.Hal
 {

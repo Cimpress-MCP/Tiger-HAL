@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using FsCheck;
 using FsCheck.Xunit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -20,6 +21,10 @@ using static Tiger.Hal.LinkData;
 
 namespace Test
 {
+
+
+
+
     /// <summary>Tests related to the <see cref="HalJsonOutputFormatter"/> class.</summary>
     [Properties(Arbitrary = new[] { typeof(Generators) }, QuietOnSuccess = true, MaxTest = 0x400)]
     public static class HalJsonOutputFormatterTests
@@ -53,7 +58,7 @@ namespace Test
         {
             // arrange
             var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, new ServiceCollection().BuildServiceProvider());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(),repo);
             var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Unregistered), null);
 
             // act
@@ -72,7 +77,7 @@ namespace Test
                 [typeof(Registered)] = new TransformationMap.Builder<Registered>(_ => Const(new Uri("about:blank", Absolute)))
             };
             var repo = new HalRepository(map, new ServiceCollection().BuildServiceProvider());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
             var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Registered), null);
 
             // act
@@ -91,7 +96,7 @@ namespace Test
                 Id = id
             };
             var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, new ServiceContainer());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
@@ -125,7 +130,7 @@ namespace Test
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
@@ -173,7 +178,7 @@ namespace Test
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
@@ -224,7 +229,7 @@ namespace Test
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
             var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),

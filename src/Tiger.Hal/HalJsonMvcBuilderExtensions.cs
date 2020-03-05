@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.DependencyInjection
         static IMvcBuilder AddHalJsonFormatter([NotNull] this IMvcBuilder builder)
         {
             builder
-                .AddJsonOptions(o => o.SerializerSettings.Converters.Add(new LinkCollection.Converter()));
+                .AddNewtonsoftJson(o => o.SerializerSettings.Converters.Add(new LinkCollection.Converter()));
 
             AddHalJsonFormatterServices(builder.Services);
             return builder;

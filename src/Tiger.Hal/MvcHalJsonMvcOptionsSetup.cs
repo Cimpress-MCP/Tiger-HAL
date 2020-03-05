@@ -1,4 +1,4 @@
-﻿// <copyright file="MvcHalJsonMvcOptionsSetup.cs" company="Cimpress, Inc.">
+// <copyright file="MvcHalJsonMvcOptionsSetup.cs" company="Cimpress, Inc.">
 //   Copyright 2018 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ namespace Tiger.Hal
         /// <param name="charPool">A pool of <see cref="char"/>.</param>
         /// <param name="halRepository">The application's HAL+JSON repository.</param>
         public MvcHalJsonMvcOptionsSetup(
-            IOptions<MvcJsonOptions> jsonOptions,
+            IOptions<MvcNewtonsoftJsonOptions> jsonOptions,
             ArrayPool<char> charPool,
             IHalRepository halRepository)
             : base(options => ConfigureMvc(
@@ -63,8 +63,8 @@ namespace Tiger.Hal
             [NotNull] ArrayPool<char> charPool,
             [NotNull] IHalRepository halRepository)
         {
-            var outputFormatter = new HalJsonOutputFormatter(serializerSettings, charPool, halRepository);
-            options.OutputFormatters.Add(outputFormatter);
+            var outputFormatter = new HalJsonOutputFormatter(serializerSettings, charPool, options, halRepository);
+            options.OutputFormatters.Insert(0, outputFormatter);
         }
     }
 }

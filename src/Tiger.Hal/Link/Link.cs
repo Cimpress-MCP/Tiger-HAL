@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using static Newtonsoft.Json.DefaultValueHandling;
 using static Newtonsoft.Json.Required;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Tiger.Hal
 {
@@ -40,7 +41,7 @@ namespace Tiger.Hal
         /// A hint to indicate the media type expected when dereferencing the target resource.
         /// </param>
         /// <param name="deprecation">
-        /// Whether the link has been deprecated – that is,
+        /// Whether the link has been deprecated â€“ that is,
         /// whether it will be removed at a future date.
         /// </param>
         /// <param name="name">
@@ -93,7 +94,7 @@ namespace Tiger.Hal
         public string Type { get; }
 
         /// <summary>
-        /// Gets whether the link has been deprecated – that is, whether
+        /// Gets whether the link has been deprecated â€“ that is, whether
         /// it will be removed at a future date.
         /// </summary>
         [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]

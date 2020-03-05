@@ -26,17 +26,19 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using static System.Reflection.BindingFlags;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Tiger.Hal
 {
-    /// <summary>A <see cref="JsonOutputFormatter"/> for HAL+JSON content.</summary>
+    /// <summary>A <see cref="NewtonsoftJsonOutputFormatter"/> for HAL+JSON content.</summary>
     [PublicAPI]
     public sealed class HalJsonOutputFormatter
-        : JsonOutputFormatter
+        : NewtonsoftJsonOutputFormatter
     {
         const string LinksKey = "_links";
         const string EmbeddedKey = "_embedded";
@@ -50,10 +52,10 @@ namespace Tiger.Hal
         /// <summary>Initializes a new instance of the <see cref="HalJsonOutputFormatter"/> class.</summary>
         /// <param name="serializerSettings">
         /// The <see cref="JsonSerializerSettings"/>. Should be either the application-wide settings
-        /// (<see cref="MvcJsonOptions.SerializerSettings"/>) or an instance
         /// <see cref="JsonSerializerSettingsProvider.CreateSerializerSettings"/> initially returned.
         /// </param>
         /// <param name="charPool">The <see cref="ArrayPool{T}"/>.</param>
+        /// <param name="mvcOptions">.</param>
         /// <param name="halRepository">The application's HAL+JSON repository.</param>
         /// <exception cref="ArgumentNullException"><paramref name="serializerSettings"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="charPool"/> is <see langword="null"/>.</exception>
@@ -61,8 +63,9 @@ namespace Tiger.Hal
         public HalJsonOutputFormatter(
             [NotNull] JsonSerializerSettings serializerSettings,
             [NotNull] ArrayPool<char> charPool,
+            [NotNull] MvcOptions mvcOptions,
             [NotNull] IHalRepository halRepository)
-            : base(serializerSettings, charPool)
+            : base(serializerSettings, charPool, mvcOptions)
         {
             _halRepository = halRepository ?? throw new ArgumentNullException(nameof(halRepository));
 
