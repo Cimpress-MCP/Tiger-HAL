@@ -26,15 +26,18 @@ namespace Tiger.Hal
         : ILinkInstruction
     {
         readonly Func<T, ILinkData> _selector;
+        readonly Func<T, bool> _predicate;
 
         /// <summary>Initializes a new instance of the <see cref="LinkInstruction{T}"/> class.</summary>
         /// <param name="selector">
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
+        /// <param name="predicate">Predicate based on which link is generated.</param>
         /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        public LinkInstruction([NotNull] Func<T, ILinkData> selector)
+        public LinkInstruction([NotNull] Func<T, ILinkData> selector, Func<T, bool> predicate = null)
         {
             _selector = selector ?? throw new ArgumentNullException(nameof(selector));
+            _predicate = predicate;
         }
 
         /// <inheritdoc/>
@@ -44,7 +47,14 @@ namespace Tiger.Hal
         IEnumerable<ILinkData> ILinkInstruction.TransformToLinkData(object main)
         {
             var link = _selector((T)main);
-            if (link != null)
+            var shouldGenerateLink = true;
+
+            if (_predicate != null)
+            {
+                shouldGenerateLink = _predicate((T)main);
+            }
+
+            if (shouldGenerateLink && link != null)
             {
                 yield return link;
             }

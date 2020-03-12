@@ -153,6 +153,7 @@ namespace Tiger.Hal
         /// A function that creates an <see cref="ILinkData"/>
         /// from a value of type <typeparamref name="T"/>.
         /// </param>
+        /// <param name="predicate">Predicate based on which link is created.</param>
         /// <returns>The modified transformation map.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="transformationMap"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
@@ -161,13 +162,14 @@ namespace Tiger.Hal
         public static ITransformationMap<T> Link<T>(
             [NotNull] this ITransformationMap<T> transformationMap,
             [NotNull] string relation,
-            [NotNull] Func<T, ILinkData> selector)
+            [NotNull] Func<T, ILinkData> selector,
+            Func<T, bool> predicate = null)
         {
             if (transformationMap is null) { throw new ArgumentNullException(nameof(transformationMap)); }
             if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
             if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
 
-            return transformationMap.Link(relation, new LinkInstruction<T>(selector));
+            return transformationMap.Link(relation, new LinkInstruction<T>(selector, predicate));
         }
 
         /// <summary>Creates a collection of links for the given type.</summary>
