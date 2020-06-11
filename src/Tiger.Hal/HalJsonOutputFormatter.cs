@@ -100,6 +100,11 @@ namespace Tiger.Hal
         [CanBeNull]
         JToken Visit([NotNull] object value, [NotNull] Type type)
         {
+            if (value is null)
+            {
+                return JValue.CreateNull();
+            }
+
             switch (SerializerSettings.ContractResolver.ResolveContract(type))
             {
                 case JsonObjectContract joc:
