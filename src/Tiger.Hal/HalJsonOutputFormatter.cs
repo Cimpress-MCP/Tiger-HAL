@@ -124,7 +124,8 @@ namespace Tiger.Hal
             [CanBeNull] JObject jObject,
             [CanBeNull] object value)
         {
-            if (value is null || jObject is null) { return null; }
+            if (value is null || jObject is null)
+            { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonObjectContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
@@ -206,9 +207,10 @@ namespace Tiger.Hal
             [CanBeNull] JArray jArray,
             [CanBeNull] IEnumerable value)
         {
-            if (value is null || jArray is null) { return null; }
+            if (value is null || jArray is null)
+            { return null; }
 
-            if (!_halRepository.TryGetTransformer(jsonArrayContract.UnderlyingType, out var transformer))
+            if (!_halRepository.TryGetTransformer(jsonArrayContract.CollectionItemType, out var transformer))
             { // note(cosborn) No setup, no transformation.
                 return jArray;
             }
@@ -236,50 +238,51 @@ namespace Tiger.Hal
                 }
             }
 
+            return jArray; // Just return array object instead of further processing.
+
             // note(cosborn) Lists embed themselves in a wrapper object.
-            var wrapperObject = new JObject();
+            /* var wrapperObject = new JObject();
+            // var links = transformer.GenerateLinks(value).ToImmutableDictionary();
+             if (links.Count != 0)
+             {
+                 wrapperObject[LinksKey] = JObject.FromObject(links, CreateJsonSerializer());
+             }
+             var embeds = ImmutableArray<JProperty>.Empty;
+             var embedProperties =
+                 from embedInstruction in transformer.Embeds
+                 let jEmbedValue = embedInstruction.GetEmbedValue(value, Visit)
+                 let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
+                 select jProperty;
+             foreach (var jProperty in embedProperties)
+             {
+                 embeds = embeds.Add(jProperty);
+             }
 
-            var links = transformer.GenerateLinks(value).ToImmutableDictionary();
-            if (links.Count != 0)
-            {
-                wrapperObject[LinksKey] = JObject.FromObject(links, CreateJsonSerializer());
-            }
+             if (embeds.Length != 0)
+             {
+                 wrapperObject[EmbeddedKey] = new JObject(embeds);
+             }
 
-            var embeds = ImmutableArray<JProperty>.Empty;
-            var embedProperties =
-                from embedInstruction in transformer.Embeds
-                let jEmbedValue = embedInstruction.GetEmbedValue(value, Visit)
-                let jProperty = new JProperty(embedInstruction.Relation, jEmbedValue)
-                select jProperty;
-            foreach (var jProperty in embedProperties)
-            {
-                embeds = embeds.Add(jProperty);
-            }
+             // note(cosborn) Check count because object contract creation is relatively expensive due to reflection.
+             if (transformer.Hoists.Count != 0)
+             {
+                 var objectContract = CreateObjectContract(jsonArrayContract.UnderlyingType);
 
-            if (embeds.Length != 0)
-            {
-                wrapperObject[EmbeddedKey] = new JObject(embeds);
-            }
+                 var pairs =
+                     from hoist in transformer.Hoists
+                     join property in objectContract.Properties
+                         on hoist.Name equals property.UnderlyingName
+                     let hoistValue = hoist.GetHoistValue(value)
+                     let jTokenValue = JToken.FromObject(hoistValue, CreateJsonSerializer())
+                     select (name: property.PropertyName, jTokenValue);
+                 foreach (var (name, jTokenValue) in pairs)
+                 {
+                     wrapperObject[name] = jTokenValue;
+                 }
+             }
 
-            // note(cosborn) Check count because object contract creation is relatively expensive due to reflection.
-            if (transformer.Hoists.Count != 0)
-            {
-                var objectContract = CreateObjectContract(jsonArrayContract.UnderlyingType);
-
-                var pairs =
-                    from hoist in transformer.Hoists
-                    join property in objectContract.Properties
-                        on hoist.Name equals property.UnderlyingName
-                    let hoistValue = hoist.GetHoistValue(value)
-                    let jTokenValue = JToken.FromObject(hoistValue, CreateJsonSerializer())
-                    select (name: property.PropertyName, jTokenValue);
-                foreach (var (name, jTokenValue) in pairs)
-                {
-                    wrapperObject[name] = jTokenValue;
-                }
-            }
-
-            return wrapperObject;
+             return wrapperObject;
+            */
         }
 
         [CanBeNull]
@@ -288,7 +291,8 @@ namespace Tiger.Hal
             [CanBeNull] JObject jObject,
             [CanBeNull] IDictionary value)
         {
-            if (value is null || jObject is null) { return null; }
+            if (value is null || jObject is null)
+            { return null; }
 
             if (!_halRepository.TryGetTransformer(jsonDictionaryContract.UnderlyingType, out var transformer))
             { // note(cosborn) No setup, no transformation.
