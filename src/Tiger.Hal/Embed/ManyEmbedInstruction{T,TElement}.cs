@@ -1,7 +1,7 @@
 // <copyright file="ManyEmbedInstruction{T,TElement}.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 
 namespace Tiger.Hal
@@ -36,17 +35,14 @@ namespace Tiger.Hal
         /// <param name="relation">The name of the link relation to establish.</param>
         /// <param name="memberName">The path into the object to select the value to embed.</param>
         /// <param name="valueSelector">A function that selects a value to embed.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="memberName"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="valueSelector"/> is <see langword="null"/>.</exception>
         public ManyEmbedInstruction(
-            [NotNull] string relation,
-            [NotNull] string memberName,
-            [NotNull] Func<T, IReadOnlyCollection<TElement>> valueSelector)
+            string relation,
+            string memberName,
+            Func<T, IReadOnlyCollection<TElement>> valueSelector)
         {
-            Relation = relation ?? throw new ArgumentNullException(nameof(relation));
-            Index = memberName ?? throw new ArgumentNullException(nameof(memberName));
-            _valueSelector = valueSelector ?? throw new ArgumentNullException(nameof(valueSelector));
+            Relation = relation;
+            Index = memberName;
+            _valueSelector = valueSelector;
         }
 
         /// <inheritdoc/>
@@ -56,14 +52,7 @@ namespace Tiger.Hal
         public string Index { get; }
 
         /// <inheritdoc/>
-        public JToken GetEmbedValue(object main, Func<object, Type, JToken> visitor)
-        {
-            if (main is null)
-            {
-                return JValue.CreateNull();
-            }
-
-            return JArray.FromObject(_valueSelector((T)main).Select(o => visitor(o, typeof(TElement))));
-        }
+        public JToken? GetEmbedValue(object main, Func<object?, Type, JToken?> visitor) =>
+            JArray.FromObject(_valueSelector((T)main).Select(o => visitor(o, typeof(TElement))));
     }
 }

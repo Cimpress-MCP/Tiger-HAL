@@ -1,14 +1,32 @@
-﻿using System;
+// <copyright file="HalJsonOutputFormatterTests.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
+//
+//   Licensed under the Apache License, Version 2.0 (the "License") –
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+// </copyright>
+
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.Design;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using FsCheck;
 using FsCheck.Xunit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -24,120 +42,86 @@ namespace Test
     [Properties(Arbitrary = new[] { typeof(Generators) }, QuietOnSuccess = true, MaxTest = 0x400)]
     public static class HalJsonOutputFormatterTests
     {
-        public class Unregistered
-        {
-            public Guid Id { get; set; }
-        }
-
-        public class Registered
-        {
-            public Guid Id { get; set; }
-
-            [JsonIgnore]
-            public Guid ParentId { get; set; }
-
-            public string Uninteresting { get; set; }
-        }
-
-        public class HollowHal
-        {
-            [JsonProperty("_embedded")]
-            public IReadOnlyDictionary<string, object> Embedded { get; } = new Dictionary<string, object>();
-
-            [JsonProperty("_links")]
-            public IReadOnlyDictionary<string, Link> Links { get; } = new Dictionary<string, Link>();
-        }
-
         [Property(DisplayName = "An unregistered type cannot be written.")]
         public static void UnregisteredType_CannotWriteResult(JsonSerializerSettings serializerSettings)
         {
-            // arrange
             var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, new ServiceCollection().BuildServiceProvider());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
-            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Unregistered), null);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
+            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, _) => new StreamWriter(Stream.Null), typeof(Unregistered), new Unregistered());
 
-            // act
-            var actual = sut.CanWriteResult(context);
-
-            // assert
-            Assert.False(actual);
+            Assert.False(sut.CanWriteResult(context));
         }
 
         [Property(DisplayName = "A registered type can be written.")]
         public static void RegisteredType_CanWriteResult(JsonSerializerSettings serializerSettings)
         {
-            // arrange
             var map = new Dictionary<Type, ITransformationInstructions>
             {
-                [typeof(Registered)] = new TransformationMap.Builder<Registered>(_ => Const(new Uri("about:blank", Absolute)))
+                [typeof(Registered)] = new TransformationMap.Builder<Registered>(_ => Const(new Uri("about:blank", Absolute))),
             };
             var repo = new HalRepository(map, new ServiceCollection().BuildServiceProvider());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
-            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, __) => new StreamWriter(Stream.Null), typeof(Registered), null);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
+            var context = new OutputFormatterWriteContext(new DefaultHttpContext(), (_, _) => new StreamWriter(Stream.Null), typeof(Registered), new Registered());
 
-            // act
-            var actual = sut.CanWriteResult(context);
-
-            //assert
-            Assert.True(actual);
+            Assert.True(sut.CanWriteResult(context));
         }
 
         [Property(DisplayName = "An unregistered type is serialized normally.")]
         public static async Task UnregisteredType_NotModified(Guid id, JsonSerializerSettings serializerSettings)
         {
-            // arrange
             var dto = new Unregistered
             {
-                Id = id
+                Id = id,
             };
-            var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, new ServiceContainer());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
-            var writer = new StringWriter();
+            using var svc = new ServiceContainer();
+            var repo = new HalRepository(ImmutableDictionary<Type, ITransformationInstructions>.Empty, svc);
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
+            await using var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (_, __) => writer,
+                (_, _) => writer,
                 typeof(Unregistered),
                 dto);
 
-            // act
             await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<Unregistered>(writer.ToString(), serializerSettings);
 
-            // assert
             Assert.Equal(id, actual.Id);
         }
 
         [Property(DisplayName = "A registered type creates its self link correctly.")]
         public static async Task RegisteredType_SelfLink(Guid id, JsonSerializerSettings serializerSettings)
         {
-            // arrange
+            if (serializerSettings is null)
+            {
+                throw new ArgumentNullException(nameof(serializerSettings));
+            }
+
             var dto = new Registered
             {
-                Id = id
+                Id = id,
             };
             var map = new Dictionary<Type, ITransformationInstructions>
             {
                 [typeof(Registered)] = new TransformationMap.Builder<Registered>(
-                    r => Const(new Uri($"https://example.invalid/registered/{r.Id}")))
+                    r => Const(new Uri($"https://example.invalid/registered/{r.Id}"))),
             };
-            var serviceProvider = new ServiceCollection()
+            await using var serviceProvider = new ServiceCollection()
                 .AddScoped<ILinkBuilder<Constant>, LinkBuilder.Constant>()
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
-            var writer = new StringWriter();
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
+            using var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (_, __) => writer,
+                (_, _) => writer,
                 typeof(Registered),
                 dto);
 
-            // act
             await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
-            // assert
             Assert.NotNull(actual);
             Assert.Empty(actual.Embedded);
             Assert.NotNull(actual.Links);
@@ -154,38 +138,40 @@ namespace Test
             UnequalNonNullPair<NonEmptyString> routes,
             JsonSerializerSettings serializerSettings)
         {
-            // arrange
+            if (serializerSettings is null)
+            {
+                throw new ArgumentNullException(nameof(serializerSettings));
+            }
+
             var dto = new Registered
             {
                 Id = id,
-                ParentId = parentId
+                ParentId = parentId,
             };
             var (route, parentRoute) = routes;
             var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($"https://example.invalid/registered/{r.Id}")));
             ITransformationMap<Registered> transformationMap = builder;
-            transformationMap.Link("up", r => Const(new Uri($"https://example.invalid/parent/{r.ParentId}")));
+            _ = transformationMap.Link("up", r => Const(new Uri($"https://example.invalid/parent/{r.ParentId}")));
             var map = new Dictionary<Type, ITransformationInstructions>
             {
-                [typeof(Registered)] = builder
+                [typeof(Registered)] = builder,
             };
-            var serviceProvider = new ServiceCollection()
+            await using var serviceProvider = new ServiceCollection()
                 .AddScoped<ILinkBuilder<Constant>, LinkBuilder.Constant>()
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
-            var writer = new StringWriter();
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
+            using var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (_, __) => writer,
+                (_, _) => writer,
                 typeof(Registered),
                 dto);
 
-            // act
             await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
-            // assert
             Assert.NotNull(actual);
             Assert.Empty(actual.Embedded);
             Assert.NotNull(actual.Links);
@@ -205,44 +191,71 @@ namespace Test
             UnequalNonNullPair<NonEmptyString> routes,
             JsonSerializerSettings serializerSettings)
         {
-            // arrange
+            if (serializerSettings is null)
+            {
+                throw new ArgumentNullException(nameof(serializerSettings));
+            }
+
             var dto = new Registered
             {
                 Id = id,
-                ParentId = parentId
+                ParentId = parentId,
             };
             var (route, parentRoute) = routes;
             var builder = new TransformationMap.Builder<Registered>(r => Const(new Uri($"https://example.invalid/registered/{r.Id}")));
             ITransformationMap<Registered> transformationMap = builder;
-            transformationMap.Link("up", _ => (ILinkData)null);
+            _ = transformationMap.Link("up", _ => (ILinkData?)null);
             var map = new Dictionary<Type, ITransformationInstructions>
             {
-                [typeof(Registered)] = builder
+                [typeof(Registered)] = builder,
             };
-            var serviceProvider = new ServiceCollection()
+            await using var serviceProvider = new ServiceCollection()
                 .AddScoped<ILinkBuilder<Constant>, LinkBuilder.Constant>()
                 .BuildServiceProvider();
             var repo = new HalRepository(map, serviceProvider);
             serializerSettings.Converters.Add(new LinkCollection.Converter());
-            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, repo);
-            var writer = new StringWriter();
+            var sut = new HalJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, new MvcOptions(), repo);
+            using var writer = new StringWriter();
             var context = new OutputFormatterWriteContext(
                 new DefaultHttpContext(),
-                (_, __) => writer,
+                (_, _) => writer,
                 typeof(Registered),
                 dto);
 
-            // act
             await sut.WriteResponseBodyAsync(context, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)).ConfigureAwait(false);
             var actual = JsonConvert.DeserializeObject<HollowHal>(writer.ToString(), serializerSettings);
 
-            // assert
             Assert.NotNull(actual);
             Assert.Empty(actual.Embedded);
             Assert.NotNull(actual.Links);
             var (rel, link) = Assert.Single(actual.Links);
             Assert.Equal("self", rel);
             Assert.Equal($"https://example.invalid/registered/{id}", link.Href);
+        }
+
+        sealed class Unregistered
+        {
+            public Guid Id { get; set; }
+        }
+
+        sealed class Registered
+        {
+            public Guid Id { get; set; }
+
+            [JsonIgnore]
+            public Guid ParentId { get; set; }
+
+            public string? Uninteresting { get; set; }
+        }
+
+        [SuppressMessage("Microsoft.Style", "CA1812", Justification = "Deserialization target.")]
+        sealed class HollowHal
+        {
+            [JsonProperty("_embedded")]
+            public IReadOnlyDictionary<string, object> Embedded { get; } = new Dictionary<string, object>();
+
+            [JsonProperty("_links")]
+            public IReadOnlyDictionary<string, Link> Links { get; } = new Dictionary<string, Link>();
         }
     }
 }

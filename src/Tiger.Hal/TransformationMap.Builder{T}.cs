@@ -1,7 +1,7 @@
 // <copyright file="TransformationMap.Builder{T}.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
 using static Tiger.Hal.Properties.Resources;
 using static Tiger.Hal.Relations;
 
@@ -38,11 +37,8 @@ namespace Tiger.Hal
             /// A function that creates an <see cref="ILinkData"/>
             /// from a value of type <typeparamref name="T"/>.
             /// </param>
-            /// <exception cref="ArgumentNullException"><paramref name="self"/> is <see langword="null"/>.</exception>
-            public Builder([NotNull] Func<T, ILinkData> self)
+            public Builder(Func<T, ILinkData?> self)
             {
-                if (self is null) { throw new ArgumentNullException(nameof(self)); }
-
                 Links[Self] = new LinkInstruction<T>(self);
             }
 
@@ -77,62 +73,43 @@ namespace Tiger.Hal
             /// The name of the selected property, if <paramref name="selector"/> represents
             /// a simple property selector; otherwise, <see langword="null"/>.
             /// </returns>
-            public static string GetSelectorName<TProperty>(Expression<Func<T, TProperty>> selector)
+            public static string? GetSelectorName<TProperty>(Expression<Func<T, TProperty>> selector)
             {
                 var parameter = selector.Parameters[0];
 
                 return GetIgnoreNameCore(parameter.Name, selector.Body);
 
-                string GetIgnoreNameCore(string name, Expression body)
+                static string? GetIgnoreNameCore(string name, Expression body) => body switch
                 {
-                    switch (body)
-                    {
-                        case MemberExpression me when me.Expression is ParameterExpression pe && pe.Name == name:
-                            return me.Member.Name;
-                        case UnaryExpression ue when ue.NodeType == ExpressionType.Convert:
-                            return GetIgnoreNameCore(name, ue.Operand);
-                        default:
-                            return null;
-                    }
-                }
+                    MemberExpression { Expression: ParameterExpression { Name: { } paramName }, Member: { Name: { } memberName } } when paramName == name => memberName,
+                    UnaryExpression { NodeType: ExpressionType.Convert, Operand: { } op } => GetIgnoreNameCore(name, op),
+                    _ => null,
+                };
             }
 
             /* todo(cosborn)
              * Should expressions allow indexing, in the case of collections and dictionaries?
              */
 
-            #region Link
-
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Link(string relation, ILinkInstruction instruction)
             {
-                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (instruction is null) { throw new ArgumentNullException(nameof(instruction)); }
-
                 Links[relation] = instruction;
                 return this;
             }
-
-            #endregion
-
-            #region Embed
 
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.EmbedElements<TElement>(
                 string relation,
                 Expression<Func<T, IReadOnlyCollection<TElement>>> collectionSelector,
-                Func<TElement, ILinkData> linkSelector)
+                Func<TElement, ILinkData?> linkSelector)
             {
-                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (collectionSelector is null) { throw new ArgumentNullException(nameof(collectionSelector)); }
-                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
-
                 switch (collectionSelector.Body)
                 {
-                    case MemberExpression me:
+                    case MemberExpression { Member: { Name: { } n } }:
                         var valueSelector = collectionSelector.Compile();
                         Links[relation] = new ManyLinkInstruction<T>(c => valueSelector(c).Select(linkSelector));
-                        Embeds.Add(new ManyEmbedInstruction<T, TElement>(relation, me.Member.Name, t => valueSelector(t)));
+                        Embeds.Add(new ManyEmbedInstruction<T, TElement>(relation, n, t => valueSelector(t)));
                         return this;
                     default:
                         throw new ArgumentException(MalformedValueSelector);
@@ -143,12 +120,8 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Embed<TMember>(
                 string relation,
                 Expression<Func<T, TMember>> memberSelector,
-                Func<T, ILinkData> linkSelector)
+                Func<T, ILinkData?> linkSelector)
             {
-                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
-                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
-
                 switch (memberSelector.Body)
                 {
                     case MemberExpression me:
@@ -165,12 +138,8 @@ namespace Tiger.Hal
             ITransformationMap<T> ITransformationMap<T>.Embed<TMember>(
                 string relation,
                 Expression<Func<T, TMember>> memberSelector,
-                Func<T, TMember, ILinkData> linkSelector)
+                Func<T, TMember, ILinkData?> linkSelector)
             {
-                if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-                if (memberSelector is null) { throw new ArgumentNullException(nameof(memberSelector)); }
-                if (linkSelector is null) { throw new ArgumentNullException(nameof(linkSelector)); }
-
                 switch (memberSelector.Body)
                 { // todo(cosborn) Allow indexing, in the case of collections and dictionaries?
                     case MemberExpression me:
@@ -183,15 +152,9 @@ namespace Tiger.Hal
                 }
             }
 
-            #endregion
-
-            #region Ignore
-
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Ignore(string memberSelector1)
             {
-                if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
-
                 Ignores.Add(memberSelector1);
                 return this;
             }
@@ -199,9 +162,6 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Ignore(string memberSelector1, string memberSelector2)
             {
-                if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
-                if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
-
                 Ignores.Add(memberSelector1);
                 Ignores.Add(memberSelector2);
                 return this;
@@ -213,10 +173,6 @@ namespace Tiger.Hal
                 string memberSelector2,
                 string memberSelector3)
             {
-                if (memberSelector1 is null) { throw new ArgumentNullException(nameof(memberSelector1)); }
-                if (memberSelector2 is null) { throw new ArgumentNullException(nameof(memberSelector2)); }
-                if (memberSelector3 is null) { throw new ArgumentNullException(nameof(memberSelector3)); }
-
                 Ignores.Add(memberSelector1);
                 Ignores.Add(memberSelector2);
                 Ignores.Add(memberSelector3);
@@ -226,13 +182,9 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             ITransformationMap<T> ITransformationMap<T>.Ignore(params string[] memberSelectors)
             {
-                if (memberSelectors is null) { throw new ArgumentNullException(nameof(memberSelectors)); }
-
                 Ignores.AddRange(memberSelectors);
                 return this;
             }
-
-            #endregion
         }
     }
 }

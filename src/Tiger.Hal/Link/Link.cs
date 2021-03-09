@@ -1,7 +1,7 @@
 // <copyright file="Link.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") â€“
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -16,7 +16,6 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using static Newtonsoft.Json.DefaultValueHandling;
@@ -40,7 +39,7 @@ namespace Tiger.Hal
         /// A hint to indicate the media type expected when dereferencing the target resource.
         /// </param>
         /// <param name="deprecation">
-        /// Whether the link has been deprecated – that is,
+        /// Whether the link has been deprecated ï¿½ that is,
         /// whether it will be removed at a future date.
         /// </param>
         /// <param name="name">
@@ -51,16 +50,16 @@ namespace Tiger.Hal
         /// <param name="hrefLang">The language of the target resource.</param>
         [JsonConstructor]
         internal Link(
-            [NotNull] string href,
+            string href,
             [JsonProperty("Templated")] bool isTemplated,
-            [CanBeNull] string type,
-            [CanBeNull] Uri deprecation,
-            [CanBeNull] string name,
-            [CanBeNull] Uri profile,
-            [CanBeNull] string title,
-            [CanBeNull] string hrefLang)
+            string? type,
+            Uri? deprecation,
+            string? name,
+            Uri? profile,
+            string? title,
+            string? hrefLang)
         {
-            Href = href ?? throw new ArgumentNullException(nameof(href));
+            Href = href;
             IsTemplated = isTemplated;
             Type = type;
             Deprecation = deprecation;
@@ -74,7 +73,7 @@ namespace Tiger.Hal
         /// Gets the location of the target resource or a template which, when bound,
         /// will be the location of the location of the target resource.
         /// </summary>
-        [JsonProperty(Required = Always), NotNull]
+        [JsonProperty(Required = Always)]
         public string Href { get; }
 
         /// <summary>
@@ -88,34 +87,34 @@ namespace Tiger.Hal
         /// Gets a hint to indicate the media type expected
         /// when dereferencing the target resource.
         /// </summary>
-        [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]
+        [JsonProperty(DefaultValueHandling = Ignore)]
         [SuppressMessage("Microsoft:Guidelines", "CA1721", Justification = "That's what it's called.")]
-        public string Type { get; }
+        public string? Type { get; }
 
         /// <summary>
-        /// Gets whether the link has been deprecated – that is, whether
+        /// Gets whether the link has been deprecated â€“ that is, whether
         /// it will be removed at a future date.
         /// </summary>
-        [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]
-        public Uri Deprecation { get; }
+        [JsonProperty(DefaultValueHandling = Ignore)]
+        public Uri? Deprecation { get; }
 
         /// <summary>
         /// Gets a secondary key for selecting links which
         /// share the same relation type.
         /// </summary>
-        [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]
-        public string Name { get; }
+        [JsonProperty(DefaultValueHandling = Ignore)]
+        public string? Name { get; }
 
         /// <summary>Gets a hint about the profile of the target resource.</summary>
-        [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]
-        public Uri Profile { get; }
+        [JsonProperty(DefaultValueHandling = Ignore)]
+        public Uri? Profile { get; }
 
         /// <summary>Gets a human-readable identifier for the link.</summary>
-        [JsonProperty(DefaultValueHandling = Ignore), CanBeNull]
-        public string Title { get; }
+        [JsonProperty(DefaultValueHandling = Ignore)]
+        public string? Title { get; }
 
         /// <summary>Gets the language of the target resource.</summary>
-        [JsonProperty("Hreflang", DefaultValueHandling = Ignore), CanBeNull]
-        public string HrefLang { get; }
+        [JsonProperty("Hreflang", DefaultValueHandling = Ignore)]
+        public string? HrefLang { get; }
     }
 }

@@ -1,39 +1,32 @@
-﻿using System;
-using JetBrains.Annotations;
+// <copyright file="AbsoluteUri.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
+//
+//   Licensed under the Apache License, Version 2.0 (the "License") –
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+// </copyright>
+
+using System;
 
 namespace Test.Utility
 {
     /// <summary>Represents a <see cref="Uri"/> with, at least, protocol and domain.</summary>
-    struct AbsoluteUri
+    sealed record AbsoluteUri(Uri Uri)
     {
-        readonly Uri _uri;
-
-        /// <summary>Initializes a new instance of the <see cref="AbsoluteUri"/> struct.</summary>
-        /// <param name="uri">The <see cref="Uri"/> from which to build this value.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="uri"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException"><paramref name="uri"/> is not absolute.</exception>
-        public AbsoluteUri([NotNull] Uri uri)
-        {
-            if (uri is null) { throw new ArgumentNullException(nameof(uri)); }
-            if (!uri.IsAbsoluteUri)
-            {
-                throw new ArgumentException("URI must be absolute.", nameof(uri));
-            }
-            _uri = uri;
-        }
+        /// <summary>Converts an absolute URI to an undistinguished URI.</summary>
+        /// <param name="uri">The URI to convert.</param>
+        public static implicit operator Uri(AbsoluteUri uri) => uri.Uri;
 
         /// <summary>Converts an absolute URI to an undistinguished URI.</summary>
         /// <returns>The underlying instance of <see cref="Uri"/>.</returns>
-        [NotNull, Pure]
-        public Uri ToUri() => _uri;
-
-        /// <inheritdoc/>
-        [NotNull, Pure]
-        public override string ToString() => _uri.AbsoluteUri;
-
-        /// <summary>Converts an absolute URI to an undistinguished URI.</summary>
-        /// <param name="uri">The URI to convert.</param>
-        [NotNull]
-        public static implicit operator Uri(AbsoluteUri uri) => uri._uri;
+        public Uri ToUri() => Uri;
     }
 }

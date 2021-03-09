@@ -1,7 +1,7 @@
 // <copyright file="HalJsonMvcBuilderExtensions.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,49 +25,48 @@ using static Microsoft.Extensions.DependencyInjection.ServiceDescriptor;
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>Extends the functionality of <see cref="IServiceCollection"/> for HAL+JSON.</summary>
-    [PublicAPI]
     public static class HalJsonMvcBuilderExtensions
     {
         /// <summary>Adds HAL+JSON transformation and serialization to the application.</summary>
         /// <typeparam name="TProfile">The type of the profile to add.</typeparam>
         /// <param name="builder">The application's MVC builder.</param>
         /// <returns>The modified MVC core builder.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="builder"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">A profile could not be added to the repository builder.</exception>
-        [NotNull]
-        public static IMvcBuilder AddHalJson<TProfile>([NotNull] this IMvcBuilder builder)
+        public static IMvcBuilder AddHalJson<TProfile>(this IMvcBuilder builder)
             where TProfile : class, IHalProfile
         {
-            if (builder is null) { throw new ArgumentNullException(nameof(builder)); }
-
-            builder.Services.AddTransient<IHalProfile, TProfile>();
-            builder.Services.AddSingleton<HalRepositoryBuilder>();
-            builder.Services.AddTransient<ILinkBuilder<LinkData.Constant>, LinkBuilder.Constant>();
-            builder.Services.AddTransient<ILinkBuilder<LinkData.Templated>, LinkBuilder.Templated>();
-            builder.Services.AddTransient<ILinkBuilder<LinkData.Routed>, LinkBuilder.Routed>();
-            builder.Services.AddSingleton(p =>
+            if (builder is null)
             {
-                var profile = p.GetRequiredService<IHalProfile>();
-                var repoBuilder = p.GetRequiredService<HalRepositoryBuilder>();
-                return repoBuilder.Build(profile);
-            });
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            _ = builder.Services
+                .AddTransient<IHalProfile, TProfile>()
+                .AddSingleton<HalRepositoryBuilder>()
+                .AddTransient<ILinkBuilder<LinkData.Constant>, LinkBuilder.Constant>()
+                .AddTransient<ILinkBuilder<LinkData.Templated>, LinkBuilder.Templated>()
+                .AddTransient<ILinkBuilder<LinkData.Routed>, LinkBuilder.Routed>()
+                .AddSingleton(p =>
+                {
+                    var profile = p.GetRequiredService<IHalProfile>();
+                    var repoBuilder = p.GetRequiredService<HalRepositoryBuilder>();
+                    return repoBuilder.Build(profile);
+                });
 
             return builder.AddHalJsonFormatter();
         }
 
-        [NotNull]
-        static IMvcBuilder AddHalJsonFormatter([NotNull] this IMvcBuilder builder)
+        static IMvcBuilder AddHalJsonFormatter(this IMvcBuilder builder)
         {
-            builder
-                .AddJsonOptions(o => o.SerializerSettings.Converters.Add(new LinkCollection.Converter()));
+            _ = builder.AddNewtonsoftJson(o => o.SerializerSettings.Converters.Add(new LinkCollection.Converter()));
 
             AddHalJsonFormatterServices(builder.Services);
             return builder;
         }
 
-        static void AddHalJsonFormatterServices([NotNull] IServiceCollection services)
+        static void AddHalJsonFormatterServices(IServiceCollection services)
         {
-            services.AddOptions();
+            _ = services.AddOptions();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.TryAddEnumerable(Transient<IConfigureOptions<MvcOptions>, MvcHalJsonMvcOptionsSetup>());
         }

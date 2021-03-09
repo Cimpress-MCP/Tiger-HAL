@@ -1,7 +1,7 @@
-﻿// <copyright file="TypeTransformer.KeyEqualityComparer.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+// <copyright file="TypeTransformer.KeyEqualityComparer.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -24,26 +24,31 @@ namespace Tiger.Hal
     {
         /// <inheritdoc/>
         sealed class KeyEqualityComparer
-            : IEqualityComparer<(string rel, bool isSingular)>
+            : IEqualityComparer<(string Rel, bool IsSingular)>
         {
-            readonly StringComparison _comparison;
+            readonly StringComparer _comparer;
 
             /// <summary>Initializes a new instance of the <see cref="KeyEqualityComparer"/> class.</summary>
-            /// <param name="comparison">The type of string comparison to use for "rel".</param>
-            public KeyEqualityComparer(StringComparison comparison)
+            /// <param name="comparer">The string comparer to use for "rel".</param>
+            public KeyEqualityComparer(StringComparer comparer)
             {
-                _comparison = comparison;
+                _comparer = comparer;
             }
 
             /// <inheritdoc/>
-            bool IEqualityComparer<(string rel, bool isSingular)>.Equals(
-                (string rel, bool isSingular) x,
-                (string rel, bool isSingular) y) => string.Equals(x.rel, y.rel, _comparison)
-                                                    && x.isSingular == y.isSingular;
+            bool IEqualityComparer<(string Rel, bool IsSingular)>.Equals(
+                (string Rel, bool IsSingular) x,
+                (string Rel, bool IsSingular) y) =>
+                    _comparer.Equals(x.Rel, y.Rel) && x.IsSingular == y.IsSingular;
 
             /// <inheritdoc/>
-            int IEqualityComparer<(string rel, bool isSingular)>.GetHashCode((string rel, bool isSingular) obj) =>
-                obj.GetHashCode();
+            int IEqualityComparer<(string Rel, bool IsSingular)>.GetHashCode((string Rel, bool IsSingular) obj)
+            {
+                var hash = default(HashCode);
+                hash.Add(obj.Rel, _comparer);
+                hash.Add(obj.IsSingular);
+                return hash.ToHashCode();
+            }
         }
     }
 }

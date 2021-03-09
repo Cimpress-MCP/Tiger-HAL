@@ -1,4 +1,10 @@
-﻿### What's new in 6.0.0 (Released 2019-07-04)
+﻿### What's new in 7.0.0 (Released 2021-03-11)
+
+* The library has grown support for more modern frameworks.
+* The library has grown nullability annotations.
+* Collections of types which already implement `ILinkData` can be mapped directly without a passthrough selector.
+
+### What's new in 6.0.0 (Released 2019-07-04)
 
 * The library has grown support for custom rules for producing links.
   * Standard rules go through this single entry point, so Tiger.HAL is implemented on the same base as your rules.

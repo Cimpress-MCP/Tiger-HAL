@@ -1,7 +1,7 @@
 // <copyright file="HalRepositoryBuilder.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,23 +15,19 @@
 // </copyright>
 
 using System;
-using JetBrains.Annotations;
-using static JetBrains.Annotations.ImplicitUseTargetFlags;
 
 namespace Tiger.Hal
 {
     /// <summary>Builds an <see cref="IHalRepository"/> from <see cref="IHalProfile"/>s.</summary>
-    [UsedImplicitly(Members)]
     sealed class HalRepositoryBuilder
     {
         readonly IServiceProvider _serviceProvider;
 
         /// <summary>Initializes a new instance of the <see cref="HalRepositoryBuilder"/> class.</summary>
         /// <param name="serviceProvider">The application's service provider.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
-        public HalRepositoryBuilder([NotNull] IServiceProvider serviceProvider)
+        public HalRepositoryBuilder(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _serviceProvider = serviceProvider;
         }
 
         /// <summary>Builds an <see cref="IHalRepository"/>.</summary>
@@ -39,8 +35,7 @@ namespace Tiger.Hal
         /// The profile containing the declarations for creating a transformation mapping.
         /// </param>
         /// <returns>The built <see cref="IHalRepository"/>.</returns>
-        [NotNull]
-        public IHalRepository Build([NotNull] IHalProfile profile)
+        public IHalRepository Build(IHalProfile profile)
         {
             var transformationMap = new TransformationMap();
             profile.OnTransformationMapCreating(transformationMap);

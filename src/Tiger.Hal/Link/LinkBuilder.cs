@@ -1,7 +1,7 @@
-﻿// <copyright file="LinkBuilder.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+// <copyright file="LinkBuilder.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -35,8 +34,6 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             Link ILinkBuilder<LinkData.Constant>.Build(LinkData.Constant linkData)
             {
-                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
-
                 var href = linkData.Href.IsAbsoluteUri
                     ? linkData.Href.AbsoluteUri
                     : linkData.Href.OriginalString;
@@ -60,20 +57,15 @@ namespace Tiger.Hal
             : ILinkBuilder<LinkData.Templated>
         {
             /// <inheritdoc/>
-            Link ILinkBuilder<LinkData.Templated>.Build(LinkData.Templated linkData)
-            {
-                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
-
-                return new Link(
-                    linkData.Template.Resolve(),
-                    true,
-                    linkData.Type,
-                    linkData.Deprecation,
-                    linkData.Name,
-                    linkData.Profile,
-                    linkData.Title,
-                    linkData.HrefLang);
-            }
+            Link ILinkBuilder<LinkData.Templated>.Build(LinkData.Templated linkData) => new(
+                linkData.Template.Resolve(),
+                true,
+                linkData.Type,
+                linkData.Deprecation,
+                linkData.Name,
+                linkData.Profile,
+                linkData.Title,
+                linkData.HrefLang);
         }
 
         /// <summary>
@@ -91,38 +83,21 @@ namespace Tiger.Hal
             /// <exception cref="ArgumentNullException"><paramref name="actionContextAccessor"/> is <see langword="null"/>.</exception>
             /// <exception cref="ArgumentNullException"><paramref name="urlHelperFactory"/> is <see langword="null"/>.</exception>
             public Routed(
-                [NotNull] IActionContextAccessor actionContextAccessor,
-                [NotNull] IUrlHelperFactory urlHelperFactory)
+                IActionContextAccessor actionContextAccessor,
+                IUrlHelperFactory urlHelperFactory)
             {
-                _actionContextAccessor = actionContextAccessor ?? throw new ArgumentNullException(nameof(actionContextAccessor));
-                _urlHelperFactory = urlHelperFactory ?? throw new ArgumentNullException(nameof(urlHelperFactory));
+                _actionContextAccessor = actionContextAccessor;
+                _urlHelperFactory = urlHelperFactory;
             }
 
             /// <inheritdoc/>
             Link ILinkBuilder<LinkData.Routed>.Build(LinkData.Routed linkData)
             {
-                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
-
                 var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
                 var href = urlHelper.Link(linkData.RouteName, linkData.RouteValues);
-                if (href is null)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            InvariantCulture,
-                            @"No route exists with name ""{0}"".",
-                            linkData.RouteName));
-                }
-
-                return new Link(
-                    href,
-                    false,
-                    linkData.Type,
-                    linkData.Deprecation,
-                    linkData.Name,
-                    linkData.Profile,
-                    linkData.Title,
-                    linkData.HrefLang);
+                return href is null
+                    ? throw new InvalidOperationException(string.Format(InvariantCulture, @"No route exists with name ""{0}"".", linkData.RouteName))
+                    : new(href, false, linkData.Type, linkData.Deprecation, linkData.Name, linkData.Profile, linkData.Title, linkData.HrefLang);
             }
         }
     }

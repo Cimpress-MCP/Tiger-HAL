@@ -1,7 +1,7 @@
 // <copyright file="IHoistInstruction.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -14,21 +14,17 @@
 //   limitations under the License.
 // </copyright>
 
-using JetBrains.Annotations;
-
 namespace Tiger.Hal
 {
     /// <summary>Represents an instruction for creating a hoist in a HAL response.</summary>
     public interface IHoistInstruction
     {
         /// <summary>Gets the path into the object to select the value to hoist.</summary>
-        [NotNull]
         string Name { get; }
 
         /// <summary>Retrieves the value to hoist from the given main object.</summary>
         /// <param name="main">The main object.</param>
         /// <returns>The value to hoist.</returns>
-        [NotNull]
-        object GetHoistValue([NotNull] object main);
+        object? GetHoistValue(object main);
     }
 }

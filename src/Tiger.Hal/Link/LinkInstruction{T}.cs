@@ -1,7 +1,7 @@
 // <copyright file="LinkInstruction{T}.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
@@ -25,16 +24,16 @@ namespace Tiger.Hal
     sealed class LinkInstruction<T>
         : ILinkInstruction
     {
-        readonly Func<T, ILinkData> _selector;
+        readonly Func<T, ILinkData?> _selector;
 
         /// <summary>Initializes a new instance of the <see cref="LinkInstruction{T}"/> class.</summary>
         /// <param name="selector">
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        public LinkInstruction([NotNull] Func<T, ILinkData> selector)
+        public LinkInstruction(Func<T, ILinkData?> selector)
         {
-            _selector = selector ?? throw new ArgumentNullException(nameof(selector));
+            _selector = selector;
         }
 
         /// <inheritdoc/>
@@ -43,8 +42,7 @@ namespace Tiger.Hal
         /// <inheritdoc/>
         IEnumerable<ILinkData> ILinkInstruction.TransformToLinkData(object main)
         {
-            var link = _selector((T)main);
-            if (link != null)
+            if (_selector((T)main) is { } link)
             {
                 yield return link;
             }
