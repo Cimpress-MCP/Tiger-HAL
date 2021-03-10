@@ -1,7 +1,7 @@
 // <copyright file="ManyLinkInstruction{T}.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
@@ -26,16 +25,16 @@ namespace Tiger.Hal
     sealed class ManyLinkInstruction<T>
         : ILinkInstruction
     {
-        readonly Func<T, IEnumerable<ILinkData>> _selector;
+        readonly Func<T, IEnumerable<ILinkData?>> _selector;
 
         /// <summary>Initializes a new instance of the <see cref="ManyLinkInstruction{T}"/> class.</summary>
         /// <param name="linkSelector">
         /// A function that creates an <see cref="ILinkData"/> from a value of type <typeparamref name="T"/>.
         /// </param>
         /// <exception cref="ArgumentNullException"><paramref name="linkSelector"/> is <see langword="null"/>.</exception>
-        public ManyLinkInstruction([NotNull] Func<T, IEnumerable<ILinkData>> linkSelector)
+        public ManyLinkInstruction(Func<T, IEnumerable<ILinkData?>> linkSelector)
         {
-            _selector = linkSelector ?? throw new ArgumentNullException(nameof(linkSelector));
+            _selector = linkSelector;
         }
 
         /// <inheritdoc/>
@@ -43,6 +42,6 @@ namespace Tiger.Hal
 
         /// <inheritdoc/>
         IEnumerable<ILinkData> ILinkInstruction.TransformToLinkData(object main) =>
-            _selector((T)main).Where(ld => ld != null);
+            _selector((T)main).Where(ld => ld is not null).Cast<ILinkData>();
     }
 }

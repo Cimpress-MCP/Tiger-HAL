@@ -1,7 +1,7 @@
-﻿// <copyright file="ILinkBuilder{TLinkData}.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+// <copyright file="ILinkBuilder{TLinkData}.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -13,9 +13,6 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 // </copyright>
-
-using System;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
@@ -29,8 +26,6 @@ namespace Tiger.Hal
         /// </summary>
         /// <param name="linkData">The data from which to build a link.</param>
         /// <returns>A link.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="linkData"/> is <see langword="null"/>.</exception>
-        [NotNull]
-        Link Build([NotNull] TLinkData linkData);
+        Link Build(TLinkData linkData);
     }
 }

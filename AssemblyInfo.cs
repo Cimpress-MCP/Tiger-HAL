@@ -14,7 +14,6 @@
 //   limitations under the License.
 // </copyright>
 
-using System.Runtime.CompilerServices;
+using System;
 
-[assembly: InternalsVisibleTo("Tiger.Hal.UnitTest")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+[assembly: CLSCompliant(false)]

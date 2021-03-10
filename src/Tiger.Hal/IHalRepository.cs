@@ -1,7 +1,7 @@
-﻿// <copyright file="IHalRepository.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+// <copyright file="IHalRepository.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,7 +15,7 @@
 // </copyright>
 
 using System;
-using JetBrains.Annotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Tiger.Hal
 {
@@ -30,7 +30,7 @@ namespace Tiger.Hal
         /// <see langword="true"/> if <paramref name="type"/> has a registered transformer,
         /// otherwise, <see langword="false"/>.
         /// </returns>
-        bool CanTransform([NotNull] Type type);
+        bool CanTransform(Type type);
 
         /// <summary>
         /// Gets the transformer that is associated with the given type.
@@ -45,8 +45,6 @@ namespace Tiger.Hal
         /// <see langword="true"/> if there is a transformer associated with <paramref name="type"/>;
         /// otherwise, <see langword="false"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException"><paramref name="type"/> is <see langword="null"/>.</exception>
-        [ContractAnnotation("=> true, transformer:notnull; => false, transformer:null")]
-        bool TryGetTransformer([NotNull] Type type, out ITypeTransformer transformer);
+        bool TryGetTransformer(Type type, [MaybeNullWhen(returnValue: false)] out ITypeTransformer transformer);
     }
 }

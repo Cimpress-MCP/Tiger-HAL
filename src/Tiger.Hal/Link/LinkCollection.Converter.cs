@@ -1,7 +1,7 @@
 // <copyright file="LinkCollection.Converter.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -16,7 +16,6 @@
 
 using System;
 using System.Linq;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Tiger.Hal
@@ -34,8 +33,8 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             public override void WriteJson(
                 JsonWriter writer,
-                [CanBeNull] LinkCollection value,
-                [NotNull] JsonSerializer serializer)
+                LinkCollection? value,
+                JsonSerializer serializer)
             {
                 if (value is null)
                 { // note(cosborn) Frankly, something has gone wrong.
