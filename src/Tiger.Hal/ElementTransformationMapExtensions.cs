@@ -105,9 +105,9 @@ namespace Tiger.Hal
             this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
             string relation,
             Func<TElement, Uri> selector)
-            where TCollection : IReadOnlyCollection<TElement> => elementTransformationMap is null
+            where TCollection : IReadOnlyCollection<TElement> => elementTransformationMap is not { } etm
                 ? throw new ArgumentNullException(nameof(elementTransformationMap))
-                : elementTransformationMap.EmbedElements(relation, t => selector(t).Pipe(Const));
+                : etm.EmbedElements(relation, t => selector(t).Pipe(Const));
 
         /// <summary>Creates embeds of the elements for the given collection type.</summary>
         /// <typeparam name="TCollection">The collection type being transformed.</typeparam>

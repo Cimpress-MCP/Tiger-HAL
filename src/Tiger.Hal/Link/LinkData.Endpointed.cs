@@ -1,4 +1,4 @@
-// <copyright file="LinkData.Routed.cs" company="Cimpress, Inc.">
+// <copyright file="LinkData.Endpointed.cs" company="Cimpress, Inc.">
 //   Copyright 2020 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License") –
@@ -22,25 +22,25 @@ namespace Tiger.Hal
     /// <summary>Routing support.</summary>
     public static partial class LinkData
     {
-        /// <summary>Represents a link from an ASP.NET MVC route.</summary>
-        /// <remarks>Be sure that you named the route in your controller.</remarks>
-        public sealed class Routed
+        /// <summary>Represents a link from an ASP.NET MVC endpoint.</summary>
+        /// <remarks>Be sure that you named the endpoint in your controller.</remarks>
+        public sealed class Endpointed
             : ILinkData
         {
-            /// <summary>Initializes a new instance of the <see cref="LinkData.Routed"/> class.</summary>
-            /// <param name="routeName">The name of the route for which to generate a link.</param>
-            /// <param name="routeValues">The route values to use when generating a link.</param>
-            public Routed(string routeName, object? routeValues = null)
+            /// <summary>Initializes a new instance of the <see cref="Endpointed"/> class.</summary>
+            /// <param name="endpointName">The name of the route for which to generate a link.</param>
+            /// <param name="values">The values to use when generating a link.</param>
+            public Endpointed(string endpointName, object? values = null)
             {
-                RouteName = routeName;
-                RouteValues = routeValues ?? new { };
+                EndpointName = endpointName;
+                Values = values ?? new { };
             }
 
             /// <summary>Gets the name of the route for which to generate a link.</summary>
-            public string RouteName { get; }
+            public string EndpointName { get; }
 
             /// <summary>Gets the values required to generate a link.</summary>
-            public object RouteValues { get; }
+            public object Values { get; }
 
             /// <summary>
             /// Gets or sets a hint to indicate the media type expected

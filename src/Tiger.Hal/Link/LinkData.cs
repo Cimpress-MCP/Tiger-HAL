@@ -22,12 +22,12 @@ namespace Tiger.Hal
     /// <summary>Convenience methods for creating <see cref="ILinkData"/> instances.</summary>
     public static partial class LinkData
     {
-        /// <summary>Creates a link from an ASP.NET MVC route.</summary>
-        /// <param name="routeName">The name of the route for which to generate a link.</param>
-        /// <param name="routeValues">The route values to use when generating a link.</param>
+        /// <summary>Creates a link from an endpoint.</summary>
+        /// <param name="endpointName">The name of the endpoint for which to generate a link.</param>
+        /// <param name="values">The values to use when generating a link.</param>
         /// <returns>A link builder.</returns>
-        public static ILinkData Route(string routeName, object? routeValues = null) =>
-            new Routed(routeName, routeValues);
+        public static ILinkData Endpoint(string endpointName, object? values = null) =>
+            new Endpointed(endpointName, values);
 
         /// <summary>Creates a templated link from a URI template.</summary>
         /// <param name="template">The template that will become the value of <see cref="Link.Href"/>.</param>
