@@ -1,7 +1,7 @@
-﻿// <copyright file="ElementTransformationMapExtensions.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+// <copyright file="ElementTransformationMapExtensions.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using Tiger.Types;
 using static Tiger.Hal.LinkData;
 using static Tiger.Hal.Properties.Resources;
@@ -38,23 +37,13 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="TElement"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="elementTransformationMap"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        [NotNull]
         public static ITransformationMap<TCollection, TElement> LinkElements<TCollection, TElement>(
-            [NotNull] this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
-            [NotNull] string relation,
-            [NotNull] Func<TElement, Uri> selector)
-            where TCollection : IReadOnlyCollection<TElement>
-        {
-            if (elementTransformationMap is null) { throw new ArgumentNullException(nameof(elementTransformationMap)); }
-            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
-
-            return elementTransformationMap.LinkElements(relation, t => selector(t)?.Pipe(Const));
-        }
+            this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
+            string relation,
+            Func<TElement, Uri> selector)
+            where TCollection : IReadOnlyCollection<TElement> => elementTransformationMap is null
+                ? throw new ArgumentNullException(nameof(elementTransformationMap))
+                : elementTransformationMap.LinkElements(relation, t => selector(t).Pipe(Const));
 
         /// <summary>Creates links to the elements for the given collection type.</summary>
         /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
@@ -66,24 +55,18 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="TElement"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="elementTransformationMap"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        [NotNull]
         public static ITransformationMap<TCollection, TElement> LinkElements<TCollection, TElement>(
-            [NotNull] this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
-            [NotNull] Uri relation,
-            [NotNull] Func<TElement, ILinkData> selector)
-            where TCollection : IReadOnlyCollection<TElement>
-        {
-            if (elementTransformationMap is null) { throw new ArgumentNullException(nameof(elementTransformationMap)); }
-            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
-
-            return elementTransformationMap.LinkElements(relation.AbsoluteUri, selector);
-        }
+            this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
+            Uri relation,
+            Func<TElement, ILinkData?> selector)
+            where TCollection : IReadOnlyCollection<TElement> => (elementTransformationMap, relation) switch
+            {
+                (null, _) => throw new ArgumentNullException(nameof(elementTransformationMap)),
+                (_, null) => throw new ArgumentNullException(nameof(relation)),
+                (_, { IsAbsoluteUri: false }) => throw new ArgumentException(RelativeRelationUri, nameof(relation)),
+                ({ } etm, { AbsoluteUri: { } u }) => etm.LinkElements(u, selector),
+            };
 
         /// <summary>Creates links to the elements for the given collection type.</summary>
         /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
@@ -95,24 +78,18 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="TElement"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="elementTransformationMap"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        [NotNull]
         public static ITransformationMap<TCollection, TElement> LinkElements<TCollection, TElement>(
-            [NotNull] this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
-            [NotNull] Uri relation,
-            [NotNull] Func<TElement, Uri> selector)
-            where TCollection : IReadOnlyCollection<TElement>
-        {
-            if (elementTransformationMap is null) { throw new ArgumentNullException(nameof(elementTransformationMap)); }
-            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
-
-            return elementTransformationMap.LinkElements(relation.AbsoluteUri, selector);
-        }
+            this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
+            Uri relation,
+            Func<TElement, Uri> selector)
+            where TCollection : IReadOnlyCollection<TElement> => (elementTransformationMap, relation) switch
+            {
+                (null, _) => throw new ArgumentNullException(nameof(elementTransformationMap)),
+                (_, null) => throw new ArgumentNullException(nameof(relation)),
+                (_, { IsAbsoluteUri: false }) => throw new ArgumentException(RelativeRelationUri, nameof(relation)),
+                ({ } etm, { AbsoluteUri: { } u }) => etm.LinkElements(u, selector),
+            };
 
         /// <summary>Creates embeds of the elements for the given collection type.</summary>
         /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
@@ -124,23 +101,13 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="TElement"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="elementTransformationMap"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        [NotNull]
         public static ITransformationMap<TCollection, TElement> EmbedElements<TCollection, TElement>(
-            [NotNull] this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
-            [NotNull] string relation,
-            [NotNull] Func<TElement, Uri> selector)
-            where TCollection : IReadOnlyCollection<TElement>
-        {
-            if (elementTransformationMap is null) { throw new ArgumentNullException(nameof(elementTransformationMap)); }
-            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
-
-            return elementTransformationMap.EmbedElements(relation, t => selector(t)?.Pipe(Const));
-        }
+            this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
+            string relation,
+            Func<TElement, Uri> selector)
+            where TCollection : IReadOnlyCollection<TElement> => elementTransformationMap is not { } etm
+                ? throw new ArgumentNullException(nameof(elementTransformationMap))
+                : etm.EmbedElements(relation, t => selector(t).Pipe(Const));
 
         /// <summary>Creates embeds of the elements for the given collection type.</summary>
         /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
@@ -152,24 +119,18 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="TElement"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="elementTransformationMap"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        [NotNull]
         public static ITransformationMap<TCollection, TElement> EmbedElements<TCollection, TElement>(
-            [NotNull] this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
-            [NotNull] Uri relation,
-            [NotNull] Func<TElement, ILinkData> selector)
-            where TCollection : IReadOnlyCollection<TElement>
-        {
-            if (elementTransformationMap is null) { throw new ArgumentNullException(nameof(elementTransformationMap)); }
-            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
-
-            return elementTransformationMap.EmbedElements(relation.AbsoluteUri, selector);
-        }
+            this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
+            Uri relation,
+            Func<TElement, ILinkData?> selector)
+            where TCollection : IReadOnlyCollection<TElement> => (elementTransformationMap, relation) switch
+            {
+                (null, _) => throw new ArgumentNullException(nameof(elementTransformationMap)),
+                (_, null) => throw new ArgumentNullException(nameof(relation)),
+                (_, { IsAbsoluteUri: false }) => throw new ArgumentException(RelativeRelationUri, nameof(relation)),
+                ({ } etm, { AbsoluteUri: { } u }) => etm.EmbedElements(u, selector),
+            };
 
         /// <summary>Creates embeds of the elements for the given collection type.</summary>
         /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
@@ -181,23 +142,17 @@ namespace Tiger.Hal
         /// from a value of type <typeparamref name="TElement"/>.
         /// </param>
         /// <returns>The modified transformation map.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="elementTransformationMap"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="relation"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="relation"/> is not an absolute <see cref="Uri"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
-        [NotNull]
         public static ITransformationMap<TCollection, TElement> EmbedElements<TCollection, TElement>(
-            [NotNull] this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
-            [NotNull] Uri relation,
-            [NotNull] Func<TElement, Uri> selector)
-            where TCollection : IReadOnlyCollection<TElement>
-        {
-            if (elementTransformationMap is null) { throw new ArgumentNullException(nameof(elementTransformationMap)); }
-            if (relation is null) { throw new ArgumentNullException(nameof(relation)); }
-            if (!relation.IsAbsoluteUri) { throw new ArgumentException(RelativeRelationUri, nameof(relation)); }
-            if (selector is null) { throw new ArgumentNullException(nameof(selector)); }
-
-            return elementTransformationMap.EmbedElements(relation.AbsoluteUri, selector);
-        }
+            this IElementTransformationMap<TCollection, TElement> elementTransformationMap,
+            Uri relation,
+            Func<TElement, Uri> selector)
+            where TCollection : IReadOnlyCollection<TElement> => (elementTransformationMap, relation) switch
+            {
+                (null, _) => throw new ArgumentNullException(nameof(elementTransformationMap)),
+                (_, null) => throw new ArgumentNullException(nameof(relation)),
+                (_, { IsAbsoluteUri: false }) => throw new ArgumentException(RelativeRelationUri, nameof(relation)),
+                ({ } etm, { AbsoluteUri: { } u }) => etm.EmbedElements(u, selector),
+            };
     }
 }

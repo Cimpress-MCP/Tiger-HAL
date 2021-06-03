@@ -1,7 +1,7 @@
 // <copyright file="ITypeTransformer.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,7 +15,6 @@
 // </copyright>
 
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
@@ -23,15 +22,12 @@ namespace Tiger.Hal
     public interface ITypeTransformer
     {
         /// <summary>Gets a mapping of accessor to embeddable value.</summary>
-        [NotNull, ItemNotNull]
         IReadOnlyCollection<IEmbedInstruction> Embeds { get; }
 
         /// <summary>Gets a mapping of accessor to hoistable value.</summary>
-        [NotNull, ItemNotNull]
         IReadOnlyCollection<IHoistInstruction> Hoists { get; }
 
         /// <summary>Gets a collection of ignorable properties.</summary>
-        [NotNull, ItemNotNull]
         IReadOnlyCollection<string> Ignores { get; }
 
         /// <summary>
@@ -44,7 +40,6 @@ namespace Tiger.Hal
         /// Remember that <see cref="LinkCollection"/> serializes to a single object
         /// if the collection is singular.
         /// </remarks>
-        [NotNull]
-        IReadOnlyDictionary<string, LinkCollection> GenerateLinks([NotNull] object value);
+        IReadOnlyDictionary<string, LinkCollection> GenerateLinks(object value);
     }
 }

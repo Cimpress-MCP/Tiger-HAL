@@ -2,45 +2,39 @@
 
   <PropertyGroup>
     <Description>A transformer for ASP.NET Core to produce HAL+JSON responses.</Description>
-    <Copyright>©Cimpress 2017</Copyright>
+    <Copyright>©Cimpress 2021</Copyright>
     <AssemblyTitle>Tiger Hal</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>5.0.0</VersionPrefix>
+    <VersionPrefix>7.0.0</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
-    <DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DebugType>portable</DebugType>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <CodeAnalysisRuleSet>../../Tiger.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <AssemblyName>Tiger.Hal</AssemblyName>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageId>Tiger.Hal</PackageId>
     <PackageTags>hal;json;hal+json;link</PackageTags>
-    <PackageReleaseNotes><![CDATA[➟ Release 5.0.0
-⁃ The library has grown special support for transformation maps of collection types.
+    <PackageReleaseNotes><![CDATA[➟ Release 7.0.0
+⁃ The library has grown support for more modern frameworks.
+⁃ The library has grown nullability annotations.
+⁃ Collections of types which already implement `ILinkData` can be mapped directly without a passthrough selector.
 
-➟ Release 4.0.0
-⁃ A companion library of analyzers has been created: Tiger.Hal.Analyzers.
-⁃ Properties may now be ignored automatically if they meet certain criteria.
-⁃ Dependencies have been greatly rationalized.
-⁃ Namespaces have been adjusted.
-⁃ More utility methods have been added.
+➟ Release 6.0.0
+⁃ The library has grown support for custom rules for producing links.
+  ⁃ Standard rules go through this single entry point, so Tiger.HAL is implemented on the same base as your rules.
+⁃ The elements of collections can be embedded without linking to the collection itself.
+  ⁃ Because this is the same results as the `EmbedElements` command on base collections, it has the same name.
+⁃ Debug Symbols and SourceLink are now published to NuGet.
 ]]></PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-HAL</PackageProjectUrl>
-    <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/Cimpress-MCP/Tiger-HAL/master/tiger_logo.png</PackageIconUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageIcon>tiger_logo.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/Cimpress-MCP/Tiger-HAL.git</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <Features>IOperation</Features>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="../../stylecop.json" />
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Link/LinkData.Constant.cs">
@@ -71,22 +65,16 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
-  </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.13" />
     <PackageReference Include="Tavis.UriTemplates" Version="1.1.1" />
     <PackageReference Include="Tiger.Types" Version="5.0.0" />
 
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="2.0.0" PrivateAssets="All" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta009" PrivateAssets="All" />
-    <PackageReference Include="Text.Analyzers" Version="2.6.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Analyzers" Version="3.1.0" PrivateAssets="all" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.321" PrivateAssets="all" />
+
+    <None Include="../../tiger_logo.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

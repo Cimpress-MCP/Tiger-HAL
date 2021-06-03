@@ -1,7 +1,7 @@
 // <copyright file="ILinkInstruction.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,25 +15,25 @@
 // </copyright>
 
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
     /// <summary>Represents an instruction for creating a link relation in a HAL response.</summary>
-    interface ILinkInstruction
+    public interface ILinkInstruction
     {
         /// <summary>
         /// Gets a value indicating whether this link instruction represents a single value
-        /// when it produces a singleton collection from <see cref="TransformToLinkBuilders"/>.
+        /// when it produces a singleton collection from <see cref="TransformToLinkData"/>.
         /// </summary>
-        bool IsSingular { get; }
+        /// <param name="main">The main object from which to determine cardinality.</param>
+        /// <returns><see langword="true"/> if <paramref name="main"/> represents a singular object; otherwise, <see langword="false"/>.</returns>
+        bool IsSingular(object main);
 
         /// <summary>
         /// Transforms this instance into a collection of instances of <see cref="ILinkData"/>.
         /// </summary>
         /// <param name="main">The main object from which to create a link collection.</param>
         /// <returns>A collection of instances of <see cref="ILinkData"/>.</returns>
-        [NotNull, ItemNotNull]
-        IEnumerable<ILinkData> TransformToLinkBuilders([NotNull] object main);
+        IEnumerable<ILinkData> TransformToLinkData(object main);
     }
 }

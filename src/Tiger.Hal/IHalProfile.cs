@@ -1,7 +1,7 @@
 // <copyright file="IHalProfile.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -14,16 +14,13 @@
 //   limitations under the License.
 // </copyright>
 
-using JetBrains.Annotations;
-
 namespace Tiger.Hal
 {
     /// <summary>Defines the HAL+JSON transformations for an application.</summary>
-    [PublicAPI]
     public interface IHalProfile
     {
         /// <summary>Configures the transformation from a type to its HAL+JSON representation.</summary>
         /// <param name="transformationMap">The application's map of HAL transformation.</param>
-        void OnTransformationMapCreating([NotNull] ITransformationMap transformationMap);
+        void OnTransformationMapCreating(ITransformationMap transformationMap);
     }
 }

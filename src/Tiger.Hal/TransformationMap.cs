@@ -1,7 +1,7 @@
 // <copyright file="TransformationMap.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
@@ -24,18 +23,15 @@ namespace Tiger.Hal
     sealed partial class TransformationMap
         : ITransformationMap
     {
-        readonly Dictionary<Type, ITransformationInstructions> _maps = new Dictionary<Type, ITransformationInstructions>();
+        readonly Dictionary<Type, ITransformationInstructions> _maps = new();
 
         /// <summary>Gets the mapping of transformation instructions.</summary>
-        [NotNull]
         internal IReadOnlyDictionary<Type, ITransformationInstructions> Maps => _maps;
 
         /// <inheritdoc/>
         ITransformationMap<T> ITransformationMap.Self<T>(
-            Func<T, ILinkData> self)
+            Func<T, ILinkData?> self)
         {
-            if (self is null) { throw new ArgumentNullException(nameof(self)); }
-
             var builder = new Builder<T>(self);
             _maps[typeof(T)] = builder;
             return builder;
@@ -43,10 +39,8 @@ namespace Tiger.Hal
 
         /// <inheritdoc/>
         IElementTransformationMap<TCollection, TElement> ITransformationMap.Self<TCollection, TElement>(
-            Func<TCollection, ILinkData> self)
+            Func<TCollection, ILinkData?> self)
         {
-            if (self is null) { throw new ArgumentNullException(nameof(self)); }
-
             var builder = new Builder<TCollection, TElement>(self);
             _maps[typeof(TCollection)] = builder;
             return builder;

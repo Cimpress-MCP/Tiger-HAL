@@ -1,37 +1,51 @@
-image: microsoft/dotnet:2.1-sdk-alpine
+image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
 
 stages:
-  - build
-  - test-pack
-  - deploy
+- build
+- test-pack
+- deploy
 
-cache:
-  key: "$CI_PIPELINE_ID"
+variables:
+  CONFIGURATION: Release
+  GIT_STRATEGY: clone
 
 build:
   stage: build
   script:
-    - dotnet build -c Release
-  artifacts:
-    untracked: true
+  - dotnet build -property:ContinuousIntegrationBuild=true
+  cache: &cache_template
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+    - ./src/*/bin/*
+    - ./unit/*
+    policy: push
 
 test:
   stage: test-pack
   script:
-    - dotnet test -c Release ./unit/Test.csproj
+  - dotnet test --logger 'junit;MethodFormat=Class;FailureBodyFormat=Verbose' --collect 'XPlat Code Coverage'
+  cache:
+    <<: *cache_template
+    policy: pull
+  artifacts:
+    reports:
+      cobertura: ./unit/TestResults/**/coverage.cobertura.xml
+      junit: ./unit/TestResults/TestResults.xml
 
 pack:
   stage: test-pack
   script:
-    - dotnet pack -c Release -o "$(pwd)/dist/"
+  - dotnet pack --output "$(pwd)/dist/"
+  cache:
+    <<: *cache_template
+    policy: pull
   artifacts:
-    untracked: false
     paths:
-      - dist/
+    - ./dist/
 
 deploy:
   stage: deploy
   script:
-    - dotnet nuget push ./dist/*.nupkg -k $NUGET_API_KEY
+  - dotnet nuget push --api-key "${NUGET_API_KEY}" ./dist/*.nupkg
   only:
-    - master
+  - main

@@ -1,7 +1,7 @@
-﻿// <copyright file="TypeTransformer.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+// <copyright file="TypeTransformer.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -16,10 +16,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using static System.StringComparison;
+using static System.StringComparer;
 
 namespace Tiger.Hal
 {
@@ -27,7 +27,7 @@ namespace Tiger.Hal
     sealed partial class TypeTransformer
         : ITypeTransformer
     {
-        static readonly KeyEqualityComparer s_comparer = new KeyEqualityComparer(Ordinal);
+        static readonly KeyEqualityComparer s_comparer = new(Ordinal);
 
         readonly ITransformationInstructions _transformationInstructions;
         readonly IServiceProvider _serviceProvider;
@@ -37,14 +37,12 @@ namespace Tiger.Hal
         /// </summary>
         /// <param name="transformationInstructions">The transformation map for a type.</param>
         /// <param name="serviceProvider">The application's serviceProvider.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="transformationInstructions"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
         public TypeTransformer(
-            [NotNull] ITransformationInstructions transformationInstructions,
-            [NotNull] IServiceProvider serviceProvider)
+            ITransformationInstructions transformationInstructions,
+            IServiceProvider serviceProvider)
         {
-            _transformationInstructions = transformationInstructions ?? throw new ArgumentNullException(nameof(transformationInstructions));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _transformationInstructions = transformationInstructions;
+            _serviceProvider = serviceProvider;
         }
 
         /// <inheritdoc/>
@@ -60,34 +58,35 @@ namespace Tiger.Hal
         /// <exception cref="InvalidOperationException">A builder for the provided <see cref="ILinkData"/> could not be resolved.</exception>
         IReadOnlyDictionary<string, LinkCollection> ITypeTransformer.GenerateLinks(object value)
         {
-            if (value is null) { throw new ArgumentNullException(nameof(value)); }
-
-            return _transformationInstructions.LinkInstructions
+            var dict = _transformationInstructions
+                .LinkInstructions
                 .SelectMany(
-                    kvp => kvp.Value.TransformToLinkBuilders(value),
-                    (kvp, lb) => (rel: kvp.Key, isSingular: kvp.Value.IsSingular, link: Build(lb)))
-                .ToLookup(kvp => (kvp.rel, kvp.isSingular), kvp => kvp.link, s_comparer)
-                .ToDictionary(g => g.Key.rel, g => new LinkCollection(g.ToList(), g.Key.isSingular));
+                    kvp => kvp.Value.TransformToLinkData(value),
+                    (kvp, ld) => (Rel: kvp.Key, IsSingular: kvp.Value.IsSingular(value), Link: Build(ld)))
+                .GroupBy(t => (t.Rel, t.IsSingular), kvp => kvp.Link, s_comparer)
+                .ToImmutableDictionary(g => g.Key.Rel, g => new LinkCollection(g.ToList(), g.Key.IsSingular), Ordinal);
+            var allowedEmpty = _transformationInstructions
+                .LinkInstructions
+                .Where(kvp => !kvp.Value.IsSingular(value))
+                .Select(kvp => kvp.Key)
+                .Where(k => !dict.ContainsKey(k))
+                .Select(k => KeyValuePair.Create(k, new LinkCollection(ImmutableArray<Link>.Empty, isSingular: false)));
+            return dict.AddRange(allowedEmpty);
         }
 
         /// <summary>Builds a link from the provided link data.</summary>
         /// <param name="linkData">The data from which to build a link.</param>
         /// <returns>A link.</returns>
         /// <exception cref="InvalidOperationException">A builder for the provided <see cref="ILinkData"/> could not be resolved.</exception>
-        [NotNull]
-        Link Build([NotNull] ILinkData linkData)
+        Link Build(ILinkData linkData)
         {
             var dataType = linkData.GetType();
             var builderType = typeof(ILinkBuilder<>).MakeGenericType(dataType);
-            var buildMethod = builderType.GetMethod(nameof(ILinkBuilder<ILinkData>.Build), new[] { dataType });
+            var buildMethod = builderType.GetMethod(nameof(ILinkBuilder<ILinkData>.Build), new[] { dataType })!;
 
-            object builder;
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                builder = scope.ServiceProvider.GetRequiredService(builderType);
-            }
-
-            return (Link)buildMethod.Invoke(builder, new object[] { linkData });
+            using var scope = _serviceProvider.CreateScope();
+            var builder = scope.ServiceProvider.GetRequiredService(builderType);
+            return (Link)buildMethod.Invoke(builder, new object[] { linkData })!;
         }
     }
 }

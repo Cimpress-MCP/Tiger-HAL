@@ -1,7 +1,7 @@
 // <copyright file="MemberHoistInstruction{T,TMember}.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
@@ -30,20 +29,18 @@ namespace Tiger.Hal
         /// <summary>Initializes a new instance of the <see cref="MemberHoistInstruction{T,TMember}"/> class.</summary>
         /// <param name="memberName">The name of the member to hoist.</param>
         /// <param name="valueSelector">A function that seelcts a value to embed.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="memberName"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="valueSelector"/> is <see langword="null"/>.</exception>
         public MemberHoistInstruction(
-            [NotNull] string memberName,
-            [NotNull] Func<T, TMember> valueSelector)
+            string memberName,
+            Func<T, TMember> valueSelector)
         {
-            Name = memberName ?? throw new ArgumentNullException(nameof(memberName));
-            _valueSelector = valueSelector ?? throw new ArgumentNullException(nameof(valueSelector));
+            Name = memberName;
+            _valueSelector = valueSelector;
         }
 
         /// <inheritdoc/>
         public string Name { get; }
 
         /// <inheritdoc/>
-        object IHoistInstruction.GetHoistValue(object main) => _valueSelector((T)main);
+        object? IHoistInstruction.GetHoistValue(object main) => _valueSelector((T)main);
     }
 }

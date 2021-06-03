@@ -1,7 +1,7 @@
 // <copyright file="ITransformationMap.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -16,12 +16,10 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace Tiger.Hal
 {
     /// <summary>Defines a series of transformations for a type to its HAL representation.</summary>
-    [PublicAPI]
     public interface ITransformationMap
     {
         /// <summary>Creates the "self" link relation for the given type.</summary>
@@ -32,9 +30,7 @@ namespace Tiger.Hal
         /// for the "self" relation.
         /// </param>
         /// <returns>A transformation map from which further transformations can be defined.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="self"/> is <see langword="null"/>.</exception>
-        [NotNull]
-        ITransformationMap<T> Self<T>([NotNull] Func<T, ILinkData> self);
+        ITransformationMap<T> Self<T>(Func<T, ILinkData?> self);
 
         /// <summary>Creates the "self" link relation for the given type.</summary>
         /// <typeparam name="TCollection">The collection type being transformed.</typeparam>
@@ -45,10 +41,8 @@ namespace Tiger.Hal
         /// for the "self" relation.
         /// </param>
         /// <returns>A transformation map from which further transformations can be defined.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="self"/> is <see langword="null"/>.</exception>
-        [NotNull]
         IElementTransformationMap<TCollection, TElement> Self<TCollection, TElement>(
-            [NotNull] Func<TCollection, ILinkData> self)
+            Func<TCollection, ILinkData?> self)
             where TCollection : IReadOnlyCollection<TElement>;
     }
 }

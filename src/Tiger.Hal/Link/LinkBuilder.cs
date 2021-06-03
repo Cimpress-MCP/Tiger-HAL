@@ -1,7 +1,7 @@
-﻿// <copyright file="LinkBuilder.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+// <copyright file="LinkBuilder.cs" company="Cimpress, Inc.">
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,10 +15,11 @@
 // </copyright>
 
 using System;
-using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using static System.Globalization.CultureInfo;
 
 namespace Tiger.Hal
@@ -35,8 +36,6 @@ namespace Tiger.Hal
             /// <inheritdoc/>
             Link ILinkBuilder<LinkData.Constant>.Build(LinkData.Constant linkData)
             {
-                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
-
                 var href = linkData.Href.IsAbsoluteUri
                     ? linkData.Href.AbsoluteUri
                     : linkData.Href.OriginalString;
@@ -60,69 +59,47 @@ namespace Tiger.Hal
             : ILinkBuilder<LinkData.Templated>
         {
             /// <inheritdoc/>
-            Link ILinkBuilder<LinkData.Templated>.Build(LinkData.Templated linkData)
-            {
-                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
-
-                return new Link(
-                    linkData.Template.Resolve(),
-                    true,
-                    linkData.Type,
-                    linkData.Deprecation,
-                    linkData.Name,
-                    linkData.Profile,
-                    linkData.Title,
-                    linkData.HrefLang);
-            }
+            Link ILinkBuilder<LinkData.Templated>.Build(LinkData.Templated linkData) => new(
+                linkData.Template.Resolve(),
+                true,
+                linkData.Type,
+                linkData.Deprecation,
+                linkData.Name,
+                linkData.Profile,
+                linkData.Title,
+                linkData.HrefLang);
         }
 
         /// <summary>
-        /// Transforms an instance of <see cref="LinkData.Routed"/> to an instance of <see cref="Link"/>.
+        /// Transforms an instance of <see cref="LinkData.Endpointed"/> to an instance of <see cref="Link"/>.
         /// </summary>
         public sealed class Routed
-            : ILinkBuilder<LinkData.Routed>
+            : ILinkBuilder<LinkData.Endpointed>
         {
-            readonly IActionContextAccessor _actionContextAccessor;
-            readonly IUrlHelperFactory _urlHelperFactory;
+            readonly IHttpContextAccessor _httpContextAccessor;
+            readonly LinkGenerator _linkGenerator;
 
             /// <summary>Initializes a new instance of the <see cref="Routed"/> class.</summary>
-            /// <param name="actionContextAccessor">The application's <see cref="ActionContext"/> accessor.</param>
-            /// <param name="urlHelperFactory">The application's <see cref="IUrlHelper"/> factory.</param>
-            /// <exception cref="ArgumentNullException"><paramref name="actionContextAccessor"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentNullException"><paramref name="urlHelperFactory"/> is <see langword="null"/>.</exception>
+            /// <param name="httpContextAccessor">The application's <see cref="HttpContext"/> accessor.</param>
+            /// <param name="linkGenerator">The application's generator of links.</param>
             public Routed(
-                [NotNull] IActionContextAccessor actionContextAccessor,
-                [NotNull] IUrlHelperFactory urlHelperFactory)
+                IHttpContextAccessor httpContextAccessor,
+                LinkGenerator linkGenerator)
             {
-                _actionContextAccessor = actionContextAccessor ?? throw new ArgumentNullException(nameof(actionContextAccessor));
-                _urlHelperFactory = urlHelperFactory ?? throw new ArgumentNullException(nameof(urlHelperFactory));
+                _httpContextAccessor = httpContextAccessor;
+                _linkGenerator = linkGenerator;
             }
 
             /// <inheritdoc/>
-            Link ILinkBuilder<LinkData.Routed>.Build(LinkData.Routed linkData)
+            Link ILinkBuilder<LinkData.Endpointed>.Build(LinkData.Endpointed linkData)
             {
-                if (linkData is null) { throw new ArgumentNullException(nameof(linkData)); }
-
-                var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-                var href = urlHelper.Link(linkData.RouteName, linkData.RouteValues);
-                if (href is null)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            InvariantCulture,
-                            @"No route exists with name ""{0}"".",
-                            linkData.RouteName));
-                }
-
-                return new Link(
-                    href,
-                    false,
-                    linkData.Type,
-                    linkData.Deprecation,
-                    linkData.Name,
-                    linkData.Profile,
-                    linkData.Title,
-                    linkData.HrefLang);
+                var href = _linkGenerator.GetUriByName(
+                    _httpContextAccessor.HttpContext,
+                    endpointName: linkData.EndpointName,
+                    values: linkData.Values);
+                return href is null
+                    ? throw new InvalidOperationException(string.Format(InvariantCulture, @"No route exists with name ""{0}"".", linkData.EndpointName))
+                    : new(href, false, linkData.Type, linkData.Deprecation, linkData.Name, linkData.Profile, linkData.Title, linkData.HrefLang);
             }
         }
     }

@@ -1,7 +1,7 @@
 // <copyright file="IEmbedInstruction.cs" company="Cimpress, Inc.">
-//   Copyright 2018 Cimpress, Inc.
+//   Copyright 2020 Cimpress, Inc.
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
@@ -15,7 +15,7 @@
 // </copyright>
 
 using System;
-using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
 
 namespace Tiger.Hal
 {
@@ -32,21 +32,15 @@ namespace Tiger.Hal
     public interface IEmbedInstruction
     {
         /// <summary>Gets the name of the link relation to establish.</summary>
-        [NotNull]
         string Relation { get; }
 
         /// <summary>Gets the path into the object to select the value to embed.</summary>
-        [NotNull]
-        object Index { get; }
-
-        /// <summary>Gets the type of the value to embed.</summary>
-        [NotNull]
-        Type Type { get; }
+        string Index { get; }
 
         /// <summary>Retrieves the value to embed from the given main object.</summary>
         /// <param name="main">The main object.</param>
+        /// <param name="visitor">The default visitor.</param>
         /// <returns>The value to embed.</returns>
-        [NotNull]
-        object GetEmbedValue([NotNull] object main);
+        JToken? GetEmbedValue(object main, Func<object?, Type, JToken?> visitor);
     }
 }
