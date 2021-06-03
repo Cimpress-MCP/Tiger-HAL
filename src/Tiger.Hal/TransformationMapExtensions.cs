@@ -906,6 +906,94 @@ namespace Tiger.Hal
                 ({ } tm, { AbsoluteUri: { } u }) => tm.Embed(u, memberSelector, linkSelector),
             };
 
+        /// <summary>
+        /// Creates an embed for the given type, using the main object and the elements of the selected object.
+        /// </summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <typeparam name="TElement">The type of the elements of the selected value.</typeparam>
+        /// <param name="transformationMap">
+        /// The transformation map to which to add the embeds.
+        /// </param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="collectionSelector">A function selecting a top-level member whose elements to embed.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="TElement"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentException"><paramref name="collectionSelector"/> is malformed.</exception>
+        public static ITransformationMap<T> EmbedElements<T, TElement>(
+            this ITransformationMap<T> transformationMap,
+            Uri relation,
+            Expression<Func<T, IReadOnlyCollection<TElement>>> collectionSelector,
+            Func<TElement, ILinkData?> linkSelector) => (transformationMap, relation, collectionSelector, linkSelector) switch
+            {
+                (null, _, _, _) => throw new ArgumentNullException(nameof(transformationMap)),
+                (_, null, _, _) => throw new ArgumentNullException(nameof(relation)),
+                (_, { IsAbsoluteUri: false }, _, _) => throw new ArgumentException(RelativeRelationUri, nameof(relation)),
+                (_, _, null, _) => throw new ArgumentNullException(nameof(collectionSelector)),
+                (_, _, _, null) => throw new ArgumentNullException(nameof(linkSelector)),
+                ({ } tm, { AbsoluteUri: { } u }, { } cs, { } ls) => tm.EmbedElements(u, cs, ls),
+            };
+
+        /// <summary>
+        /// Creates an embed for the given type, using the main object and the elements of the selected object.
+        /// </summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <typeparam name="TElement">The type of the elements of the selected value.</typeparam>
+        /// <param name="transformationMap">
+        /// The transformation map to which to add the embeds.
+        /// </param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="collectionSelector">A function selecting a top-level member whose elements to embed.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="TElement"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentException"><paramref name="collectionSelector"/> is malformed.</exception>
+        public static ITransformationMap<T> EmbedElements<T, TElement>(
+            this ITransformationMap<T> transformationMap,
+            string relation,
+            Expression<Func<T, IReadOnlyCollection<TElement>>> collectionSelector,
+            Func<TElement, Uri?> linkSelector) => (transformationMap, collectionSelector, linkSelector) switch
+            {
+                (null, _, _) => throw new ArgumentNullException(nameof(transformationMap)),
+                (_, null, _) => throw new ArgumentNullException(nameof(collectionSelector)),
+                (_, _, null) => throw new ArgumentNullException(nameof(linkSelector)),
+                ({ } tm, { } cs, { } ls) => tm.EmbedElements(relation, cs, ls),
+            };
+
+        /// <summary>
+        /// Creates an embed for the given type, using the main object and the elements of the selected object.
+        /// </summary>
+        /// <typeparam name="T">The type being transformed.</typeparam>
+        /// <typeparam name="TElement">The type of the elements of the selected value.</typeparam>
+        /// <param name="transformationMap">
+        /// The transformation map to which to add the embeds.
+        /// </param>
+        /// <param name="relation">The name of the link relation to establish.</param>
+        /// <param name="collectionSelector">A function selecting a top-level member whose elements to embed.</param>
+        /// <param name="linkSelector">
+        /// A function that creates a <see cref="ILinkData"/>
+        /// from a value of type <typeparamref name="TElement"/>.
+        /// </param>
+        /// <returns>The modified transformation map.</returns>
+        /// <exception cref="ArgumentException"><paramref name="collectionSelector"/> is malformed.</exception>
+        public static ITransformationMap<T> EmbedElements<T, TElement>(
+            this ITransformationMap<T> transformationMap,
+            Uri relation,
+            Expression<Func<T, IReadOnlyCollection<TElement>>> collectionSelector,
+            Func<TElement, Uri?> linkSelector) => (transformationMap, relation, collectionSelector, linkSelector) switch
+            {
+                (null, _, _, _) => throw new ArgumentNullException(nameof(transformationMap)),
+                (_, null, _, _) => throw new ArgumentNullException(nameof(relation)),
+                (_, { IsAbsoluteUri: false }, _, _) => throw new ArgumentException(RelativeRelationUri, nameof(relation)),
+                (_, _, null, _) => throw new ArgumentNullException(nameof(collectionSelector)),
+                (_, _, _, null) => throw new ArgumentNullException(nameof(linkSelector)),
+                ({ } tm, { AbsoluteUri: { } u }, { } cs, { } ls) => tm.EmbedElements(u, cs, ls),
+            };
+
         /// <summary>Causes a member not to be represented in the HAL+JSON serialization of a value.</summary>
         /// <typeparam name="T">The type being transformed.</typeparam>
         /// <param name="transformationMap">

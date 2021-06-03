@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSingleton<HalRepositoryBuilder>()
                 .AddTransient<ILinkBuilder<LinkData.Constant>, LinkBuilder.Constant>()
                 .AddTransient<ILinkBuilder<LinkData.Templated>, LinkBuilder.Templated>()
-                .AddTransient<ILinkBuilder<LinkData.Routed>, LinkBuilder.Routed>()
+                .AddTransient<ILinkBuilder<LinkData.Endpointed>, LinkBuilder.Routed>()
                 .AddSingleton(p =>
                 {
                     var profile = p.GetRequiredService<IHalProfile>();
@@ -64,11 +64,9 @@ namespace Microsoft.Extensions.DependencyInjection
             return builder;
         }
 
-        static void AddHalJsonFormatterServices(IServiceCollection services)
-        {
-            _ = services.AddOptions();
-            services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.TryAddEnumerable(Transient<IConfigureOptions<MvcOptions>, MvcHalJsonMvcOptionsSetup>());
-        }
+        static void AddHalJsonFormatterServices(IServiceCollection services) => services
+            .AddOptions()
+            .ConfigureOptions<MvcHalJsonMvcOptionsSetup>()
+            .AddHttpContextAccessor();
     }
 }

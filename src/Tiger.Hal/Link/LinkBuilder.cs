@@ -15,9 +15,11 @@
 // </copyright>
 
 using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using static System.Globalization.CultureInfo;
 
 namespace Tiger.Hal
@@ -69,34 +71,34 @@ namespace Tiger.Hal
         }
 
         /// <summary>
-        /// Transforms an instance of <see cref="LinkData.Routed"/> to an instance of <see cref="Link"/>.
+        /// Transforms an instance of <see cref="LinkData.Endpointed"/> to an instance of <see cref="Link"/>.
         /// </summary>
         public sealed class Routed
-            : ILinkBuilder<LinkData.Routed>
+            : ILinkBuilder<LinkData.Endpointed>
         {
-            readonly IActionContextAccessor _actionContextAccessor;
-            readonly IUrlHelperFactory _urlHelperFactory;
+            readonly IHttpContextAccessor _httpContextAccessor;
+            readonly LinkGenerator _linkGenerator;
 
             /// <summary>Initializes a new instance of the <see cref="Routed"/> class.</summary>
-            /// <param name="actionContextAccessor">The application's <see cref="ActionContext"/> accessor.</param>
-            /// <param name="urlHelperFactory">The application's <see cref="IUrlHelper"/> factory.</param>
-            /// <exception cref="ArgumentNullException"><paramref name="actionContextAccessor"/> is <see langword="null"/>.</exception>
-            /// <exception cref="ArgumentNullException"><paramref name="urlHelperFactory"/> is <see langword="null"/>.</exception>
+            /// <param name="httpContextAccessor">The application's <see cref="HttpContext"/> accessor.</param>
+            /// <param name="linkGenerator">The application's generator of links.</param>
             public Routed(
-                IActionContextAccessor actionContextAccessor,
-                IUrlHelperFactory urlHelperFactory)
+                IHttpContextAccessor httpContextAccessor,
+                LinkGenerator linkGenerator)
             {
-                _actionContextAccessor = actionContextAccessor;
-                _urlHelperFactory = urlHelperFactory;
+                _httpContextAccessor = httpContextAccessor;
+                _linkGenerator = linkGenerator;
             }
 
             /// <inheritdoc/>
-            Link ILinkBuilder<LinkData.Routed>.Build(LinkData.Routed linkData)
+            Link ILinkBuilder<LinkData.Endpointed>.Build(LinkData.Endpointed linkData)
             {
-                var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-                var href = urlHelper.Link(linkData.RouteName, linkData.RouteValues);
+                var href = _linkGenerator.GetUriByName(
+                    _httpContextAccessor.HttpContext,
+                    endpointName: linkData.EndpointName,
+                    values: linkData.Values);
                 return href is null
-                    ? throw new InvalidOperationException(string.Format(InvariantCulture, @"No route exists with name ""{0}"".", linkData.RouteName))
+                    ? throw new InvalidOperationException(string.Format(InvariantCulture, @"No route exists with name ""{0}"".", linkData.EndpointName))
                     : new(href, false, linkData.Type, linkData.Deprecation, linkData.Name, linkData.Profile, linkData.Title, linkData.HrefLang);
             }
         }
