@@ -1,4 +1,8 @@
-﻿### What's new in 7.0.0 (Released 2021-03-11)
+### What's new in 7.0.1 (Released 2021-08-05)
+
+* Nullability annotations have been enhanced.
+
+### What's new in 7.0.0 (Released 2021-03-11)
 
 * The library has grown support for more modern frameworks.
 * The library has grown nullability annotations.
