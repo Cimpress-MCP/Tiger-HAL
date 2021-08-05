@@ -334,7 +334,7 @@ namespace Tiger.Hal
         public static ITransformationMap<T> Link<T>(
             this ITransformationMap<T> transformationMap,
             Uri relation,
-            Func<T, Uri> selector) => (transformationMap, relation) switch
+            Func<T, Uri?> selector) => (transformationMap, relation) switch
             {
                 (null, _) => throw new ArgumentNullException(nameof(transformationMap)),
                 (_, null) => throw new ArgumentNullException(nameof(relation)),
@@ -356,7 +356,7 @@ namespace Tiger.Hal
         public static ITransformationMap<TCollection, TElement> Link<TCollection, TElement>(
             this ITransformationMap<TCollection, TElement> transformationMap,
             Uri relation,
-            Func<TCollection, Uri> selector)
+            Func<TCollection, Uri?> selector)
             where TCollection : IReadOnlyCollection<TElement> => (transformationMap, relation) switch
             {
                 (null, _) => throw new ArgumentNullException(nameof(transformationMap)),
@@ -716,7 +716,7 @@ namespace Tiger.Hal
         public static ITransformationMap<T> LinkAndIgnore<T>(
             this ITransformationMap<T> transformationMap,
             string relation,
-            Expression<Func<T, Uri>> selector) => transformationMap is not { } tm
+            Expression<Func<T, Uri?>> selector) => transformationMap is not { } tm
                 ? throw new ArgumentNullException(nameof(transformationMap))
                 : tm.Link(relation, t => selector.Compile().Invoke(t)?.Pipe(Const)).Ignore(selector);
 
@@ -738,10 +738,10 @@ namespace Tiger.Hal
         public static ITransformationMap<TCollection, TElement> LinkAndIgnore<TCollection, TElement>(
             this ITransformationMap<TCollection, TElement> transformationMap,
             string relation,
-            Expression<Func<TCollection, Uri>> selector)
+            Expression<Func<TCollection, Uri?>> selector)
             where TCollection : IReadOnlyCollection<TElement> => transformationMap is not { } tm
                 ? throw new ArgumentNullException(nameof(transformationMap))
-                : tm.Link(relation, t => selector.Compile().Invoke(t).Pipe(Const)).Ignore(selector);
+                : tm.Link(relation, t => selector.Compile().Invoke(t)?.Pipe(Const)).Ignore(selector);
 
         /// <summary>
         /// Creates a link for the given type and ignores the member selected to create that link.
@@ -761,7 +761,7 @@ namespace Tiger.Hal
         public static ITransformationMap<T> LinkAndIgnore<T>(
             this ITransformationMap<T> transformationMap,
             Uri relation,
-            Expression<Func<T, Uri>> selector) => (transformationMap, relation) switch
+            Expression<Func<T, Uri?>> selector) => (transformationMap, relation) switch
             {
                 (null, _) => throw new ArgumentNullException(nameof(transformationMap)),
                 (_, null) => throw new ArgumentNullException(nameof(relation)),
@@ -788,7 +788,7 @@ namespace Tiger.Hal
         public static ITransformationMap<TCollection, TElement> LinkAndIgnore<TCollection, TElement>(
             this ITransformationMap<TCollection, TElement> transformationMap,
             Uri relation,
-            Expression<Func<TCollection, Uri>> selector)
+            Expression<Func<TCollection, Uri?>> selector)
             where TCollection : IReadOnlyCollection<TElement> => (transformationMap, relation) switch
             {
                 (null, _) => throw new ArgumentNullException(nameof(transformationMap)),
